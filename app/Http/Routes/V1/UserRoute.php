@@ -19,7 +19,7 @@ class UserRoute
             $router->post('/redeemgiftcard', 'V1\\User\\UserController@redeemgiftcard');
             $router->post('/changePassword', 'V1\\User\\UserController@changePassword');
             $router->post('/update', 'V1\\User\\UserController@update');
-            $router->get ('/getSubscribe', 'V1\\User\\UserController@getSubscribe');
+            $router->get ('/getSubscribe', 'V1\\User\\UserController@getSubscribe')->middleware('subscription.log:address');
             $router->get ('/getStat', 'V1\\User\\UserController@getStat');
             $router->get ('/checkLogin', 'V1\\User\\UserController@checkLogin');
             $router->post('/transfer', 'V1\\User\\UserController@transfer');

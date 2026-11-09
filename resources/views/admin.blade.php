@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/assets/admin/custom.css?v={{$version}}">
     <link rel="stylesheet" href="/assets/admin/permissions.css?v={{$version}}-admin-permissions-2">
     <link rel="stylesheet" href="/assets/admin/login.css?v={{$version}}-user-frontend-1">
+    <link rel="stylesheet" href="/assets/admin/subscription-log.css?v={{$version}}-subscription-history-1">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no">
     <title>{{$title}}</title>
@@ -31,9 +32,10 @@
 <body>
 <div id="root"></div>
 <script src="/assets/admin/permissions.js?v={{$version}}-admin-permissions-2"></script>
+<script src="/assets/admin/subscription-log.js?v={{$version}}-subscription-history-1"></script>
 <script src="/assets/admin/vendors.async.js?v={{$version}}"></script>
 <script src="/assets/admin/components.async.js?v={{$version}}"></script>
-<script src="/assets/admin/umi.js?v={{$version}}-user-frontend-1"></script>
+<script src="/assets/admin/umi.js?v={{$version}}-subscription-history-1"></script>
 </body>
 
 </html>

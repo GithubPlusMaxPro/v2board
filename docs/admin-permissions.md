@@ -60,3 +60,33 @@ node --check public/assets/admin/umi.js
 ```
 
 权限接口测试使用 SQLite 内存数据库，不连接业务数据库。数据库行锁在 MySQL 上串行处理权限分配；SQLite 测试不验证并发锁行为。
+
+## 订阅历史
+
+后台「用户管理」打开用户详情后，点击「订阅历史」。完整管理员可直接查看；受限管理员需单独授予 `user.subscribe_log`（查看用户订阅历史），保存授权时会自动补齐 `user.view` 等页面权限。受限管理员仅能查询普通用户，不可查看管理员或员工的历史。
+
+记录保存在独立表 `v2_subscription_log`，包含用户 ID、请求时间（Unix 秒）、IP（支持 IPv4/IPv6）、客户端 User-Agent（最多 1024 字符）和 HTTP 响应码。两种事件分别记录：
+
+- `address`：用户面板请求 `GET /api/v1/user/getSubscribe` 获取地址；该接口也可能由页面自动调用，不代表用户一定点击了复制。
+- `download`：客户端拉取订阅，默认路径及配置的自定义订阅路径均支持，包括一次性／限时订阅令牌。
+
+只记录通过身份验证后的请求；非法令牌无法关联用户，不会生成历史。HTTP 响应码沿用接口原始行为，`200` 不保证账号可用或订阅有节点。记录不保存订阅令牌、完整 URL、请求参数或订阅内容。IP 使用 Laravel 的请求 IP，反向代理环境需按实际部署正确配置可信代理，否则可能记录代理地址；不会无条件信任客户端提交的转发头。
+
+记录从功能启用且建表成功后开始，无法补回以前的历史，默认持续保留，不受系统日志每月清理影响。写入失败不会中断订阅，会在 `storage/logs` 的每日应用日志中留下不含令牌的提示。
+
+### 创建历史表
+
+对现有实例，发布代码时可只执行本次迁移：
+
+```sh
+php artisan migrate --path=database/migrations/2026_11_09_000000_create_subscription_log_table.php --force
+php artisan config:clear
+php artisan config:cache
+php artisan view:clear
+```
+
+该迁移可兼容已经通过 SQL 更新流程创建的同名表。`database/install.sql` 和 `database/update.sql` 也包含建表语句；使用现有安装／更新流程的实例无需另建数据库。按部署方式重启常驻 PHP 进程。后台模板会加载 `subscription-log.js`、`subscription-log.css`，并更新 `umi.js` 的缓存标记；以后替换后台构建文件时需保留用户详情按钮的接入。
+
+查询接口为 `GET /api/v1/{secure_path}/user/getSubscribeLog`，必传 `id`（用户 ID）；可传 `current`（默认 1）、`page_size`（默认 20，最多 100）、`action`（`address` 或 `download`）、`ip`（完整 IP 精确匹配）。响应含 `data`、`total`、`current`、`page_size`，按记录 ID 倒序返回。后台按浏览器本地时区显示时间。
+
+验证：`php -d disable_functions= vendor/bin/phpunit tests/Feature/SubscriptionLogTest.php`。测试使用 SQLite 内存数据库，不连接业务数据库。

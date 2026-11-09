@@ -588,3 +588,16 @@ CREATE TABLE `v2_user` (
 
 
 -- 2025-09-12 10:05:00
+
+CREATE TABLE IF NOT EXISTS `v2_subscription_log` (
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` int(11) NOT NULL,
+    `action` varchar(16) NOT NULL,
+    `ip` varchar(45) NOT NULL,
+    `user_agent` varchar(1024) NOT NULL DEFAULT '',
+    `status_code` smallint unsigned NOT NULL,
+    `created_at` int unsigned NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `subscription_log_user_id` (`user_id`, `id`),
+    KEY `subscription_log_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

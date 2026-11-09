@@ -22304,7 +22304,14 @@
                     visible: f,
                     onClose: ()=>this.hide(),
                     cancelText: "\u53d6\u6d88"
-                }, t.email ? p.a.createElement("div", null, p.a.createElement("div", null, p.a.createElement("div", {
+                }, t.email ? p.a.createElement("div", null,
+                window.AdminPermissions.has("user.subscribe_log") ? p.a.createElement("button", {
+                    type: "button",
+                    className: "ant-btn",
+                    style: {marginBottom: 16},
+                    onClick: ()=>window.SubscriptionHistory.open(t)
+                }, "订阅历史") : null,
+                p.a.createElement("div", null, p.a.createElement("div", {
                     className: "form-group"
                 }, p.a.createElement("label", {
                     for: "example-text-input-alt"

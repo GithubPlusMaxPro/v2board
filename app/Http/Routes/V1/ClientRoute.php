@@ -13,7 +13,7 @@ class ClientRoute
         ], function ($router) {
             // Client
             if (empty(config('v2board.subscribe_path'))) {
-                $router->get('/subscribe', 'V1\\Client\\ClientController@subscribe');
+                $router->get('/subscribe', 'V1\\Client\\ClientController@subscribe')->middleware('subscription.log:download');
             }
             // App
             $router->get('/app/getConfig', 'V1\\Client\\AppController@getConfig');

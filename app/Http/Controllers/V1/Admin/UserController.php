@@ -24,13 +24,22 @@ use Illuminate\Support\Facades\Cache;
 
 class UserController extends Controller
 {
-    private function userQuery(Request $request)
+    private function scopeUsers(Request $request, $query, bool $includeSelf = false)
     {
-        $query = User::query();
         if (!AdminPermissionService::isSuper($request->user)) {
-            $query->where('is_admin', 0)->where('is_staff', 0);
+            $query->where(function ($visible) use ($request, $includeSelf) {
+                $visible->where(function ($ordinary) {
+                    $ordinary->where('is_admin', 0)->where('is_staff', 0);
+                });
+                if ($includeSelf) $visible->orWhere('id', $request->user['id']);
+            });
         }
         return $query;
+    }
+
+    private function userQuery(Request $request, bool $includeSelf = false)
+    {
+        return $this->scopeUsers($request, User::query(), $includeSelf);
     }
 
     private function hideSecrets($user, Request $request)
@@ -39,6 +48,7 @@ class UserController extends Controller
         $user->makeHidden(['password', 'password_algo', 'password_salt']);
         if (!AdminPermissionService::isSuper($request->user)) {
             $user->makeHidden(['token', 'uuid', 'subscribe_url', 'admin_permissions']);
+            $user->setAttribute('read_only', (int)$user->id === (int)$request->user['id']);
         }
     }
 
@@ -53,11 +63,9 @@ class UserController extends Controller
         ]);
     }
 
-    private function filter(Request $request, $builder)
+    private function filter(Request $request, $builder, bool $includeSelf = false)
     {
-        if (!AdminPermissionService::isSuper($request->user)) {
-            $builder->where('is_admin', 0)->where('is_staff', 0);
-        }
+        $this->scopeUsers($request, $builder, $includeSelf);
         $filters = $request->input('filter');
         if ($filters) {
             foreach ($filters as $k => $filter) {
@@ -95,7 +103,7 @@ class UserController extends Controller
             DB::raw('(u+d) as total_used')
         )
             ->orderBy($sort, $sortType);
-        $this->filter($request, $userModel);
+        $this->filter($request, $userModel, true);
         $total = $userModel->count();
         $res = $userModel->forPage($current, $pageSize)
             ->get();
@@ -137,7 +145,7 @@ class UserController extends Controller
         if (empty($request->input('id'))) {
             abort(500, '参数错误');
         }
-        $user = $this->userQuery($request)->find($request->input('id'));
+        $user = $this->userQuery($request, true)->find($request->input('id'));
         if (!$user) abort(404, '用户不存在');
         if ($user->invite_user_id) {
             $user['invite_user'] = $this->userQuery($request)->find($user->invite_user_id);

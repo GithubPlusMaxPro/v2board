@@ -3,6 +3,7 @@
     var current = null;
     var permissionMenus = [
         { title: '仪表盘', modules: ['dashboard', 'stat'] },
+        { title: '订阅访问记录', permissions: ['user.subscribe_log'] },
         { title: '系统配置', modules: ['config'] },
         { title: '支付配置', modules: ['payment'] },
         { title: '主题配置', modules: ['theme'] },
@@ -169,7 +170,7 @@
                     sync();
                 }
                 permissionMenus.forEach(function (menu, index) {
-                    renderMenu(menu, keys.filter(function (key) { return menu.modules.indexOf(key.split('.')[0]) !== -1; }), index);
+                    renderMenu(menu, keys.filter(function (key) { return !assigned.has(key) && (menu.permissions ? menu.permissions.indexOf(key) !== -1 : menu.modules.indexOf(key.split('.')[0]) !== -1); }), index);
                 });
                 renderMenu({ title: '其他权限' }, keys.filter(function (key) { return !assigned.has(key); }), permissionMenus.length);
                 function toggle() {

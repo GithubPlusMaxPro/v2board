@@ -22279,6 +22279,7 @@
                 )
             }
             formChange(e, t) {
+                if (this.props.user.user.read_only) return;
                 this.props.dispatch({
                     type: "user/setState",
                     payload: {
@@ -22289,6 +22290,7 @@
                 })
             }
             submit() {
+                if (this.props.user.user.read_only) return;
                 var e = f()({}, this.props.user.user);
                 this.props.dispatch({
                     type: "user/update",
@@ -22313,11 +22315,14 @@
                     visible: f,
                     onClose: ()=>this.hide(),
                     cancelText: "\u53d6\u6d88"
-                }, t.email ? p.a.createElement("div", null, p.a.createElement("div", null, p.a.createElement("div", {
+                }, t.email ? p.a.createElement("div", null,
+                t.read_only ? p.a.createElement("p", {className: "alert alert-info", role: "note"}, "这是您的管理员账户，仅供查看。") : null,
+                p.a.createElement("div", null, p.a.createElement("div", {
                     className: "form-group"
                 }, p.a.createElement("label", {
                     for: "example-text-input-alt"
                 }, "\u90ae\u7bb1"), p.a.createElement(u["a"], {
+                    disabled: !!t.read_only,
                     placeholder: "\u8bf7\u8f93\u5165\u90ae\u7bb1",
                     defaultValue: t.email,
                     onChange: e=>this.formChange("email", e.target.value)
@@ -22326,6 +22331,7 @@
                 }, p.a.createElement("label", {
                     for: "example-text-input-alt"
                 }, "\u9080\u8bf7\u4eba\u90ae\u7bb1"), p.a.createElement(u["a"], {
+                    disabled: !!t.read_only,
                     placeholder: "\u8bf7\u8f93\u5165\u9080\u8bf7\u4eba\u90ae\u7bb1",
                     defaultValue: t.invite_user_email,
                     onChange: e=>this.formChange("invite_user_email", e.target.value)
@@ -22334,6 +22340,7 @@
                 }, p.a.createElement("label", {
                     for: "example-text-input-alt"
                 }, "\u5bc6\u7801"), p.a.createElement(u["a"], {
+                    disabled: !!t.read_only,
                     defaultValue: t.password,
                     placeholder: "\u5982\u9700\u4fee\u6539\u5bc6\u7801\u8bf7\u8f93\u5165",
                     onChange: e=>this.formChange("password", e.target.value)
@@ -22342,6 +22349,7 @@
                 }, p.a.createElement("div", {
                     className: "form-group col-md-6 col-xs-12"
                 }, p.a.createElement("label", null, "\u4f59\u989d"), p.a.createElement(u["a"], {
+                    disabled: !!t.read_only,
                     type: "number",
                     addonAfter: "\xa5",
                     placeholder: "\u4f59\u989d",
@@ -22350,6 +22358,7 @@
                 })), p.a.createElement("div", {
                     className: "form-group col-md-6 col-xs-12"
                 }, p.a.createElement("label", null, "\u63a8\u5e7f\u4f63\u91d1"), p.a.createElement(u["a"], {
+                    disabled: !!t.read_only,
                     type: "number",
                     addonAfter: "\xa5",
                     placeholder: "\u63a8\u5e7f\u4f63\u91d1",
@@ -22360,6 +22369,7 @@
                 }, p.a.createElement("div", {
                     className: "form-group col-md-6 col-xs-12"
                 }, p.a.createElement("label", null, "\u5df2\u7528\u4e0a\u884c"), p.a.createElement(u["a"], {
+                    disabled: !!t.read_only,
                     type: "number",
                     addonAfter: "GB",
                     placeholder: "\u5df2\u7528\u4e0a\u884c",
@@ -22368,6 +22378,7 @@
                 })), p.a.createElement("div", {
                     className: "form-group col-md-6 col-xs-12"
                 }, p.a.createElement("label", null, "\u5df2\u7528\u4e0b\u884c"), p.a.createElement(u["a"], {
+                    disabled: !!t.read_only,
                     type: "number",
                     addonAfter: "GB",
                     placeholder: "\u5df2\u7528\u4e0b\u884c",
@@ -22378,6 +22389,7 @@
                 }, p.a.createElement("label", {
                     for: "example-text-input-alt"
                 }, "\u6d41\u91cf"), p.a.createElement(u["a"], {
+                    disabled: !!t.read_only,
                     type: "number",
                     addonAfter: "GB",
                     defaultValue: t.transfer_enable,
@@ -22388,6 +22400,7 @@
                 }, p.a.createElement("label", {
                     for: "example-text-input-alt"
                 }, "\u8bbe\u5907\u6570\u9650\u5236"), p.a.createElement(u["a"], {
+                    disabled: !!t.read_only,
                     placeholder: "\u7559\u7a7a\u5219\u4e0d\u9650\u5236",
                     defaultValue: t.device_limit,
                     onChange: e=>this.formChange("device_limit", e.target.value)
@@ -22396,6 +22409,7 @@
                 }, p.a.createElement("label", {
                     for: "example-text-input-alt"
                 }, "\u5230\u671f\u65f6\u95f4"), p.a.createElement("div", null, p.a.createElement(c["a"], {
+                    disabled: !!t.read_only,
                     placeholder: "\u957f\u671f\u6709\u6548",
                     defaultValue: null !== t.expired_at && v()(1e3 * t.expired_at),
                     style: {
@@ -22407,6 +22421,7 @@
                 }, p.a.createElement("label", {
                     for: "example-text-input-alt"
                 }, "\u8ba2\u9605\u8ba1\u5212"), p.a.createElement(l["a"], {
+                    disabled: !!t.read_only,
                     placeholder: "\u8bf7\u9009\u62e9\u7528\u6237\u8ba2\u9605\u8ba1\u5212",
                     style: {
                         width: "100%"
@@ -22426,6 +22441,7 @@
                 }, p.a.createElement("label", {
                     for: "example-text-input-alt"
                 }, "\u8d26\u6237\u72b6\u6001"), p.a.createElement(l["a"], {
+                    disabled: !!t.read_only,
                     style: {
                         width: "100%"
                     },
@@ -22442,6 +22458,7 @@
                 }, p.a.createElement("label", {
                     for: "example-text-input-alt"
                 }, "\u63a8\u8350\u8fd4\u5229\u7c7b\u578b"), p.a.createElement(l["a"], {
+                    disabled: !!t.read_only,
                     style: {
                         width: "100%"
                     },
@@ -22461,6 +22478,7 @@
                 }, p.a.createElement("label", {
                     for: "example-text-input-alt"
                 }, "\u63a8\u8350\u8fd4\u5229\u6bd4\u4f8b"), p.a.createElement(u["a"], {
+                    disabled: !!t.read_only,
                     addonAfter: "%",
                     defaultValue: t.commission_rate,
                     placeholder: "\u8bf7\u8f93\u5165\u63a8\u8350\u8fd4\u5229\u6bd4\u4f8b(\u4e3a\u7a7a\u5219\u8ddf\u968f\u7ad9\u70b9\u8bbe\u7f6e\u8fd4\u5229\u6bd4\u4f8b)",
@@ -22475,6 +22493,7 @@
                 }, p.a.createElement(s["a"], {
                     type: "question-circle"
                 }))), p.a.createElement(u["a"], {
+                    disabled: !!t.read_only,
                     addonAfter: "%",
                     defaultValue: t.discount,
                     placeholder: "\u8bf7\u8f93\u5165\u4e13\u4eab\u6298\u6263\u6bd4\u4f8b",
@@ -22484,6 +22503,7 @@
                 }, p.a.createElement("label", {
                     for: "example-text-input-alt"
                 }, "\u9650\u901f"), p.a.createElement(u["a"], {
+                    disabled: !!t.read_only,
                     addonAfter: "Mbps",
                     defaultValue: t.speed_limit,
                     placeholder: "\u7559\u7a7a\u5219\u4e0d\u9650\u5236",
@@ -22509,6 +22529,7 @@
                 }, p.a.createElement("label", {
                     htmlFor: "example-text-input-alt"
                 }, "\u5907\u6ce8"), p.a.createElement("div", null, p.a.createElement(u["a"].TextArea, {
+                    disabled: !!t.read_only,
                     rows: 4,
                     placeholder: "\u8bf7\u5728\u8fd9\u91cc\u8bb0\u5f55..",
                     defaultValue: t.remarks,
@@ -22521,7 +22542,7 @@
                     },
                     onClick: ()=>this.hide()
                 }, "\u53d6\u6d88"), p.a.createElement(i["a"], {
-                    disabled: n,
+                    disabled: n || !!t.read_only,
                     loading: n,
                     onClick: ()=>this.submit(),
                     type: "primary"
@@ -70961,6 +70982,7 @@
                     align: "right",
                     fixed: "right",
                     render: (e,t,n)=>{
+                        if (t.read_only) return g.a.createElement(k["a"], {userId: t.id, key: t.id}, g.a.createElement("a", null, "查看"));
                         return g.a.createElement(g.a.Fragment, null, g.a.createElement(l["a"], {
                             trigger: "click",
                             overlay: g.a.createElement(c["a"], null, g.a.createElement(c["a"].Item, {
@@ -71169,7 +71191,10 @@
                         x: 1500
                     },
                     onChange: (e,t,n)=>this.tableOnChange(e, n)
-                }, g.a.createElement("ul", {
+                }, this.record && this.record.read_only ? g.a.createElement("ul", {
+                    className: "ant-dropdown-menu ant-dropdown-menu-light ant-dropdown-menu-root ant-dropdown-menu-vertical"
+                }, g.a.createElement("li", {className: "ant-dropdown-menu-item"},
+                    g.a.createElement(k["a"], {userId: this.record.id, key: this.record.id}, g.a.createElement("a", null, "查看")))) : g.a.createElement("ul", {
                     className: "ant-dropdown-menu ant-dropdown-menu-light ant-dropdown-menu-root ant-dropdown-menu-vertical"
                 }, g.a.createElement("li", {
                     className: "ant-dropdown-menu-item"

@@ -134,9 +134,80 @@ class AdminPermissionTest extends TestCase
         $this->assertSame('hashed-password', $super->fresh()->password);
         $this->postJson($this->base . 'user/update', $this->updatePayload($user, ['is_admin' => 1]))->assertForbidden();
         $this->postJson($this->base . 'user/delUser', ['id' => $super->id])->assertStatus(500);
-        $this->getJson($this->base . 'user/fetch')->assertOk()->assertJsonCount(1, 'data')->assertJsonMissing(['password' => 'hashed-password']);
+        $this->getJson($this->base . 'user/fetch')->assertOk()->assertJsonCount(2, 'data')->assertJsonMissing(['password' => 'hashed-password']);
         $detail = $this->getJson($this->base . 'user/getUserInfoById?id=' . $user->id)->assertOk()->json('data');
         foreach (['password', 'token', 'uuid', 'admin_permissions'] as $secret) $this->assertArrayNotHasKey($secret, $detail);
+    }
+
+    public function testRestrictedAdminsSeeTheirOwnAccountAndFiltersStillApply(): void
+    {
+        $super = $this->account(); $otherAdmin = $this->account(['user.view']);
+        $manager = $this->account(['user.view']); $user = $this->account([], false);
+        $staff = $this->account([], false); $staff->update(['is_staff' => 1]);
+        $this->withHeader('authorization', $this->token($manager));
+        $list = $this->getJson($this->base . 'user/fetch')->assertOk()->assertJsonPath('total', 2)->json('data');
+        $this->assertEqualsCanonicalizing([$manager->id, $user->id], array_column($list, 'id'));
+        foreach ($list as $item) {
+            $this->assertSame($item['id'] === $manager->id, $item['read_only']);
+            foreach (['password', 'token', 'uuid', 'subscribe_url', 'admin_permissions'] as $secret) $this->assertArrayNotHasKey($secret, $item);
+        }
+        foreach ([['email', $user->email, 1], ['id', $otherAdmin->id, 0], ['id', $super->id, 0],
+            ['id', $staff->id, 0], ['is_admin', 1, 1], ['email', $manager->email, 1]] as $filter) {
+            $query = http_build_query(['filter' => [['key' => $filter[0], 'condition' => '=', 'value' => $filter[1]]]]);
+            $response = $this->getJson($this->base . 'user/fetch?' . $query)->assertOk()->assertJsonPath('total', $filter[2]);
+            if ($filter[0] === 'is_admin') $response->assertJsonPath('data.0.id', $manager->id);
+        }
+        $this->getJson($this->base . 'user/getUserInfoById?id=' . $manager->id)->assertOk()
+            ->assertJsonPath('data.read_only', true)->assertJsonPath('data.id', $manager->id)
+            ->assertJsonMissing(['password' => 'hashed-password', 'token' => $manager->token, 'uuid' => $manager->uuid]);
+        $this->getJson($this->base . 'user/getUserInfoById?id=' . $user->id)->assertOk()->assertJsonPath('data.read_only', false);
+        foreach ([$super, $otherAdmin, $staff] as $hidden) {
+            $this->getJson($this->base . 'user/getUserInfoById?id=' . $hidden->id)->assertNotFound();
+        }
+    }
+
+    public function testSeeingOwnAccountNeverAllowsSelfModificationOrExport(): void
+    {
+        $manager = $this->account(array_keys(config('admin_permissions.labels')));
+        $user = $this->account([], false); $oldToken = $manager->token; $oldUuid = $manager->uuid;
+        $oldPermissions = $manager->admin_permissions;
+        $this->withHeader('authorization', $this->token($manager));
+        $this->getJson($this->base . 'user/getUserInfoById?id=' . $manager->id)->assertOk()->assertJsonPath('data.read_only', true);
+        $this->postJson($this->base . 'user/update', $this->updatePayload($manager, [
+            'password' => 'replacement', 'is_admin' => 0, 'read_only' => false, 'admin_permissions' => null,
+        ]))->assertStatus(500);
+        $this->postJson($this->base . 'user/resetSecret', ['id' => $manager->id])->assertStatus(500);
+        $this->postJson($this->base . 'user/delUser', ['id' => $manager->id])->assertStatus(500);
+        $this->postJson($this->base . 'permission/save', ['id' => $manager->id, 'is_super_admin' => true, 'permissions' => []])->assertForbidden();
+        $ownFilter = ['filter' => [['key' => 'id', 'condition' => '=', 'value' => $manager->id]]];
+        $this->postJson($this->base . 'user/ban', $ownFilter)->assertOk();
+        $this->postJson($this->base . 'user/allDel', $ownFilter)->assertOk();
+        ob_start();
+        try {
+            $this->postJson($this->base . 'user/dumpCSV')->assertOk();
+        } finally {
+            $export = ob_get_clean(); // The legacy CSV action echoes its output.
+        }
+        $this->assertStringNotContainsString($manager->email, $export);
+        $this->assertStringContainsString($user->email, $export);
+        $manager->refresh();
+        $this->assertSame(1, (int)$manager->is_admin);
+        $this->assertSame(0, (int)$manager->banned);
+        $this->assertSame('hashed-password', $manager->password);
+        $this->assertSame($oldToken, $manager->token); $this->assertSame($oldUuid, $manager->uuid);
+        $this->assertSame($oldPermissions, $manager->admin_permissions);
+    }
+
+    public function testFullAdminsStillSeeAndEditOtherRestrictedAdmins(): void
+    {
+        $super = $this->account(); $manager = $this->account(['user.view']);
+        $staff = $this->account([], false); $staff->update(['is_staff' => 1]); $user = $this->account([], false);
+        $this->withHeader('authorization', $this->token($super));
+        $this->getJson($this->base . 'user/fetch')->assertOk()->assertJsonCount(4, 'data');
+        $detail = $this->getJson($this->base . 'user/getUserInfoById?id=' . $manager->id)->assertOk()->json('data');
+        $this->assertEmpty($detail['read_only'] ?? false);
+        $this->postJson($this->base . 'user/update', $this->updatePayload($manager, ['remarks' => 'reviewed']))->assertOk();
+        $this->assertSame('reviewed', $manager->fresh()->remarks);
     }
 
     public function testFinancialAndBanFieldsNeedSeparateGrants(): void

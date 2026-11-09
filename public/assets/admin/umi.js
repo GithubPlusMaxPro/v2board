@@ -5742,6 +5742,13 @@
                     defaultValue: t.tos_url,
                     onChange: e=>this.set("site", "tos_url", e.target.value)
                 })), f.a.createElement(m, {
+                    title: "普通用户登录",
+                    description: "关闭后用户中心显示暂停提示，并暂停普通用户登录和注册；管理员仍可通过原后台地址登录。"
+                }, f.a.createElement(l["a"], {
+                    checked: Number(t.user_login_enable) === 1,
+                    disabled: !window.AdminPermissions.has("config.manage"),
+                    onChange: e=>this.set("site", "user_login_enable", e ? 1 : 0)
+                })), f.a.createElement(m, {
                     title: "\u505c\u6b62\u65b0\u7528\u6237\u6ce8\u518c",
                     description: "\u5f00\u542f\u540e\u4efb\u4f55\u4eba\u90fd\u5c06\u65e0\u6cd5\u8fdb\u884c\u6ce8\u518c\u3002"
                 }, f.a.createElement(l["a"], {
@@ -41441,11 +41448,7 @@
         class l extends a.a.Component {
             constructor(e) {
                 super(e),
-                this.state = {},
-                this.keyDown = this.keyDown.bind(this)
-            }
-            keyDown(e) {
-                13 === e.keyCode && this.login()
+                this.state = {showPassword: false}
             }
             componentDidMount() {
                 var e = this.props.location.query.verify
@@ -41458,13 +41461,10 @@
                 this.props.dispatch({
                     type: "user/checkLogin",
                     redirect: t
-                }),
-                window.addEventListener("keydown", this.keyDown, !1)
-            }
-            componentWillUnmount() {
-                window.removeEventListener("keydown", this.keyDown, !1)
+                })
             }
             login() {
+                if (this.props.passport.loginLoading) return;
                 this.props.dispatch({
                     type: "passport/login",
                     email: this.refs.email.value,
@@ -41473,87 +41473,43 @@
             }
             render() {
                 var e = this.props.passport.loginLoading;
-                return a.a.createElement("div", {
-                    id: "page-container"
-                }, a.a.createElement("main", {
-                    id: "main-container"
-                }, a.a.createElement("div", {
-                    className: "v2board-background",
-                    style: {
-                        backgroundImage: window.settings.background_url && "url(".concat(window.settings.background_url, ")")
-                    }
-                }), a.a.createElement("div", {
-                    className: "no-gutters v2board-auth-box"
-                }, a.a.createElement("div", {
-                    className: "",
-                    style: {
-                        maxWidth: 450,
-                        width: "100%",
-                        margin: "auto"
-                    }
-                }, a.a.createElement("div", {
-                    className: "mx-2 mx-sm-0"
-                }, a.a.createElement("div", {
-                    className: "block block-rounded block-transparent block-fx-pop w-100 mb-0 overflow-hidden bg-image",
-                    style: {
-                        boxShadow: "0 0.5rem 2rem #0000000d"
-                    }
-                }, a.a.createElement("div", {
-                    className: "row no-gutters"
-                }, a.a.createElement("div", {
-                    className: "col-md-12 order-md-1 bg-white"
-                }, a.a.createElement("div", {
-                    className: "block-content block-content-full px-lg-4 py-md-4 py-lg-4"
-                }, a.a.createElement("div", {
-                    className: "mb-3 text-center"
-                }, a.a.createElement("a", {
-                    className: "font-size-h1",
-                    href: "javascript:void(0);"
-                }, window.settings.logo ? a.a.createElement("img", {
-                    className: "v2board-logo mb-3",
-                    src: window.settings.logo
-                }) : a.a.createElement("span", {
-                    className: "text-dark"
-                }, window.settings.title || "V2Board")), a.a.createElement("p", {
-                    className: "font-size-sm text-muted mb-3"
-                }, "\u767b\u5f55\u5230\u7ba1\u7406\u4e2d\u5fc3")), a.a.createElement("div", {
-                    className: "form-group"
-                }, a.a.createElement("input", {
-                    type: "text",
-                    className: "form-control form-control-alt",
-                    placeholder: "\u90ae\u7bb1",
-                    ref: "email"
-                })), a.a.createElement("div", {
-                    className: "form-group"
-                }, a.a.createElement("input", {
-                    type: "password",
-                    className: "form-control form-control-alt",
-                    placeholder: "\u5bc6\u7801",
-                    ref: "password"
-                })), a.a.createElement("div", {
-                    className: "form-group mb-0"
-                }, a.a.createElement("button", {
-                    disabled: e,
-                    type: "submit",
-                    className: "btn btn-block btn-primary font-w400",
-                    onClick: ()=>this.login()
-                }, e ? a.a.createElement(i["a"], {
-                    type: "loading"
-                }) : a.a.createElement("span", null, a.a.createElement("i", {
-                    className: "si si-login mr-1"
-                }), "\u767b\u5165")))))), a.a.createElement("div", {
-                    className: "text-center bg-gray-lighter p-3 px-4"
-                }, a.a.createElement("a", {
-                    onClick: ()=>{
-                        r["a"].info({
-                            title: "\u5fd8\u8bb0\u5bc6\u7801",
-                            content: a.a.createElement("div", null, a.a.createElement("div", null, "\u5728\u7ad9\u70b9\u76ee\u5f55\u4e0b\u6267\u884c\u547d\u4ee4\u627e\u56de\u5bc6\u7801"), a.a.createElement("code", null, "php artisan reset:password \u7ba1\u7406\u5458\u90ae\u7bb1")),
-                            centered: !0,
-                            okText: "\u6211\u77e5\u9053\u4e86",
-                            onOk() {}
-                        })
-                    }
-                }, "\u5fd8\u8bb0\u5bc6\u7801"))))))))
+                return a.a.createElement("div", {id: "page-container", className: "admin-auth-page"},
+                    a.a.createElement("main", {id: "main-container"},
+                        a.a.createElement("div", {className: "admin-login-background", "aria-hidden": true,
+                            style: {backgroundImage: window.settings.background_url ? "url(" + window.settings.background_url + ")" : undefined}}),
+                        a.a.createElement("div", {className: "admin-login-shell"},
+                            a.a.createElement("aside", {className: "admin-login-intro"},
+                                a.a.createElement("div", {className: "admin-login-brand"},
+                                    window.settings.logo ? a.a.createElement("img", {src: window.settings.logo, alt: window.settings.title || "V2Board"}) :
+                                    a.a.createElement(a.a.Fragment, null,
+                                        a.a.createElement("span", {className: "admin-login-mark", "aria-hidden": true}, a.a.createElement("i", {className: "si si-layers"})),
+                                        a.a.createElement("span", null, window.settings.title || "V2Board"))),
+                                a.a.createElement("div", null,
+                                    a.a.createElement("p", {className: "admin-login-eyebrow"}, "ADMIN CONSOLE"),
+                                    a.a.createElement("h1", null, "欢迎回来。", a.a.createElement("br"), "从这里开始管理。"),
+                                    a.a.createElement("p", {className: "admin-login-description"}, "在一个地方管理用户、订单与服务，让日常工作井然有序。")),
+                                a.a.createElement("div", {className: "admin-login-intro-footer"}, "管理控制台 · 仅限授权人员访问")),
+                            a.a.createElement("section", {className: "admin-login-form-panel", "aria-labelledby": "admin-login-title"},
+                                a.a.createElement("h2", {id: "admin-login-title"}, "登录管理后台"),
+                                a.a.createElement("p", {className: "admin-login-subtitle"}, "请输入你的管理员账号，继续处理工作。"),
+                                a.a.createElement("form", {onSubmit: t=>{t.preventDefault(); this.login();}},
+                                    a.a.createElement("div", {className: "admin-login-field"},
+                                        a.a.createElement("label", {htmlFor: "admin-login-email"}, "邮箱地址"),
+                                        a.a.createElement("input", {id: "admin-login-email", name: "email", type: "email", className: "admin-login-input",
+                                            placeholder: "name@example.com", autoComplete: "username", autoCapitalize: "none", spellCheck: false, required: true, autoFocus: true, ref: "email"})),
+                                    a.a.createElement("div", {className: "admin-login-field"},
+                                        a.a.createElement("label", {htmlFor: "admin-login-password"}, "密码"),
+                                        a.a.createElement("div", {className: "admin-login-password"},
+                                            a.a.createElement("input", {id: "admin-login-password", name: "password", type: this.state.showPassword ? "text" : "password",
+                                                className: "admin-login-input", placeholder: "请输入密码", autoComplete: "current-password", minLength: 8, required: true, ref: "password"}),
+                                            a.a.createElement("button", {type: "button", className: "admin-login-reveal", "aria-controls": "admin-login-password",
+                                                "aria-label": this.state.showPassword ? "隐藏密码" : "显示密码", "aria-pressed": !!this.state.showPassword,
+                                                onClick: ()=>this.setState({showPassword: !this.state.showPassword})}, this.state.showPassword ? "隐藏" : "显示"))),
+                                    a.a.createElement("button", {disabled: e, type: "submit", className: "admin-login-submit"},
+                                        e && a.a.createElement(i["a"], {type: "loading", "aria-hidden": true}), e ? "正在登录…" : "登录管理后台")),
+                                a.a.createElement("button", {type: "button", className: "admin-login-help", onClick: ()=>r["a"].info({
+                                    title: "忘记管理员密码？", content: "请联系站点负责人，协助重置管理员账号密码。", centered: true, okText: "知道了"})}, "忘记密码？"),
+                                a.a.createElement("p", {className: "admin-login-footnote"}, "登录后将根据账号授权，展示可使用的管理功能。")))))
             }
         }
         t["default"] = Object(s["c"])(e=>{
@@ -109048,7 +109004,8 @@
                                     return e.next = 4,
                                     Object(o["b"])("/passport/auth/login", {
                                         email: n,
-                                        password: r
+                                        password: r,
+                                        admin_login: 1
                                     });
                                 case 4:
                                     return t = e.sent,

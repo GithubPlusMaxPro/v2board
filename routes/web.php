@@ -1,6 +1,7 @@
 <?php
 
 use App\Services\ThemeService;
+use App\Services\LoginAccessService;
 use Illuminate\Http\Request;
 
 /*
@@ -19,6 +20,13 @@ Route::get('/', function (Request $request) {
         if ($request->server('HTTP_HOST') !== parse_url(config('v2board.app_url'))['host']) {
             abort(403);
         }
+    }
+    if (!LoginAccessService::userLoginEnabled()) {
+        return response()->view('auth.user-paused', [
+            'title' => config('v2board.app_name', 'V2Board'),
+            'logo' => config('v2board.logo'),
+            'version' => config('app.version'),
+        ])->header('Cache-Control', 'no-store');
     }
     $renderParams = [
         'title' => config('v2board.app_name', 'V2Board'),

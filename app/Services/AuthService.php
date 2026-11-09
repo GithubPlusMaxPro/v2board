@@ -21,6 +21,7 @@ class AuthService
 
     public function generateAuthData(Request $request)
     {
+        LoginAccessService::assertLoginAllowed((bool)$this->user->is_admin);
         $guid = Helper::guid();
         $authData = JWT::encode([
             'id' => $this->user->id,

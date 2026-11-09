@@ -14,6 +14,7 @@ class AuthLogin extends FormRequest
     public function rules()
     {
         return [
+            'admin_login' => 'sometimes|boolean',
             'email' => 'required|email:strict',
             'password' => 'required|min:8'
         ];

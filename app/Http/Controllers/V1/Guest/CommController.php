@@ -13,6 +13,7 @@ class CommController extends Controller
         return response([
             'data' => [
                 'tos_url' => config('v2board.tos_url'),
+                'user_login_enable' => (int)config('v2board.user_login_enable', 0),
                 'is_email_verify' => (int)config('v2board.email_verify', 0) ? 1 : 0,
                 'is_invite_force' => (int)config('v2board.invite_force', 0) ? 1 : 0,
                 'email_whitelist_suffix' => (int)config('v2board.email_whitelist_enable', 0)

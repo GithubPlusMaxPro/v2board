@@ -14,6 +14,7 @@ use App\Models\Order;
 use App\Models\Plan;
 use App\Models\TicketMessage;
 use App\Models\User;
+use App\Models\SubscriptionLog;
 use App\Services\AuthService;
 use App\Services\AdminPermissionService;
 use App\Utils\Helper;
@@ -145,6 +146,33 @@ class UserController extends Controller
         $this->hideSecrets($user, $request);
         return response([
             'data' => $user
+        ]);
+    }
+
+    public function getSubscribeLog(Request $request)
+    {
+        $params = $request->validate([
+            'id' => 'required|integer|min:1',
+            'current' => 'sometimes|integer|min:1|max:1000000',
+            'page_size' => 'sometimes|integer|min:1|max:100',
+            'action' => 'sometimes|nullable|in:address,download',
+            'ip' => 'sometimes|nullable|ip',
+        ]);
+        $user = $this->userQuery($request)->find($params['id']);
+        if (!$user) abort(404, '用户不存在');
+        $current = (int)($params['current'] ?? 1);
+        $pageSize = (int)($params['page_size'] ?? 20);
+        $query = SubscriptionLog::where('user_id', $user->id);
+        foreach (['action', 'ip'] as $filter) {
+            if (!empty($params[$filter])) $query->where($filter, $params[$filter]);
+        }
+        $total = $query->count();
+        $logs = $query->orderBy('id', 'DESC')->forPage($current, $pageSize)->get();
+        return response([
+            'data' => $logs,
+            'total' => $total,
+            'current' => $current,
+            'page_size' => $pageSize,
         ]);
     }
 

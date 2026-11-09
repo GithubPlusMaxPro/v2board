@@ -63,7 +63,7 @@ node --check public/assets/admin/umi.js
 
 ## 订阅历史
 
-后台「用户管理」打开用户详情后，点击「订阅历史」。完整管理员可直接查看；受限管理员需单独授予 `user.subscribe_log`（查看用户订阅历史），保存授权时会自动补齐 `user.view` 等页面权限。受限管理员仅能查询普通用户，不可查看管理员或员工的历史。
+后台侧栏「管理员审查 → 订阅访问记录」是独立的管理员审查页面，默认集中显示全部可查看用户的记录。可按用户 ID、完整邮箱、IP、访问类型及起止时间筛选，并分页查看。普通用户没有此页面或接口权限。完整管理员可直接查看；受限管理员需单独授予 `user.subscribe_log`（查看订阅访问记录），原有授权继续有效。受限管理员仅能查询普通用户，不可查看管理员、员工或已删除用户的历史；完整管理员可审查已删除用户的记录，邮箱显示为「用户已删除」。
 
 记录保存在独立表 `v2_subscription_log`，包含用户 ID、请求时间（Unix 秒）、IP（支持 IPv4/IPv6）、客户端 User-Agent（最多 1024 字符）和 HTTP 响应码。两种事件分别记录：
 
@@ -85,8 +85,8 @@ php artisan config:cache
 php artisan view:clear
 ```
 
-该迁移可兼容已经通过 SQL 更新流程创建的同名表。`database/install.sql` 和 `database/update.sql` 也包含建表语句；使用现有安装／更新流程的实例无需另建数据库。按部署方式重启常驻 PHP 进程。后台模板会加载 `subscription-log.js`、`subscription-log.css`，并更新 `umi.js` 的缓存标记；以后替换后台构建文件时需保留用户详情按钮的接入。
+该迁移可兼容已经通过 SQL 更新流程创建的同名表。`database/install.sql` 和 `database/update.sql` 也包含建表语句；使用现有安装／更新流程的实例无需另建数据库。按部署方式重启常驻 PHP 进程。后台模板会加载 `subscription-log.js`、`subscription-log.css`，并更新 `umi.js` 的缓存标记；以后替换后台构建文件时需保留独立菜单和页面路由的接入。此次菜单调整沿用已创建的记录表，无需新增迁移。
 
-查询接口为 `GET /api/v1/{secure_path}/user/getSubscribeLog`，必传 `id`（用户 ID）；可传 `current`（默认 1）、`page_size`（默认 20，最多 100）、`action`（`address` 或 `download`）、`ip`（完整 IP 精确匹配）。响应含 `data`、`total`、`current`、`page_size`，按记录 ID 倒序返回。后台按浏览器本地时区显示时间。
+审查接口为 `GET /api/v1/{secure_path}/subscriptionLog/fetch`，不指定用户时查询所有有权查看的记录。可传 `user_id`、`email`（完整邮箱）、`current`（默认 1）、`page_size`（默认 20，最多 100）、`action`（`address` 或 `download`）、`ip`（完整 IP）、`start_at` / `end_at`（Unix 秒，含边界）。响应含 `data`、`total`、`current`、`page_size`，每条记录包含关联用户邮箱，按记录 ID 倒序返回。后台按浏览器本地时区显示时间。旧的 `user/getSubscribeLog?id=用户ID` 接口保留兼容。
 
 验证：`php -d disable_functions= vendor/bin/phpunit tests/Feature/SubscriptionLogTest.php`。测试使用 SQLite 内存数据库，不连接业务数据库。

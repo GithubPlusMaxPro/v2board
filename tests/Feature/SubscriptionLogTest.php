@@ -144,6 +144,60 @@ class SubscriptionLogTest extends TestCase
         $this->withHeader('authorization', $this->auth($super))->getJson($url . $staff->id)->assertOk();
     }
 
+    public function testAdminAuditPageQueriesAcrossUsersAndFiltersByIdentityAndTime(): void
+    {
+        $admin = $this->account(true); $first = $this->account(); $second = $this->account();
+        foreach ([[$first, 'address', 1000], [$second, 'download', 2000], [$first, 'download', 3000]] as $item) {
+            SubscriptionLog::create(['user_id' => $item[0]->id, 'action' => $item[1], 'ip' => '2001:db8::1',
+                'user_agent' => 'AuditClient', 'status_code' => 200, 'created_at' => $item[2]]);
+        }
+        $url = $this->adminBase . 'subscriptionLog/fetch';
+        $this->withHeader('authorization', $this->auth($admin));
+        $this->getJson($url . '?page_size=2')->assertOk()->assertJsonPath('total', 3)
+            ->assertJsonCount(2, 'data')->assertJsonPath('data.0.user_id', $first->id)
+            ->assertJsonPath('data.0.email', $first->email)->assertJsonPath('data.1.email', $second->email);
+        $this->getJson($url . '?page_size=2&current=2')->assertOk()->assertJsonPath('data.0.created_at', 1000);
+        $this->getJson($url . '?user_id=' . $second->id)->assertOk()->assertJsonPath('total', 1);
+        $this->getJson($url . '?email=' . urlencode($first->email))->assertOk()->assertJsonPath('total', 2);
+        $this->getJson($url . '?start_at=1000&end_at=2000')->assertOk()->assertJsonPath('total', 2);
+        $this->getJson($url . '?user_id=' . $first->id . '&action=download&ip=2001:db8::1&start_at=2000')
+            ->assertOk()->assertJsonPath('total', 1)->assertJsonPath('data.0.created_at', 3000);
+        $this->getJson($url . '?ip=203.0.113.1')->assertOk()->assertJsonPath('total', 0);
+        $this->getJson($url . '?user_id=99999')->assertOk()->assertJsonPath('total', 0);
+        $data = $this->getJson($url)->assertOk()->json('data.0');
+        foreach (['password', 'token', 'uuid', 'admin_permissions'] as $secret) $this->assertArrayNotHasKey($secret, $data);
+    }
+
+    public function testGlobalAuditRequiresAdminPermissionAndScopesRestrictedAdmins(): void
+    {
+        $user = $this->account(); $super = $this->account(true); $staff = $this->account();
+        $staff->update(['is_staff' => 1]); $manager = $this->account(true, ['user.view']);
+        foreach ([$user->id, $super->id, $staff->id, 99999] as $userId) {
+            SubscriptionLog::create(['user_id' => $userId, 'action' => 'download', 'ip' => '203.0.113.1',
+                'user_agent' => 'Client', 'status_code' => 200, 'created_at' => time()]);
+        }
+        $url = $this->adminBase . 'subscriptionLog/fetch';
+        $this->getJson($url)->assertForbidden();
+        $this->withHeader('authorization', $this->auth($user))->getJson($url)->assertForbidden();
+        $this->withHeader('authorization', $this->auth($manager))->getJson($url)->assertForbidden();
+        $manager->update(['admin_permissions' => ['user.subscribe_log']]);
+        $this->getJson($url)->assertOk()->assertJsonPath('total', 1)->assertJsonPath('data.0.user_id', $user->id);
+        $this->getJson($url . '?user_id=' . $super->id)->assertOk()->assertJsonPath('total', 0);
+        $this->getJson($url . '?email=' . urlencode($staff->email))->assertOk()->assertJsonPath('total', 0);
+        $this->withHeader('authorization', $this->auth($super))->getJson($url)->assertOk()
+            ->assertJsonPath('total', 4)->assertJsonPath('data.0.user_id', 99999)->assertJsonPath('data.0.email', null);
+    }
+
+    public function testAuditFiltersValidatePaginationAndTimeRange(): void
+    {
+        $this->withHeader('authorization', $this->auth($this->account(true)));
+        $url = $this->adminBase . 'subscriptionLog/fetch?';
+        foreach (['current=0', 'page_size=101', 'user_id=-1', 'ip=bad-ip', 'action=unknown',
+            'start_at=-1', 'end_at=invalid', 'start_at=2000&end_at=1000'] as $query) {
+            $this->getJson($url . $query)->assertUnprocessable();
+        }
+    }
+
     public function testWriteFailureDoesNotChangeTheSubscriptionResponse(): void
     {
         $user = $this->account();

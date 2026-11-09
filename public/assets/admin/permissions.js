@@ -23,6 +23,7 @@
         '/server/manage': 'server.view', '/server/group': 'server.group.view', '/server/route': 'server.view',
         '/plan': 'plan.view', '/order': 'order.view', '/coupon': 'coupon.view', '/giftcard': 'giftcard.view',
         '/user': 'user.view', '/notice': 'notice.view', '/ticket': 'ticket.view',
+        '/subscription-log': 'user.subscribe_log',
         '/knowledge': 'knowledge.view', '/queue': 'system.view'
     };
 

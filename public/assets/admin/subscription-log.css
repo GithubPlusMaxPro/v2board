@@ -1,34 +1,32 @@
-.subscription-log-overlay {
-    position: fixed; inset: 0; z-index: 1200; background: rgba(0, 0, 0, .45);
-    display: flex; align-items: center; justify-content: center; padding: 20px;
-}
 .subscription-log-panel {
-    background: #fff; color: #333; border-radius: 8px; padding: 24px;
-    width: 1100px; max-width: 100%; max-height: 90vh; overflow-y: auto;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, .2);
+    background: #fff; color: #333; border-radius: 6px; padding: 24px; margin: 0; min-width: 0;
 }
-.subscription-log-header, .subscription-log-footer, .subscription-log-filters {
-    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-}
-.subscription-log-header { justify-content: space-between; margin-bottom: 12px; }
-.subscription-log-header h3 { margin: 0; overflow-wrap: anywhere; }
+.subscription-log-panel h2 { margin: 0 0 12px; font-size: 22px; }
+.subscription-log-filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 24px 0 0; }
+.subscription-log-filters label { display: flex; flex-direction: column; gap: 6px; margin: 0; min-width: 0; }
 .subscription-log-panel button, .subscription-log-panel input, .subscription-log-panel select {
-    font: inherit; border: 1px solid #d9d9d9; border-radius: 4px; background: #fff; color: #333; padding: 6px 10px;
+    font: inherit; border: 1px solid #d9d9d9; border-radius: 4px; background: #fff; color: #333; padding: 8px 10px;
 }
+.subscription-log-filters input, .subscription-log-filters select { width: 100%; min-width: 0; }
+.subscription-log-actions { display: flex; gap: 10px; grid-column: 1 / -1; }
 .subscription-log-panel button { cursor: pointer; }
+.subscription-log-actions button:first-child { background: #415a94; border-color: #415a94; color: #fff; }
 .subscription-log-panel button:disabled { cursor: default; opacity: .5; }
 .subscription-log-panel :focus-visible { outline: 2px solid #415a94; outline-offset: 2px; }
-.subscription-log-filters label { margin: 0; }
 .subscription-log-panel [role="status"] { min-height: 22px; margin: 12px 0; }
-.subscription-log-scroll { overflow-x: auto; }
+.subscription-log-scroll { overflow-x: auto; max-width: 100%; }
 .subscription-log-panel table { width: 100%; border-collapse: collapse; }
-.subscription-log-panel th, .subscription-log-panel td { text-align: left; padding: 10px; border-bottom: 1px solid #eee; vertical-align: top; }
+.subscription-log-panel th, .subscription-log-panel td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; vertical-align: top; }
 .subscription-log-panel th { white-space: nowrap; background: #fafafa; }
 .subscription-log-panel td { overflow-wrap: anywhere; min-width: 90px; }
+.subscription-log-panel .subscription-log-time { min-width: 160px; }
 .subscription-log-panel .subscription-log-agent { min-width: 220px; max-width: 400px; }
-.subscription-log-footer { justify-content: flex-end; margin-top: 18px; }
+.subscription-log-footer { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; margin-top: 18px; }
+@media (max-width: 900px) {
+    .subscription-log-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 @media (max-width: 600px) {
-    .subscription-log-overlay { padding: 8px; }
-    .subscription-log-panel { padding: 16px; max-height: 95vh; }
+    .subscription-log-panel { padding: 16px; }
+    .subscription-log-filters { grid-template-columns: minmax(0, 1fr); }
     .subscription-log-footer { justify-content: center; }
 }

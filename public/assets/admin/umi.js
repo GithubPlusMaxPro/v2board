@@ -21012,6 +21012,14 @@
                             className: "nav-main-link-icon si si-speedometer"
                         })
                     }, {
+                        title: "管理员审查",
+                        type: "heading"
+                    }, {
+                        title: "订阅访问记录",
+                        type: "item",
+                        href: "/subscription-log",
+                        icon: o.a.createElement("i", {className: "nav-main-link-icon si si-docs"})
+                    }, {
                         title: "\u8bbe\u7f6e",
                         type: "heading"
                     }, {title: "管理员权限", type: "permission"}, {
@@ -21148,6 +21156,7 @@
                             o.a.createElement("i", {className: "nav-main-link-icon si si-lock"}),
                             o.a.createElement("span", {className: "nav-main-link-name"}, "管理员权限"))) : null;
                 }
+                if (e === "heading" && t === "管理员审查" && !window.AdminPermissions.has("user.subscribe_log")) return null;
                 if (e === "item" && !window.AdminPermissions.canPage(n)) return null;
                 switch (e) {
                 case "heading":
@@ -22304,14 +22313,7 @@
                     visible: f,
                     onClose: ()=>this.hide(),
                     cancelText: "\u53d6\u6d88"
-                }, t.email ? p.a.createElement("div", null,
-                window.AdminPermissions.has("user.subscribe_log") ? p.a.createElement("button", {
-                    type: "button",
-                    className: "ant-btn",
-                    style: {marginBottom: 16},
-                    onClick: ()=>window.SubscriptionHistory.open(t)
-                }, "订阅历史") : null,
-                p.a.createElement("div", null, p.a.createElement("div", {
+                }, t.email ? p.a.createElement("div", null, p.a.createElement("div", null, p.a.createElement("div", {
                     className: "form-group"
                 }, p.a.createElement("label", {
                     for: "example-text-input-alt"
@@ -82357,6 +82359,17 @@
             path: "/user",
             exact: !0,
             component: n("d1ca").default
+        }, {
+            path: "/subscription-log",
+            exact: !0,
+            component: class extends i.a.Component {
+                componentDidMount() { this.dispose = window.SubscriptionHistory.mount(this.container); }
+                componentWillUnmount() { if (this.dispose) this.dispose(); }
+                render() {
+                    return i.a.createElement(n("Bl7J")["a"], Object.assign({}, this.props, {title: "订阅访问记录"}),
+                        i.a.createElement("div", {ref: node=>{this.container = node;}}));
+                }
+            }
         }];
         window.g_routes = u;
         var h = n("PszG");

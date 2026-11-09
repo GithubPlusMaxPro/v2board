@@ -1,6 +1,22 @@
 (function () {
     'use strict';
     var current = null;
+    var permissionMenus = [
+        { title: '仪表盘', modules: ['dashboard', 'stat'] },
+        { title: '系统配置', modules: ['config'] },
+        { title: '支付配置', modules: ['payment'] },
+        { title: '主题配置', modules: ['theme'] },
+        { title: '服务器管理', modules: ['server'] },
+        { title: '订阅管理', modules: ['plan'] },
+        { title: '订单管理', modules: ['order'] },
+        { title: '优惠券管理', modules: ['coupon'] },
+        { title: '礼品卡管理', modules: ['giftcard'] },
+        { title: '用户管理', modules: ['user'] },
+        { title: '公告管理', modules: ['notice'] },
+        { title: '工单管理', modules: ['ticket'] },
+        { title: '知识库管理', modules: ['knowledge'] },
+        { title: '队列与系统监控', modules: ['system'] }
+    ];
     var pages = {
         '/dashboard': 'dashboard.view', '/config/system': 'config.view',
         '/config/payment': 'payment.view', '/config/theme': 'theme.view',
@@ -100,15 +116,61 @@
                 full.type = 'checkbox'; full.checked = admin.admin_permissions === null;
                 fullLabel.appendChild(document.createTextNode(' 完整管理权限（可以管理其他管理员权限）'));
                 if (admin.id === current.id) full.disabled = true;
-                element('p', admin.id === current.id ? '不能撤销自己的完整管理权限。' : '保存时自动补齐查看权限和页面所需的套餐、节点权限组等查询权限。系统和支付配置可能包含密钥，请谨慎授权。', form);
-                var grid = element('div', '', form); grid.className = 'admin-permission-grid';
-                Object.keys(current.catalog).forEach(function (key) {
-                    var label = element('label', '', grid);
-                    var checkbox = element('input', '', label);
-                    checkbox.type = 'checkbox'; checkbox.value = key;
-                    checkbox.checked = Array.isArray(admin.admin_permissions) && admin.admin_permissions.indexOf(key) !== -1;
-                    label.appendChild(document.createTextNode(' ' + current.catalog[key]));
+                element('p', admin.id === current.id ? '不能撤销自己的完整管理权限。' : '按主菜单勾选整组权限，或展开后单独选择。保存时自动补齐查看和页面查询权限。系统和支付配置可能包含密钥，请谨慎授权。', form);
+                var grid = element('div', '', form); grid.className = 'admin-permission-groups';
+                var keys = Object.keys(current.catalog);
+                var assigned = new Set();
+                function renderMenu(menu, permissionKeys, index) {
+                    if (!permissionKeys.length) return;
+                    var section = element('section', '', grid);
+                    section.className = 'admin-permission-group';
+                    section.setAttribute('aria-label', menu.title);
+                    var heading = element('div', '', section);
+                    heading.className = 'admin-permission-group-header';
+                    var label = element('label', '', heading);
+                    var selectAll = element('input', '', label);
+                    selectAll.type = 'checkbox'; selectAll.className = 'admin-permission-group-select';
+                    selectAll.setAttribute('aria-label', menu.title + '全部权限');
+                    element('strong', menu.title, label);
+                    var expand = element('button', '', heading);
+                    expand.type = 'button'; expand.className = 'admin-permission-group-expand';
+                    expand.setAttribute('aria-controls', 'admin-permission-options-' + index);
+                    var options = element('div', '', section);
+                    options.id = 'admin-permission-options-' + index;
+                    options.className = 'admin-permission-grid';
+                    var inputs = permissionKeys.map(function (key) {
+                        assigned.add(key);
+                        var optionLabel = element('label', '', options);
+                        var checkbox = element('input', '', optionLabel);
+                        checkbox.type = 'checkbox'; checkbox.value = key;
+                        checkbox.setAttribute('data-permission-key', key);
+                        checkbox.checked = Array.isArray(admin.admin_permissions) && admin.admin_permissions.indexOf(key) !== -1;
+                        optionLabel.appendChild(document.createTextNode(' ' + current.catalog[key]));
+                        return checkbox;
+                    });
+                    var expanded = inputs.some(function (input) { return input.checked; });
+                    function sync() {
+                        var count = inputs.filter(function (input) { return input.checked; }).length;
+                        selectAll.checked = count === inputs.length;
+                        selectAll.indeterminate = count > 0 && count < inputs.length;
+                        options.hidden = !expanded;
+                        expand.setAttribute('aria-expanded', String(expanded));
+                        expand.textContent = count + '/' + inputs.length + ' ' + (expanded ? '收起' : '展开');
+                        expand.setAttribute('aria-label', (expanded ? '收起' : '展开') + menu.title + '，已选 ' + count + '/' + inputs.length);
+                    }
+                    selectAll.onchange = function () {
+                        inputs.forEach(function (input) { input.checked = selectAll.checked; });
+                        if (selectAll.checked) expanded = true;
+                        sync();
+                    };
+                    inputs.forEach(function (input) { input.onchange = sync; });
+                    expand.onclick = function () { expanded = !expanded; sync(); };
+                    sync();
+                }
+                permissionMenus.forEach(function (menu, index) {
+                    renderMenu(menu, keys.filter(function (key) { return menu.modules.indexOf(key.split('.')[0]) !== -1; }), index);
                 });
+                renderMenu({ title: '其他权限' }, keys.filter(function (key) { return !assigned.has(key); }), permissionMenus.length);
                 function toggle() {
                     grid.querySelectorAll('input').forEach(function (checkbox) { checkbox.disabled = full.checked; });
                     grid.style.opacity = full.checked ? '0.5' : '1';
@@ -119,7 +181,7 @@
                     save.disabled = true; select.disabled = true; status.textContent = '正在保存…';
                     try {
                         await request('save', { id: selectedId, is_super_admin: full.checked,
-                            permissions: Array.from(grid.querySelectorAll('input:checked')).map(function (item) { return item.value; }) });
+                            permissions: Array.from(grid.querySelectorAll('input[data-permission-key]:checked')).map(function (item) { return item.value; }) });
                         admins = await request('fetch');
                         select.value = String(selectedId); render(); status.textContent = '权限已保存，下一次请求立即生效。';
                     } catch (error) { status.textContent = error.message; }

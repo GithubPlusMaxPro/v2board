@@ -20997,7 +20997,7 @@
             constructor(e) {
                 super(e),
                 this.state = {
-                    nav: [{title: "管理员权限", type: "permission"}, {
+                    nav: [{
                         title: "\u4eea\u8868\u76d8",
                         type: "item",
                         href: "/dashboard",
@@ -21007,7 +21007,7 @@
                     }, {
                         title: "\u8bbe\u7f6e",
                         type: "heading"
-                    }, {
+                    }, {title: "管理员权限", type: "permission"}, {
                         title: "\u7cfb\u7edf\u914d\u7f6e",
                         type: "item",
                         href: "/config/system",
@@ -21137,7 +21137,9 @@
             renderMenu(e, t, n, r) {
                 if (e === "permission") {
                     return window.AdminPermissions.isSuper() ? o.a.createElement("li", {key: "admin-permissions", className: "nav-main-item"},
-                        o.a.createElement("a", {className: "nav-main-link", href: "#", onClick: e=>{e.preventDefault(); window.AdminPermissions.open();}}, "管理员权限")) : null;
+                        o.a.createElement("a", {className: "nav-main-link", href: "#", onClick: e=>{e.preventDefault(); window.AdminPermissions.open();}},
+                            o.a.createElement("i", {className: "nav-main-link-icon si si-lock"}),
+                            o.a.createElement("span", {className: "nav-main-link-name"}, "管理员权限"))) : null;
                 }
                 if (e === "item" && !window.AdminPermissions.canPage(n)) return null;
                 switch (e) {

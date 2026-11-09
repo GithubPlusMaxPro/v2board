@@ -19,7 +19,7 @@ class AdminPermissionTest extends TestCase
     {
         parent::setUp();
         config(['database.default' => 'sqlite', 'database.connections.sqlite.database' => ':memory:',
-            'cache.default' => 'array', 'v2board.user_login_enable' => 1, 'app.key' => str_repeat('k', 32)]);
+            'cache.default' => 'array', 'app.key' => str_repeat('k', 32)]);
         Cache::flush();
         foreach (app('router')->getRoutes() as $route) {
             if (strpos($route->getActionName(), 'PermissionController@current') !== false) {

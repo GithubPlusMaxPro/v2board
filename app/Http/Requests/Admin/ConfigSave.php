@@ -31,7 +31,7 @@ class ConfigSave extends FormRequest
         'logo' => 'nullable|url',
         'force_https' => 'in:0,1',
         'stop_register' => 'in:0,1',
-        'user_login_enable' => 'in:0,1',
+        'user_frontend_enable' => 'in:0,1',
         'app_name' => '',
         'app_description' => '',
         'app_url' => 'nullable|url',

@@ -11,7 +11,6 @@ use App\Models\InviteCode;
 use App\Models\Plan;
 use App\Models\User;
 use App\Services\AuthService;
-use App\Services\LoginAccessService;
 use App\Utils\CacheKey;
 use App\Utils\Dict;
 use App\Utils\Helper;
@@ -23,7 +22,6 @@ class AuthController extends Controller
 {
     public function register(AuthRegister $request)
     {
-        LoginAccessService::assertLoginAllowed(false);
         if ((int)config('v2board.register_limit_by_ip_enable', 0)) {
             $registerCountByIP = Cache::get(CacheKey::get('REGISTER_IP_RATE_LIMIT', $request->ip())) ?? 0;
             if ((int)$registerCountByIP >= (int)config('v2board.register_limit_count', 3)) {
@@ -176,10 +174,6 @@ class AuthController extends Controller
             abort(500, __('Your account has been suspended'));
         }
 
-        if ($request->boolean('admin_login') && !$user->is_admin) {
-            abort(422, '此入口仅供管理员登录');
-        }
-
         $authService = new AuthService($user);
         return response([
             'data' => $authService->generateAuthData($request)
@@ -211,7 +205,6 @@ class AuthController extends Controller
             if ($user->banned) {
                 abort(500, __('Your account has been suspended'));
             }
-            LoginAccessService::assertLoginAllowed((bool)$user->is_admin);
             Cache::forget($key);
             $authService = new AuthService($user);
             return response([
@@ -225,9 +218,8 @@ class AuthController extends Controller
         $authorization = $request->input('auth_data') ?? $request->header('authorization');
         if (!$authorization) abort(403, '未登录或登陆已过期');
 
-        $user = AuthService::decryptAuthData($authorization, true);
+        $user = AuthService::decryptAuthData($authorization);
         if (!$user) abort(403, '未登录或登陆已过期');
-        LoginAccessService::assertLoginAllowed((bool)$user['is_admin']);
 
         $code = Helper::guid();
         $key = CacheKey::get('TEMP_TOKEN', $code);

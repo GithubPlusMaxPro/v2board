@@ -1,7 +1,6 @@
 <?php
 
 use App\Services\ThemeService;
-use App\Services\LoginAccessService;
 use Illuminate\Http\Request;
 
 /*
@@ -21,7 +20,7 @@ Route::get('/', function (Request $request) {
             abort(403);
         }
     }
-    if (!LoginAccessService::userLoginEnabled()) {
+    if ((int)config('v2board.user_frontend_enable', 0) !== 1) {
         return response()->view('auth.user-paused', [
             'title' => config('v2board.app_name', 'V2Board'),
             'logo' => config('v2board.logo'),

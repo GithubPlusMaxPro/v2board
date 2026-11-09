@@ -5742,12 +5742,12 @@
                     defaultValue: t.tos_url,
                     onChange: e=>this.set("site", "tos_url", e.target.value)
                 })), f.a.createElement(m, {
-                    title: "普通用户登录",
-                    description: "关闭后用户中心显示暂停提示，并暂停普通用户登录和注册；管理员仍可通过原后台地址登录。"
+                    title: "用户前端",
+                    description: "启用或停用系统自带的用户前端页面。"
                 }, f.a.createElement(l["a"], {
-                    checked: Number(t.user_login_enable) === 1,
+                    checked: Number(t.user_frontend_enable) === 1,
                     disabled: !window.AdminPermissions.has("config.manage"),
-                    onChange: e=>this.set("site", "user_login_enable", e ? 1 : 0)
+                    onChange: e=>this.set("site", "user_frontend_enable", e ? 1 : 0)
                 })), f.a.createElement(m, {
                     title: "\u505c\u6b62\u65b0\u7528\u6237\u6ce8\u518c",
                     description: "\u5f00\u542f\u540e\u4efb\u4f55\u4eba\u90fd\u5c06\u65e0\u6cd5\u8fdb\u884c\u6ce8\u518c\u3002"
@@ -109004,8 +109004,7 @@
                                     return e.next = 4,
                                     Object(o["b"])("/passport/auth/login", {
                                         email: n,
-                                        password: r,
-                                        admin_login: 1
+                                        password: r
                                     });
                                 case 4:
                                     return t = e.sent,

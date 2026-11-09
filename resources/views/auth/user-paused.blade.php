@@ -19,9 +19,9 @@
                 <span>{{ $title }}</span>
             @endif
         </div>
-        <span class="user-paused-status">登录服务已暂停</span>
+        <span class="user-paused-status">用户前端已关闭</span>
         <h1>用户中心暂未开放</h1>
-        <p>普通用户登录暂时暂停。<br>请稍后再试，感谢你的耐心等待。</p>
+        <p>本站暂未启用用户中心。</p>
         <a class="admin-login-submit" href="{{ url('/') }}">重新检查</a>
     </main>
 </body>

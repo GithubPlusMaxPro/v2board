@@ -4,7 +4,7 @@
     var permissionMenus = [
         { title: '仪表盘', modules: ['dashboard', 'stat'] },
         { title: '订阅访问记录', permissions: ['user.subscribe_log'] },
-        { title: '用户日流量', modules: ['traffic'] },
+        { title: '节点用户日流量', modules: ['traffic'] },
         { title: '用户在线与用量', modules: ['online'] },
         { title: '系统配置', modules: ['config'] },
         { title: '支付配置', modules: ['payment'] },

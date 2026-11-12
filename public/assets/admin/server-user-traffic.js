@@ -22,7 +22,7 @@
             allowed = next;
             cleanup(); container.replaceChildren();
             if (!allowed) {
-                element('p', '需要用户日流量查看权限。', container);
+                element('p', '需要节点用户日流量查看权限。', container);
                 return;
             }
             cleanup = renderPage(container);
@@ -43,8 +43,8 @@
         var header = element('div', '', panel); header.className = 'audit-header';
         var titleBlock = element('div', '', header);
         element('span', '流量分析', titleBlock).className = 'audit-eyebrow';
-        element('h2', '用户日流量', titleBlock).id = 'server-user-traffic-title';
-        var description = element('p', '按用户与日期汇总所有节点的流量，清晰区分实际用量和倍率扣量。', titleBlock);
+        element('h2', '节点用户日流量', titleBlock).id = 'server-user-traffic-title';
+        var description = element('p', '按节点与用户查看每日流量，清晰区分实际用量和倍率扣量。', titleBlock);
         element('span', '按日统计', header).className = 'audit-header-badge';
         var filterBox = element('div', '', panel); filterBox.className = 'audit-filterbox';
         element('h3', '筛选条件', filterBox);
@@ -81,8 +81,8 @@
         reset.type = 'button';
         var summary = element('div', '', panel);
         summary.className = 'server-user-traffic-summary audit-summary';
-        var countCard = element('div', '', summary); element('span', '用户日记录', countCard); var recordCount = element('strong', '—', countCard); element('small', '全部筛选结果', countCard);
-        var userCard = element('div', '', summary); element('span', '本页用户', userCard); var userCount = element('strong', '—', userCard); element('small', '跨节点合并统计', userCard);
+        var countCard = element('div', '', summary); element('span', '匹配记录', countCard); var recordCount = element('strong', '—', countCard); element('small', '全部筛选结果', countCard);
+        var nodeCard = element('div', '', summary); element('span', '本页节点', nodeCard); var nodeCount = element('strong', '—', nodeCard); element('small', '按节点类型与 ID 区分', nodeCard);
         panel.insertBefore(summary, filterBox);
         var rawCard = element('div', '', summary);
         element('span', '实际流量合计', rawCard);
@@ -101,7 +101,7 @@
         scroll.className = 'server-user-traffic-scroll audit-table-wrap';
         var table = element('table', '', scroll);
         var heading = element('tr', '', element('thead', '', table));
-        ['日期', '用户', '上传', '下载', '实际合计', '倍率扣量'].forEach(function (title) {
+        ['日期', '节点', '用户', '上传', '下载', '实际合计', '倍率扣量'].forEach(function (title) {
             element('th', title, heading).scope = 'col';
         });
         var body = element('tbody', '', table);
@@ -122,7 +122,7 @@
         }
         function message(text) {
             body.replaceChildren();
-            element('td', text, element('tr', '', body)).colSpan = 6;
+            element('td', text, element('tr', '', body)).colSpan = 7;
         }
         async function load(targetPage) {
             if (busy) return;
@@ -138,10 +138,10 @@
                 if (controller.signal.aborted) return;
                 page = result.current; total = result.total;
                 recordCount.textContent = String(total);
-                userCount.textContent = String(new Set(result.data.map(function (item) { return item.user_id; })).size);
+                nodeCount.textContent = String(new Set(result.data.map(function (item) { return item.server_type + ':' + item.server_id; })).size);
                 if (!fields.start_date.value) fields.start_date.value = result.start_date;
                 if (!fields.end_date.value) fields.end_date.value = result.end_date;
-                description.textContent = '按用户和自然日汇总所有节点的上传及下载量。选择节点筛选时，仅汇总所选节点。统计时区：' + result.timezone + '。';
+                description.textContent = '按节点、用户和自然日累计上传及下载量。统计时区：' + result.timezone + '。';
                 rawTotal.textContent = bytes(result.summary.total);
                 billedTotal.textContent = bytes(result.summary.billed_total);
                 summaryNote.textContent = '合计包含 ' + result.start_date + ' 至 ' + result.end_date + ' 所有匹配记录。倍率扣量按每次上报时的倍率累计。';
@@ -149,6 +149,9 @@
                 result.data.forEach(function (item) {
                     var row = element('tr', '', body);
                     element('td', item.record_date, row);
+                    var node = element('td', '', row);
+                    element('strong', item.server_name || '未命名节点', node);
+                    element('small', item.server_type + ' · ID ' + item.server_id, node).className = 'audit-meta';
                     var user = element('td', '', row);
                     var identity = element('div', '', user); identity.className = 'audit-identity';
                     element('span', item.email ? item.email.charAt(0).toUpperCase() : '?', identity).className = 'audit-avatar';
@@ -162,7 +165,7 @@
                 status.textContent = '';
             } catch (error) {
                 if (!controller.signal.aborted) {
-                    status.textContent = error.message; rawTotal.textContent = billedTotal.textContent = recordCount.textContent = userCount.textContent = '—';
+                    status.textContent = error.message; rawTotal.textContent = billedTotal.textContent = recordCount.textContent = nodeCount.textContent = '—';
                     page = 1; total = 0; message('加载失败，请重试');
                 }
             } finally {

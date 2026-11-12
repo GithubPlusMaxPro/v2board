@@ -4,6 +4,7 @@
     var permissionMenus = [
         { title: '仪表盘', modules: ['dashboard', 'stat'] },
         { title: '订阅访问记录', permissions: ['user.subscribe_log'] },
+        { title: '节点用户日流量', modules: ['traffic'] },
         { title: '系统配置', modules: ['config'] },
         { title: '支付配置', modules: ['payment'] },
         { title: '主题配置', modules: ['theme'] },
@@ -25,6 +26,7 @@
         '/plan': 'plan.view', '/order': 'order.view', '/coupon': 'coupon.view', '/giftcard': 'giftcard.view',
         '/user': 'user.view', '/notice': 'notice.view', '/ticket': 'ticket.view',
         '/subscription-log': 'user.subscribe_log',
+        '/server-user-traffic': 'traffic.view',
         '/knowledge': 'knowledge.view', '/queue': 'system.view'
     };
 

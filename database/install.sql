@@ -601,3 +601,30 @@ CREATE TABLE IF NOT EXISTS `v2_subscription_log` (
     KEY `subscription_log_user_id` (`user_id`, `id`),
     KEY `subscription_log_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `v2_stat_server_user` (
+    `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+    `record_at` int unsigned NOT NULL,
+    `server_type` varchar(16) NOT NULL,
+    `server_id` int NOT NULL,
+    `server_name` varchar(255) NOT NULL DEFAULT '',
+    `user_id` int NOT NULL,
+    `u` bigint unsigned NOT NULL DEFAULT 0,
+    `d` bigint unsigned NOT NULL DEFAULT 0,
+    `billed_u` bigint unsigned NOT NULL DEFAULT 0,
+    `billed_d` bigint unsigned NOT NULL DEFAULT 0,
+    `created_at` int unsigned NOT NULL,
+    `updated_at` int unsigned NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `stat_server_user_day_node_user` (`record_at`, `server_type`, `server_id`, `user_id`),
+    KEY `stat_server_user_user_day` (`user_id`, `record_at`),
+    KEY `stat_server_user_node_day` (`server_type`, `server_id`, `record_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `v2_stat_server_user_batch` (
+    `id` char(36) NOT NULL,
+    `record_at` int unsigned NOT NULL,
+    `created_at` int unsigned NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `v2_stat_server_user_batch_record_at_index` (`record_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -90,3 +90,36 @@ php artisan view:clear
 审查接口为 `GET /api/v1/{secure_path}/subscriptionLog/fetch`，不指定用户时查询所有有权查看的记录。可传 `user_id`、`email`（完整邮箱）、`current`（默认 1）、`page_size`（默认 20，最多 100）、`action`（`address` 或 `download`）、`ip`（完整 IP）、`start_at` / `end_at`（Unix 秒，含边界）。响应含 `data`、`total`、`current`、`page_size`，每条记录包含关联用户邮箱，按记录 ID 倒序返回。后台按浏览器本地时区显示时间。旧的 `user/getSubscribeLog?id=用户ID` 接口保留兼容。
 
 验证：`php -d disable_functions= vendor/bin/phpunit tests/Feature/SubscriptionLogTest.php`。测试使用 SQLite 内存数据库，不连接业务数据库。
+
+## 节点用户日流量
+
+后台侧栏「管理员审查 → 节点用户日流量」按面板节点、用户和自然日显示原始上传、原始下载、合计及倍率扣量。管理员权限弹窗有独立的「节点用户日流量」分组，权限键为 `traffic.view`，不依赖用户管理或节点配置查看权限，不会因此授予节点连接凭证。完整管理员可直接查看；受限管理员只可查询普通用户的明细，管理员、员工和已删除用户的记录不返回。完整管理员能看到已删除用户的记录，节点名称保留上报时的快照。
+
+### 数据与统计口径
+
+- `v2_stat_server_user`：每天、节点类型、节点 ID、用户 ID 唯一一行，`u` / `d` 是节点上报的原始字节，`billed_u` / `billed_d` 是每次上报乘当时倍率并取整数后的累计扣量。倍率当天变更不会将旧用量按新倍率重算。
+- `v2_stat_server_user_batch`：保存统计任务的批次编号，用于同一队列任务重试、重放去重；批次标记与流量累加在同一数据库事务中提交。计数采用数据库原子累加，避免多个节点上报任务相互覆盖。
+- 日期在 `UserService::trafficFetch` 接收上报时确定，按 `config/app.php` 的站点时区归日，当前为 `Asia/Shanghai`（UTC+8）。队列跨零点执行或重试不会改变归属日期。节点没有上报逐笔发生时间，所以跨日上报的整批用量按面板接收日归属，不能精确拆分真实发生日期。
+- 新任务通过已有 `stat` 队列处理，现有套餐扣量和节点／用户汇总链路保留。该记录从功能部署后开始，旧的汇总数据无法反推节点与用户的交叉明细。零用量不创建行。
+- 这里的节点是面板中的协议节点，不是物理服务器；同一台机器上的不同节点分别统计。
+- 两张新表默认持续保留，不受现有 `reset:log` 两个月清理影响。如需归档，应将相同日期的明细和批次标记一起处理；单独移除批次标记后重放旧任务可能再次累计。去重针对同一队列任务，不会将节点再次发送的相同 HTTP 请求识别成同一批次，因为现有上报没有全局批次 ID。
+
+### 部署与变更范围
+
+新增每日明细模型 `app/Models/StatServerUser.php`、统计任务 `app/Jobs/StatServerUserJob.php` 和查询控制器 `app/Http/Controllers/V1/Admin/ServerUserTrafficController.php`。`UserService::trafficFetch` 增加一个任务派发；管理路由、权限目录、权限弹窗、后台菜单和模板增加对应入口。前端功能位于 `public/assets/admin/server-user-traffic.js` / `.css`，`umi.js` 只接入菜单与路由。安装和更新 SQL 同步建表，新迁移可用于现有实例。
+
+先更新服务器代码，再在项目目录执行：
+
+```sh
+php artisan migrate --path=database/migrations/2026_11_12_000000_create_stat_server_user_tables.php --force
+php artisan config:cache
+php artisan route:clear
+php artisan view:clear
+php artisan horizon:terminate
+```
+
+`horizon:terminate` 让旧队列进程退出，需由已有 Supervisor／进程守护重新启动 Horizon。若部署使用其他队列管理方式，应按现有方式重启工作进程；常驻 HTTP 进程也要重新加载代码。节点客户端不需要改协议。未配置业务数据库的开发副本不会自动建业务表。
+
+接口为 `GET /api/v1/{secure_path}/serverUserTraffic/fetch`：支持 `start_date` / `end_date`（`YYYY-MM-DD`，含两端，最多一年）、`server_type`、`server_id`、`user_id`、`email`、`current`、`page_size`（最多 100）。默认查看站点当天；按节点 ID 查询时必须同时提供节点类型。响应包括分页数据、筛选范围内全部记录的原始及倍率合计、日期范围和时区。日期取站点时区，界面以二进制单位 KiB / MiB / GiB 显示用量。
+
+验证使用 SQLite 内存库，覆盖跨日、不同节点／用户／协议、倍率变化、序列化重试、跨批次事务回滚、原有任务派发、筛选合计、权限隔离和迁移重复执行。SQLite 测试不验证 MySQL 实际并发锁调度。

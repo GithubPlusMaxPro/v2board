@@ -5,6 +5,7 @@ namespace App\Http\Controllers\V1\Server;
 use App\Http\Controllers\Controller;
 use App\Services\ServerService;
 use App\Services\UserService;
+use App\Jobs\RecordUserOnlineJob;
 use App\Utils\CacheKey;
 use App\Utils\Helper;
 use Illuminate\Http\Request;
@@ -167,7 +168,7 @@ class UniProxyController extends Controller
             $ips_array = $cachedData[$key] ?? [];
 
             // 更新节点数据
-            $ips_array[$this->nodeType . $this->nodeId] = ['aliveips' => $ips, 'lastupdateAt' => $updateAt];
+            $ips_array[$this->nodeType . $this->nodeId] = ['aliveips' => $ips, 'lastupdateAt' => $updateAt, 'server_name' => $this->nodeInfo->name];
             // 清理过期数据
             foreach ($ips_array as $nodetypeid => $oldips) {
                 if ($nodetypeid !== 'alive_ip' && is_array($oldips) && ($updateAt - ($oldips['lastupdateAt'] ?? 0) > 100)) {
@@ -203,6 +204,15 @@ class UniProxyController extends Controller
         // 批量更新缓存
         foreach ($updates as $key => $value) {
             Cache::put($key, $value, 120);
+        }
+
+        try {
+            RecordUserOnlineJob::dispatch($data, ['id' => $this->nodeInfo->id, 'name' => $this->nodeInfo->name], $this->nodeType, $updateAt);
+        } catch (\Throwable $e) {
+            try {
+                \Log::channel('daily')->warning('Online history dispatch failed', ['server_type' => $this->nodeType, 'server_id' => $this->nodeId]);
+            } catch (\Throwable $ignored) {
+            }
         }
 
         return response([

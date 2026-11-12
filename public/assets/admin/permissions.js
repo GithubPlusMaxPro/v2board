@@ -5,6 +5,7 @@
         { title: '仪表盘', modules: ['dashboard', 'stat'] },
         { title: '订阅访问记录', permissions: ['user.subscribe_log'] },
         { title: '节点用户日流量', modules: ['traffic'] },
+        { title: '用户在线与用量', modules: ['online'] },
         { title: '系统配置', modules: ['config'] },
         { title: '支付配置', modules: ['payment'] },
         { title: '主题配置', modules: ['theme'] },
@@ -27,6 +28,7 @@
         '/user': 'user.view', '/notice': 'notice.view', '/ticket': 'ticket.view',
         '/subscription-log': 'user.subscribe_log',
         '/server-user-traffic': 'traffic.view',
+        '/user-online': 'online.view',
         '/knowledge': 'knowledge.view', '/queue': 'system.view'
     };
 

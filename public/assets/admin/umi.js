@@ -21020,6 +21020,11 @@
                         href: "/subscription-log",
                         icon: o.a.createElement("i", {className: "nav-main-link-icon si si-docs"})
                     }, {
+                        title: "节点用户日流量",
+                        type: "item",
+                        href: "/server-user-traffic",
+                        icon: o.a.createElement("i", {className: "nav-main-link-icon si si-chart"})
+                    }, {
                         title: "\u8bbe\u7f6e",
                         type: "heading"
                     }, {title: "管理员权限", type: "permission"}, {
@@ -21156,7 +21161,7 @@
                             o.a.createElement("i", {className: "nav-main-link-icon si si-lock"}),
                             o.a.createElement("span", {className: "nav-main-link-name"}, "管理员权限"))) : null;
                 }
-                if (e === "heading" && t === "管理员审查" && !window.AdminPermissions.has("user.subscribe_log")) return null;
+                if (e === "heading" && t === "管理员审查" && !window.AdminPermissions.has("user.subscribe_log") && !window.AdminPermissions.has("traffic.view")) return null;
                 if (e === "item" && !window.AdminPermissions.canPage(n)) return null;
                 switch (e) {
                 case "heading":
@@ -82384,6 +82389,17 @@
             path: "/user",
             exact: !0,
             component: n("d1ca").default
+        }, {
+            path: "/server-user-traffic",
+            exact: !0,
+            component: class extends i.a.Component {
+                componentDidMount() { this.dispose = window.ServerUserTraffic.mount(this.container); }
+                componentWillUnmount() { if (this.dispose) this.dispose(); }
+                render() {
+                    return i.a.createElement(n("Bl7J")["a"], Object.assign({}, this.props, {title: "节点用户日流量"}),
+                        i.a.createElement("div", {ref: node=>{this.container = node;}}));
+                }
+            }
         }, {
             path: "/subscription-log",
             exact: !0,

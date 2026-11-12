@@ -1,0 +1,40 @@
+.server-user-traffic-panel {
+    background: #fff; color: #333; border-radius: 6px; padding: 24px; margin: 0; min-width: 0;
+}
+.server-user-traffic-panel h2 { margin: 0 0 12px; font-size: 22px; }
+.server-user-traffic-filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 24px 0 0; }
+.server-user-traffic-filters label { display: flex; flex-direction: column; gap: 6px; margin: 0; min-width: 0; }
+.server-user-traffic-panel button, .server-user-traffic-panel input, .server-user-traffic-panel select {
+    font: inherit; border: 1px solid #d9d9d9; border-radius: 4px; background: #fff; color: #333; padding: 8px 10px;
+}
+.server-user-traffic-filters input, .server-user-traffic-filters select { width: 100%; min-width: 0; }
+.server-user-traffic-actions { display: flex; gap: 10px; grid-column: 1 / -1; }
+.server-user-traffic-panel button { cursor: pointer; }
+.server-user-traffic-actions button:first-child { background: #415a94; border-color: #415a94; color: #fff; }
+.server-user-traffic-panel button:disabled { cursor: default; opacity: .5; }
+.server-user-traffic-panel :focus-visible { outline: 2px solid #415a94; outline-offset: 2px; }
+.server-user-traffic-panel [role="status"] { min-height: 22px; margin: 12px 0; }
+.server-user-traffic-scroll { overflow-x: auto; max-width: 100%; }
+.server-user-traffic-panel table { width: 100%; border-collapse: collapse; }
+.server-user-traffic-panel th, .server-user-traffic-panel td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; vertical-align: top; }
+.server-user-traffic-panel th { white-space: nowrap; background: #fafafa; }
+.server-user-traffic-panel td { overflow-wrap: anywhere; min-width: 90px; }
+.server-user-traffic-footer { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; margin-top: 18px; }
+@media (max-width: 900px) {
+    .server-user-traffic-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+    .server-user-traffic-panel { padding: 16px; }
+    .server-user-traffic-filters { grid-template-columns: minmax(0, 1fr); }
+    .server-user-traffic-footer { justify-content: center; }
+}
+
+.server-user-traffic-panel td { min-width: 110px; }
+.server-user-traffic-panel td small { display: block; margin-top: 4px; color: #687588; }
+.server-user-traffic-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 24px 0 12px; }
+.server-user-traffic-summary > div { padding: 16px; background: #f5f7fb; border-radius: 6px; }
+.server-user-traffic-summary span { display: block; margin-bottom: 8px; color: #687588; }
+.server-user-traffic-summary strong { font-size: 24px; }
+@media (max-width: 600px) { .server-user-traffic-summary { grid-template-columns: minmax(0, 1fr); } }
+
+.server-user-traffic-panel td:first-child, .server-user-traffic-panel td:nth-child(n+4) { white-space: nowrap; }

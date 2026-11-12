@@ -5,6 +5,7 @@ return [
     'labels' => [
         'dashboard.view' => '查看仪表盘',
         'stat.view' => '查看统计报表',
+        'traffic.view' => '查看节点用户日流量',
         'user.view' => '查看普通用户',
         'user.subscribe_log' => '查看订阅访问记录（管理员审查）',
         'user.update' => '修改普通用户资料和套餐',
@@ -45,6 +46,7 @@ return [
         'system.log' => '查看系统日志',
     ],
     'actions' => [
+        'App\Http\Controllers\V1\Admin\ServerUserTrafficController@fetch' => 'traffic.view',
         'App\Http\Controllers\V1\Admin\ConfigController@fetch' => 'config.view',
         'App\Http\Controllers\V1\Admin\ConfigController@save' => 'config.manage',
         'App\Http\Controllers\V1\Admin\ConfigController@getEmailTemplate' => 'config.view',

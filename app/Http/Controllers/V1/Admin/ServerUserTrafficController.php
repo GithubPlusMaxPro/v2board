@@ -15,7 +15,7 @@ class ServerUserTrafficController extends Controller
         $params = $request->validate([
             'user_id' => 'sometimes|nullable|integer|min:1',
             'email' => 'sometimes|nullable|string|max:254',
-            'server_type' => 'required_with:server_id|nullable|in:shadowsocks,vmess,trojan,tuic,hysteria,vless,anytls,v2node',
+            'server_type' => 'sometimes|nullable|in:shadowsocks,vmess,trojan,tuic,hysteria,vless,anytls,v2node',
             'server_id' => 'sometimes|nullable|integer|min:1',
             'start_date' => 'sometimes|nullable|date_format:Y-m-d',
             'end_date' => 'sometimes|nullable|date_format:Y-m-d',

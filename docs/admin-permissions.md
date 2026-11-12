@@ -120,6 +120,6 @@ php artisan horizon:terminate
 
 `horizon:terminate` 让旧队列进程退出，需由已有 Supervisor／进程守护重新启动 Horizon。若部署使用其他队列管理方式，应按现有方式重启工作进程；常驻 HTTP 进程也要重新加载代码。节点客户端不需要改协议。未配置业务数据库的开发副本不会自动建业务表。
 
-接口为 `GET /api/v1/{secure_path}/serverUserTraffic/fetch`：支持 `start_date` / `end_date`（`YYYY-MM-DD`，含两端，最多一年）、`server_type`、`server_id`、`user_id`、`email`、`current`、`page_size`（最多 100）。默认查看站点当天；按节点 ID 查询时必须同时提供节点类型。响应包括分页数据、筛选范围内全部记录的原始及倍率合计、日期范围和时区。日期取站点时区，界面以二进制单位 KiB / MiB / GiB 显示用量。
+接口为 `GET /api/v1/{secure_path}/serverUserTraffic/fetch`：支持 `start_date` / `end_date`（`YYYY-MM-DD`，含两端，最多一年）、`server_type`、`server_id`、`user_id`、`email`、`current`、`page_size`（最多 100）。默认查看站点当天；节点 ID 可独立查询；未指定节点类型时，返回所有类型下该 ID 的记录，各类型仍分别列出，指定类型后可进一步限定。响应包括分页数据、筛选范围内全部记录的原始及倍率合计、日期范围和时区。日期取站点时区，界面以二进制单位 KiB / MiB / GiB 显示用量。
 
 验证使用 SQLite 内存库，覆盖跨日、不同节点／用户／协议、倍率变化、序列化重试、跨批次事务回滚、原有任务派发、筛选合计、权限隔离和迁移重复执行。SQLite 测试不验证 MySQL 实际并发锁调度。

@@ -167,9 +167,6 @@
             if (filters.start_date && filters.end_date && filters.end_date < filters.start_date) {
                 status.textContent = '结束日期不能早于开始日期'; return;
             }
-            if (filters.server_id && !filters.server_type) {
-                status.textContent = '按节点 ID 查询时请选择节点类型'; return;
-            }
             activeFilters = filters; load(1);
         };
         reset.onclick = function () { form.reset(); activeFilters = {}; load(1); };

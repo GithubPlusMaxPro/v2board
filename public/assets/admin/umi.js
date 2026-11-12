@@ -21020,7 +21020,7 @@
                         href: "/subscription-log",
                         icon: o.a.createElement("i", {className: "nav-main-link-icon si si-docs"})
                     }, {
-                        title: "节点用户日流量",
+                        title: "用户日流量",
                         type: "item",
                         href: "/server-user-traffic",
                         icon: o.a.createElement("i", {className: "nav-main-link-icon si si-chart"})
@@ -82412,7 +82412,7 @@
                 componentDidMount() { this.dispose = window.ServerUserTraffic.mount(this.container); }
                 componentWillUnmount() { if (this.dispose) this.dispose(); }
                 render() {
-                    return i.a.createElement(n("Bl7J")["a"], Object.assign({}, this.props, {title: "节点用户日流量"}),
+                    return i.a.createElement(n("Bl7J")["a"], Object.assign({}, this.props, {title: "用户日流量"}),
                         i.a.createElement("div", {ref: node=>{this.container = node;}}));
                 }
             }

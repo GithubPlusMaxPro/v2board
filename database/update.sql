@@ -902,3 +902,19 @@ CREATE TABLE IF NOT EXISTS `v2_stat_server_user_batch` (
     PRIMARY KEY (`id`),
     KEY `v2_stat_server_user_batch_record_at_index` (`record_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `v2_user_online_log` (
+    `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` int NOT NULL,
+    `record_at` int unsigned NOT NULL,
+    `server_type` varchar(16) NOT NULL,
+    `server_id` int NOT NULL,
+    `server_name` varchar(255) NOT NULL DEFAULT '',
+    `ip` varchar(45) NOT NULL,
+    `first_seen` int unsigned NOT NULL,
+    `last_seen` int unsigned NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `user_online_day_user_node_ip` (`record_at`, `user_id`, `server_type`, `server_id`, `ip`),
+    KEY `user_online_user_last_seen` (`user_id`, `last_seen`),
+    KEY `user_online_user_ip` (`user_id`, `ip`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

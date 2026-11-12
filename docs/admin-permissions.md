@@ -123,3 +123,35 @@ php artisan horizon:terminate
 接口为 `GET /api/v1/{secure_path}/serverUserTraffic/fetch`：支持 `start_date` / `end_date`（`YYYY-MM-DD`，含两端，最多一年）、`server_type`、`server_id`、`user_id`、`email`、`current`、`page_size`（最多 100）。默认查看站点当天；节点 ID 可独立查询；未指定节点类型时，返回所有类型下该 ID 的记录，各类型仍分别列出，指定类型后可进一步限定。响应包括分页数据、筛选范围内全部记录的原始及倍率合计、日期范围和时区。日期取站点时区，界面以二进制单位 KiB / MiB / GiB 显示用量。
 
 验证使用 SQLite 内存库，覆盖跨日、不同节点／用户／协议、倍率变化、序列化重试、跨批次事务回滚、原有任务派发、筛选合计、权限隔离和迁移重复执行。SQLite 测试不验证 MySQL 实际并发锁调度。
+
+## 用户在线与用量
+
+后台侧栏「管理员审查 → 用户在线与用量」是独立页面，按用户 ID 或完整邮箱查询，包含「当前在线 IP」「在线 IP 历史」「流量用量」三个页签，以及当日原始流量和倍率扣量概览。管理员权限弹窗有独立的同名分组，权限为 `online.view`，不自动授予用户管理、节点配置或全站日流量权限。完整管理员可查看所有现存用户；受限管理员只能查询普通用户，不能访问管理员或员工的在线记录。所有接口都要求指定有权查看的用户，不能省略用户参数查询全站数据。
+
+当前在线 IP 读取节点 `UniProxy/alive` 上报的缓存，只显示最近 100 秒仍有上报的节点数据。IPv4 / IPv6 会规范化并去重，同一 IP 出现在多个节点时分别列出，概览按唯一 IP 计数，不代表设备数量。未上报在线 IP 的节点无法据此确认在线或离线；面板登录会话和订阅访问 IP 也不会被当作节点在线 IP。
+
+新增表 `v2_user_online_log` 按「日期、用户、节点类型、节点 ID、IP」汇总，记录当日首次观察时间、最近观察时间以及节点名称快照。既有在线上报缓存仍即时更新，新的 `RecordUserOnlineJob` 通过 `stat` 队列持久化。日期在接收节点上报时确定，原子 upsert 使用最小首次时间与最大最近时间，因此队列重试、乱序执行不会重复插入或回退时间。空 IP 列表不清除历史；缓存过期后当前 IP 会消失，历史继续保留。历史不是精确连接／断开日志，也不据此计算在线时长。默认持续留存，部署前的历史无法补回。
+
+流量页签复用已新增的 `v2_stat_server_user` 每日统计，支持日期、节点类型和节点 ID 筛选，节点 ID 可单独查询。当天卡片与页签使用同一原始／倍率统计口径。查询返回用户 ID 和邮箱，不返回密码、UUID、订阅 token 或节点密钥。
+
+### IP 归属地
+
+接入 [GeoJS Geo API](https://www.geojs.io/docs/v1/endpoints/geo/)，经后台 HTTPS 请求查询公网 IP，显示提供方返回的国家、地区、城市、网络归属组织及 ASN。字段可能为空，结果是近似归属地，不能当作设备的准确物理位置。IPv4 / IPv6 均支持，不需要 API 密钥。仅发送查询的公网 IP，不附带用户邮箱、ID 或订阅凭证。内网和保留 IP 本地标记，不发送外部请求。接口地址固定，前端不能指定任意目标 URL。
+
+成功查询缓存 7 天，失败缓存 5 分钟；请求超时 3 秒，不跟随重定向。前端按需异步加载、最多同时请求两个归属地，同一 IP 在页签之间复用结果，不阻塞在线与流量查询。归属地接口限制每分钟 60 次，并校验 IP 确实属于目标用户的当前 IP 或历史记录。`config/ip_lookup.php` 提供超时和缓存配置；在 `.env` 设置 `IP_LOOKUP_ENABLED=false` 并重新生成配置缓存可以停用外部查询。
+
+### 部署
+
+此功能依赖上一版的每日节点用户流量表。已有该表的实例，更新代码后执行新增在线历史迁移：
+
+```sh
+php artisan migrate --path=database/migrations/2026_11_12_000001_create_user_online_log_table.php --force
+php artisan config:cache
+php artisan route:clear
+php artisan view:clear
+php artisan horizon:terminate
+```
+
+若尚未执行上一版的 `2026_11_12_000000_create_stat_server_user_tables.php`，先执行该迁移。SQL 安装和更新脚本已同步加入在线历史表。迁移允许同名表已存在；队列进程由现有守护服务重新启动，常驻 HTTP 进程也需要按部署方式加载新代码。节点需要启用在线 IP 上报，才能生成当前 IP 与在线 IP 历史。
+
+新增接口均位于 `GET /api/v1/{secure_path}/userOnline/`：`summary` 返回用户、当前 IP 和当天流量；`history` 返回按天汇总的 IP 历史；`traffic` 返回指定用户的每日节点流量；`ipInfo` 查询该用户已出现 IP 的归属地。所有接口必传 `user_id` 或 `email`，同时提供时必须对应同一账号。`history` / `traffic` 支持 `start_date`、`end_date`、`server_type`、`server_id`、`current`、`page_size`，历史另支持 `ip` 精确筛选。日期范围最多一年，每页最多 100 条。`ipInfo` 还需传 `ip`。

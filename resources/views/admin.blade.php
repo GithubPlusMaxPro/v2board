@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="/assets/admin/login.css?v={{$version}}-user-frontend-1">
     <link rel="stylesheet" href="/assets/admin/audit.css?v={{$version}}-modern-audit-1">
     <link rel="stylesheet" href="/assets/admin/subscription-log.css?v={{$version}}-modern-audit-1">
-    <link rel="stylesheet" href="/assets/admin/server-user-traffic.css?v={{$version}}-modern-audit-1">
+    <link rel="stylesheet" href="/assets/admin/server-user-traffic.css?v={{$version}}-user-details-1">
     <link rel="stylesheet" href="/assets/admin/user-online.css?v={{$version}}-user-list-2">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no">

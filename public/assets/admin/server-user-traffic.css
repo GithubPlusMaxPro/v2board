@@ -4,4 +4,13 @@
 .server-user-traffic-panel .traffic-total { font-size: 14px; font-weight: 650; color: #386cd0; font-variant-numeric: tabular-nums; }
 .server-user-traffic-panel .traffic-billed { font-size: 13px; font-weight: 600; color: #9273b5; font-variant-numeric: tabular-nums; }
 .server-user-traffic-panel td:nth-child(2) { min-width: 160px; }
-.server-user-traffic-panel td:nth-child(3) { min-width: 210px; }
+.server-user-traffic-panel td:nth-child(3) { min-width: 110px; }
+.server-user-traffic-panel .traffic-detail-toggle { display: block; margin-top: 7px; padding: 3px 0; border: 0; color: #3974d5; background: transparent; font-size: 11px; }
+.server-user-traffic-panel .traffic-detail-toggle:hover:not(:disabled) { color: #1d4ed8; background: transparent; }
+.server-user-traffic-panel .traffic-details-row[hidden] { display: none; }
+.server-user-traffic-panel .traffic-details-row > td { padding: 12px 18px; background: #f8fafd; }
+.server-user-traffic-panel .traffic-node-details { overflow-x: auto; }
+.server-user-traffic-panel .traffic-node-details > p { margin: 6px 0; color: #7c8da4; font-size: 12px; }
+.server-user-traffic-panel .traffic-node-table { min-width: 650px; background: #fff; border: 1px solid #e8edf5; border-radius: 10px; overflow: hidden; }
+.server-user-traffic-panel .traffic-node-table th, .server-user-traffic-panel .traffic-node-table td { padding: 10px 12px; font-size: 12px; }
+.server-user-traffic-panel .traffic-node-table th { background: #f1f5fb; }

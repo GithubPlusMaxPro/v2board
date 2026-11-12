@@ -11,9 +11,52 @@ use App\Services\IpLookupService;
 use App\Services\UserOnlineService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class UserOnlineController extends Controller
 {
+    public function fetch(Request $request)
+    {
+        $params = $request->validate([
+            'user_id' => 'sometimes|nullable|integer|min:1',
+            'email' => 'sometimes|nullable|string|max:254',
+            'sort' => 'sometimes|in:id,traffic',
+            'current' => 'sometimes|integer|min:1|max:1000000',
+            'page_size' => 'sometimes|integer|min:1|max:100',
+        ]);
+        $day = CarbonImmutable::now(config('app.timezone'))->startOfDay();
+        $daily = StatServerUser::where('record_at', $day->getTimestamp())->select('user_id')
+            ->selectRaw('SUM(u) AS day_u, SUM(d) AS day_d, SUM(billed_u) AS day_billed_u, SUM(billed_d) AS day_billed_d')->groupBy('user_id');
+        $query = User::query()->leftJoinSub($daily, 'daily', function ($join) { $join->on('daily.user_id', '=', 'v2_user.id'); });
+        if (!AdminPermissionService::isSuper($request->user)) $query->where('v2_user.is_admin', 0)->where('v2_user.is_staff', 0);
+        if (!empty($params['user_id'])) $query->where('v2_user.id', $params['user_id']);
+        if (!empty($params['email'])) $query->whereRaw("v2_user.email LIKE ? ESCAPE '!'", ['%' . str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $params['email']) . '%']);
+        $total = $query->count();
+        if (($params['sort'] ?? 'id') === 'traffic') $query->orderByRaw('(COALESCE(daily.day_u, 0) + COALESCE(daily.day_d, 0)) DESC');
+        $current = (int)($params['current'] ?? 1); $pageSize = (int)($params['page_size'] ?? 20);
+        $users = $query->select('v2_user.id', 'v2_user.email', 'v2_user.banned')
+            ->selectRaw('COALESCE(daily.day_u, 0) AS day_u, COALESCE(daily.day_d, 0) AS day_d, COALESCE(daily.day_billed_u, 0) AS day_billed_u, COALESCE(daily.day_billed_d, 0) AS day_billed_d')
+            ->orderBy('v2_user.id', 'DESC')->forPage($current, $pageSize)->get();
+        $keys = $users->map(function ($user) { return 'ALIVE_IP_USER_' . $user->id; })->all();
+        $cached = $keys ? Cache::many($keys) : [];
+        $now = time(); $service = app(UserOnlineService::class); $data = [];
+        $summary = ['page_users' => $users->count(), 'page_online' => 0, 'page_total' => 0, 'page_billed_total' => 0];
+        foreach ($users as $user) {
+            $cache = $cached['ALIVE_IP_USER_' . $user->id] ?? [];
+            $online = $service->snapshot(is_array($cache) ? $cache : [], $now);
+            $actual = (int)$user->day_u + (int)$user->day_d;
+            $billed = (int)$user->day_billed_u + (int)$user->day_billed_d;
+            if ($online['unique_ip_count']) $summary['page_online']++;
+            $summary['page_total'] += $actual; $summary['page_billed_total'] += $billed;
+            $data[] = ['id' => $user->id, 'email' => $user->email, 'banned' => (bool)$user->banned,
+                'online_ip_count' => $online['unique_ip_count'], 'online_node_count' => $online['node_count'],
+                'ips' => array_slice(array_values(array_unique(array_column($online['items'], 'ip'))), 0, 3),
+                'today_total' => $actual, 'today_billed_total' => $billed];
+        }
+        return response(['data' => $data, 'total' => $total, 'summary' => $summary,
+            'current' => $current, 'page_size' => $pageSize, 'date' => $day->toDateString(), 'as_of' => $now]);
+    }
+
     private function findUser(Request $request): User
     {
         $params = $request->validate([

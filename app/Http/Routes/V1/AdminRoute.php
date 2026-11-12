@@ -123,6 +123,7 @@ class AdminRoute
             $router->get('/user/getSubscribeLog', 'V1\\Admin\\UserController@getSubscribeLog');
             $router->get('/subscriptionLog/fetch', 'V1\\Admin\\SubscriptionLogController@fetch');
             $router->get('/serverUserTraffic/fetch', 'V1\\Admin\\ServerUserTrafficController@fetch');
+            $router->get('/userOnline/fetch', 'V1\\Admin\\UserOnlineController@fetch');
             $router->get('/userOnline/summary', 'V1\\Admin\\UserOnlineController@summary');
             $router->get('/userOnline/history', 'V1\\Admin\\UserOnlineController@history');
             $router->get('/userOnline/traffic', 'V1\\Admin\\UserOnlineController@traffic');

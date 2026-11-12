@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="/assets/admin/components.chunk.css?v={{$version}}">
     <link rel="stylesheet" href="/assets/admin/umi.css?v={{$version}}">
     <link rel="stylesheet" href="/assets/admin/custom.css?v={{$version}}">
-    <link rel="stylesheet" href="/assets/admin/permissions.css?v={{$version}}-admin-permissions-2">
+    <link rel="stylesheet" href="/assets/admin/permissions.css?v={{$version}}-modern-permissions-1">
     <link rel="stylesheet" href="/assets/admin/login.css?v={{$version}}-user-frontend-1">
     <link rel="stylesheet" href="/assets/admin/audit.css?v={{$version}}-modern-audit-1">
     <link rel="stylesheet" href="/assets/admin/subscription-log.css?v={{$version}}-modern-audit-1">
@@ -34,7 +34,7 @@
 
 <body>
 <div id="root"></div>
-<script src="/assets/admin/permissions.js?v={{$version}}-online-audit-1"></script>
+<script src="/assets/admin/permissions.js?v={{$version}}-modern-permissions-1"></script>
 <script src="/assets/admin/subscription-log.js?v={{$version}}-modern-audit-1"></script>
 <script src="/assets/admin/server-user-traffic.js?v={{$version}}-modern-audit-1"></script>
 <script src="/assets/admin/user-online.js?v={{$version}}-user-list-2"></script>

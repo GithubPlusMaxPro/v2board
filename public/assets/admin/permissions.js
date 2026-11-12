@@ -79,11 +79,11 @@
         overlay.setAttribute('aria-modal', 'true');
         overlay.setAttribute('aria-labelledby', 'admin-permission-title');
         var previousFocus = document.activeElement;
-        function close() { overlay.remove(); document.removeEventListener('keydown', onKey); if (previousFocus) previousFocus.focus(); }
+        function close() { overlay.remove(); document.removeEventListener('keydown', onKey); if (previousFocus && previousFocus.isConnected) previousFocus.focus(); }
         function onKey(event) {
-            if (event.key === 'Escape') close();
+            if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close(); }
             if (event.key === 'Tab') {
-                var focusable = Array.from(overlay.querySelectorAll('button,select,input')).filter(function (node) { return !node.disabled; });
+                var focusable = Array.from(overlay.querySelectorAll('button,select,input')).filter(function (node) { return !node.disabled && node.getClientRects().length; });
                 var first = focusable[0], last = focusable[focusable.length - 1];
                 if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
                 if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
@@ -93,16 +93,25 @@
         panel.className = 'admin-permission-panel';
         var header = element('div', '', panel);
         header.className = 'admin-permission-header';
-        element('h3', '管理员权限', header).id = 'admin-permission-title';
+        var heading = element('div', '', header);
+        element('span', '访问控制', heading).className = 'admin-permission-eyebrow';
+        element('h3', '管理员权限', heading).id = 'admin-permission-title';
+        element('p', '按功能模块分配权限，清晰管理每个管理员的访问范围。', heading);
         var closeButton = element('button', '关闭', header);
         closeButton.type = 'button'; closeButton.onclick = close;
-        element('p', '先在用户管理中将账号设为管理员，再在这里分配权限。新管理员默认没有操作权限。', panel);
-        var select = element('select', '', panel);
+        var content = element('div', '', panel); content.className = 'admin-permission-body';
+        var account = element('div', '', content); account.className = 'admin-permission-account';
+        var accountHeading = element('div', '', account); accountHeading.className = 'admin-permission-account-heading';
+        element('strong', '选择管理员', accountHeading);
+        var modeBadge = element('span', '正在加载', accountHeading); modeBadge.className = 'admin-permission-mode';
+        var select = element('select', '', account);
         select.setAttribute('aria-label', '选择管理员');
-        var form = element('div', '', panel);
-        var status = element('p', '正在加载…', panel);
-        status.setAttribute('role', 'status');
-        var save = element('button', '保存权限', panel);
+        element('p', '先在用户管理中将账号设为管理员，再在这里分配权限。新管理员默认没有操作权限。', account);
+        var form = element('div', '', content);
+        var footer = element('div', '', panel); footer.className = 'admin-permission-footer';
+        var status = element('p', '正在加载…', footer);
+        status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite');
+        var save = element('button', '保存权限', footer);
         save.type = 'button'; save.className = 'admin-permission-save'; save.disabled = true;
         document.body.appendChild(overlay);
         document.addEventListener('keydown', onKey);
@@ -118,14 +127,33 @@
                 var admin = admins.find(function (item) { return item.id === Number(select.value); });
                 if (!admin) { status.textContent = '没有可管理的管理员账号'; return; }
                 var fullLabel = element('label', '', form);
+                fullLabel.className = 'admin-permission-full';
                 var full = element('input', '', fullLabel);
                 full.type = 'checkbox'; full.checked = admin.admin_permissions === null;
-                fullLabel.appendChild(document.createTextNode(' 完整管理权限（可以管理其他管理员权限）'));
+                var fullText = element('span', '', fullLabel);
+                element('strong', '完整管理权限', fullText);
+                element('small', '允许访问所有功能，并管理其他管理员的权限。', fullText);
                 if (admin.id === current.id) full.disabled = true;
                 element('p', admin.id === current.id ? '不能撤销自己的完整管理权限。' : '按主菜单勾选整组权限，或展开后单独选择。保存时自动补齐查看和页面查询权限。系统和支付配置可能包含密钥，请谨慎授权。', form);
+                var overview = element('div', '', form); overview.className = 'admin-permission-overview';
+                var summaryValues = [];
+                ['已选功能', '可分配功能', '已选模块'].forEach(function (text) {
+                    var tile = element('div', '', overview); element('span', text, tile); summaryValues.push(element('strong', '—', tile));
+                });
+                var sectionHeading = element('div', '', form); sectionHeading.className = 'admin-permission-section-heading';
+                element('h4', '功能权限', sectionHeading); element('span', '整组选中，或展开单独配置', sectionHeading);
                 var grid = element('div', '', form); grid.className = 'admin-permission-groups';
                 var keys = Object.keys(current.catalog);
                 var assigned = new Set();
+                function updateOverview() {
+                    summaryValues[0].textContent = String(full.checked ? keys.length : grid.querySelectorAll('input[data-permission-key]:checked').length);
+                    summaryValues[1].textContent = String(keys.length);
+                    summaryValues[2].textContent = String(full.checked ? grid.querySelectorAll('section').length : grid.querySelectorAll('section.is-selected').length);
+                    modeBadge.textContent = full.checked ? '完整权限' : '受限权限';
+                    modeBadge.classList.toggle('is-full', full.checked);
+                    fullLabel.classList.toggle('is-active', full.checked);
+                }
+
                 function renderMenu(menu, permissionKeys, index) {
                     if (!permissionKeys.length) return;
                     var section = element('section', '', grid);
@@ -158,11 +186,13 @@
                     function sync() {
                         var count = inputs.filter(function (input) { return input.checked; }).length;
                         selectAll.checked = count === inputs.length;
+                        section.classList.toggle('is-selected', count > 0);
                         selectAll.indeterminate = count > 0 && count < inputs.length;
                         options.hidden = !expanded;
                         expand.setAttribute('aria-expanded', String(expanded));
                         expand.textContent = count + '/' + inputs.length + ' ' + (expanded ? '收起' : '展开');
                         expand.setAttribute('aria-label', (expanded ? '收起' : '展开') + menu.title + '，已选 ' + count + '/' + inputs.length);
+                        updateOverview();
                     }
                     selectAll.onchange = function () {
                         inputs.forEach(function (input) { input.checked = selectAll.checked; });
@@ -180,6 +210,7 @@
                 function toggle() {
                     grid.querySelectorAll('input').forEach(function (checkbox) { checkbox.disabled = full.checked; });
                     grid.style.opacity = full.checked ? '0.5' : '1';
+                    updateOverview();
                 }
                 full.onchange = toggle; toggle(); save.disabled = false;
                 save.onclick = async function () {

@@ -38,12 +38,19 @@
     function renderPage(container) {
         var controller = new AbortController();
         var panel = element('section', '', container);
-        panel.className = 'server-user-traffic-panel';
+        panel.className = 'server-user-traffic-panel audit-page';
         panel.setAttribute('aria-labelledby', 'server-user-traffic-title');
-        element('h2', '节点用户日流量', panel).id = 'server-user-traffic-title';
-        var description = element('p', '按节点、用户和自然日累计上传及下载量。仅统计功能启用后节点上报的数据。', panel);
-        var form = element('form', '', panel);
-        form.className = 'server-user-traffic-filters';
+        var header = element('div', '', panel); header.className = 'audit-header';
+        var titleBlock = element('div', '', header);
+        element('span', '流量分析', titleBlock).className = 'audit-eyebrow';
+        element('h2', '节点用户日流量', titleBlock).id = 'server-user-traffic-title';
+        var description = element('p', '按节点与用户查看每日流量，清晰区分实际用量和倍率扣量。', titleBlock);
+        element('span', '按日统计', header).className = 'audit-header-badge';
+        var filterBox = element('div', '', panel); filterBox.className = 'audit-filterbox';
+        element('h3', '筛选条件', filterBox);
+
+        var form = element('form', '', filterBox);
+        form.className = 'server-user-traffic-filters audit-filters';
         var fields = {};
         function input(key, label, type, placeholder) {
             var wrapper = element('label', label, form);
@@ -67,24 +74,31 @@
         input('start_date', '开始日期', 'date');
         input('end_date', '结束日期', 'date');
         var actions = element('div', '', form);
-        actions.className = 'server-user-traffic-actions';
+        actions.className = 'server-user-traffic-actions audit-actions';
         var apply = element('button', '查询 / 刷新', actions);
         apply.type = 'submit';
         var reset = element('button', '重置', actions);
         reset.type = 'button';
         var summary = element('div', '', panel);
-        summary.className = 'server-user-traffic-summary';
+        summary.className = 'server-user-traffic-summary audit-summary';
+        var countCard = element('div', '', summary); element('span', '匹配记录', countCard); var recordCount = element('strong', '—', countCard); element('small', '全部筛选结果', countCard);
+        var nodeCard = element('div', '', summary); element('span', '本页节点', nodeCard); var nodeCount = element('strong', '—', nodeCard); element('small', '按节点类型与 ID 区分', nodeCard);
+        panel.insertBefore(summary, filterBox);
         var rawCard = element('div', '', summary);
         element('span', '实际流量合计', rawCard);
         var rawTotal = element('strong', '—', rawCard);
         var billedCard = element('div', '', summary);
         element('span', '倍率扣量合计', billedCard);
         var billedTotal = element('strong', '—', billedCard);
-        var summaryNote = element('p', '合计包含当前筛选范围的所有记录。', panel);
+        element('small', '筛选范围内实际用量', rawCard);
+        element('small', '筛选范围内倍率扣量', billedCard);
+        var summaryNote = element('p', '合计包含当前筛选范围的所有记录。', panel); summaryNote.className = 'audit-summary-note';
         var status = element('p', '', panel);
         status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite');
+        var tableIntro = element('div', '', panel); tableIntro.className = 'audit-table-intro';
+        element('h3', '用量明细', tableIntro);
         var scroll = element('div', '', panel);
-        scroll.className = 'server-user-traffic-scroll';
+        scroll.className = 'server-user-traffic-scroll audit-table-wrap';
         var table = element('table', '', scroll);
         var heading = element('tr', '', element('thead', '', table));
         ['日期', '节点', '用户', '上传', '下载', '实际合计', '倍率扣量'].forEach(function (title) {
@@ -92,10 +106,11 @@
         });
         var body = element('tbody', '', table);
         var footer = element('div', '', panel);
-        footer.className = 'server-user-traffic-footer';
-        var prev = element('button', '上一页', footer);
+        footer.className = 'server-user-traffic-footer audit-footer';
         var pageLabel = element('span', '', footer);
-        var next = element('button', '下一页', footer);
+        var pager = element('div', '', footer); pager.className = 'audit-pagination';
+        var prev = element('button', '上一页', pager);
+        var next = element('button', '下一页', pager);
         prev.type = next.type = 'button';
         var page = 1, pageSize = 20, total = 0, busy = false, activeFilters = {};
         function controls() {
@@ -122,6 +137,8 @@
                 if (!response.ok) throw new Error(result.errors ? Object.values(result.errors)[0][0] : result.message || '加载失败，请重试');
                 if (controller.signal.aborted) return;
                 page = result.current; total = result.total;
+                recordCount.textContent = String(total);
+                nodeCount.textContent = String(new Set(result.data.map(function (item) { return item.server_type + ':' + item.server_id; })).size);
                 if (!fields.start_date.value) fields.start_date.value = result.start_date;
                 if (!fields.end_date.value) fields.end_date.value = result.end_date;
                 description.textContent = '按节点、用户和自然日累计上传及下载量。统计时区：' + result.timezone + '。';
@@ -134,20 +151,21 @@
                     element('td', item.record_date, row);
                     var node = element('td', '', row);
                     element('strong', item.server_name || '未命名节点', node);
-                    element('small', item.server_type + ' · ID ' + item.server_id, node);
+                    element('small', item.server_type + ' · ID ' + item.server_id, node).className = 'audit-meta';
                     var user = element('td', '', row);
-                    element('span', item.email || '用户已删除', user);
-                    element('small', 'ID ' + item.user_id, user);
+                    var identity = element('div', '', user); identity.className = 'audit-identity';
+                    element('span', item.email ? item.email.charAt(0).toUpperCase() : '?', identity).className = 'audit-avatar';
+                    var account = element('div', '', identity); element('span', item.email || '用户已删除', account); element('small', 'ID ' + item.user_id, account);
                     element('td', bytes(item.u), row);
                     element('td', bytes(item.d), row);
-                    element('td', bytes(Number(item.u) + Number(item.d)), row);
-                    element('td', bytes(Number(item.billed_u) + Number(item.billed_d)), row);
+                    element('td', bytes(Number(item.u) + Number(item.d)), row).className = 'traffic-total';
+                    element('td', bytes(Number(item.billed_u) + Number(item.billed_d)), row).className = 'traffic-billed';
                 });
                 if (!result.data.length) message('暂无流量记录');
                 status.textContent = '';
             } catch (error) {
                 if (!controller.signal.aborted) {
-                    status.textContent = error.message; rawTotal.textContent = billedTotal.textContent = '—';
+                    status.textContent = error.message; rawTotal.textContent = billedTotal.textContent = recordCount.textContent = nodeCount.textContent = '—';
                     page = 1; total = 0; message('加载失败，请重试');
                 }
             } finally {

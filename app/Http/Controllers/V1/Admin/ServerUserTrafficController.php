@@ -7,6 +7,7 @@ use App\Models\StatServerUser;
 use App\Services\AdminPermissionService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ServerUserTrafficController extends Controller
 {
@@ -39,8 +40,7 @@ class ServerUserTrafficController extends Controller
         }
         if (!empty($params['email'])) $query->where('v2_user.email', $params['email']);
         $summary = (clone $query)->selectRaw(
-            'COUNT(*) AS count, '
-            . 'COALESCE(SUM(v2_stat_server_user.u), 0) AS u, '
+            'COALESCE(SUM(v2_stat_server_user.u), 0) AS u, '
             . 'COALESCE(SUM(v2_stat_server_user.d), 0) AS d, '
             . 'COALESCE(SUM(v2_stat_server_user.billed_u), 0) AS billed_u, '
             . 'COALESCE(SUM(v2_stat_server_user.billed_d), 0) AS billed_d'
@@ -49,13 +49,22 @@ class ServerUserTrafficController extends Controller
         foreach (['u', 'd', 'billed_u', 'billed_d'] as $column) $totals[$column] = (int)$summary->{$column};
         $totals['total'] = $totals['u'] + $totals['d'];
         $totals['billed_total'] = $totals['billed_u'] + $totals['billed_d'];
-        $rows = $query->select('v2_stat_server_user.*', 'v2_user.email')
-            ->orderBy('v2_stat_server_user.record_at', 'DESC')->orderBy('v2_stat_server_user.id', 'DESC')
+        $total = DB::query()->fromSub((clone $query)
+            ->select('v2_stat_server_user.record_at', 'v2_stat_server_user.user_id')
+            ->groupBy('v2_stat_server_user.record_at', 'v2_stat_server_user.user_id'), 'traffic_user_days')->count();
+        $rows = (clone $query)->selectRaw(
+            'v2_stat_server_user.record_at, v2_stat_server_user.user_id, MAX(v2_user.email) AS email, '
+            . 'COALESCE(SUM(v2_stat_server_user.u), 0) AS u, '
+            . 'COALESCE(SUM(v2_stat_server_user.d), 0) AS d, '
+            . 'COALESCE(SUM(v2_stat_server_user.billed_u), 0) AS billed_u, '
+            . 'COALESCE(SUM(v2_stat_server_user.billed_d), 0) AS billed_d'
+        )->groupBy('v2_stat_server_user.record_at', 'v2_stat_server_user.user_id')
+            ->orderBy('v2_stat_server_user.record_at', 'DESC')->orderBy('v2_stat_server_user.user_id', 'ASC')
             ->forPage($current, $pageSize)->get();
         foreach ($rows as $row) {
             $row->setAttribute('record_date', CarbonImmutable::createFromTimestamp($row->record_at, $timezone)->toDateString());
         }
-        return response(['data' => $rows, 'total' => (int)$summary->count, 'summary' => $totals,
+        return response(['data' => $rows, 'total' => $total, 'summary' => $totals,
             'current' => $current, 'page_size' => $pageSize, 'start_date' => $start->toDateString(),
             'end_date' => $end->toDateString(), 'timezone' => $timezone]);
     }

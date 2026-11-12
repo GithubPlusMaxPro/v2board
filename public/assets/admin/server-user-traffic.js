@@ -153,60 +153,6 @@
                     var identity = element('div', '', user); identity.className = 'audit-identity';
                     element('span', item.email ? item.email.charAt(0).toUpperCase() : '?', identity).className = 'audit-avatar';
                     var account = element('div', '', identity); element('span', item.email || '用户已删除', account); element('small', 'ID ' + item.user_id, account);
-                    var detailsRow = element('tr', '', body); detailsRow.className = 'traffic-details-row'; detailsRow.hidden = true;
-                    var detailsCell = element('td', '', detailsRow); detailsCell.colSpan = 6;
-                    var detailContent = element('div', '', detailsCell); detailContent.className = 'traffic-node-details';
-                    var detailButton = element('button', '展开节点明细', account); detailButton.type = 'button'; detailButton.className = 'traffic-detail-toggle';
-                    detailButton.setAttribute('aria-expanded', 'false');
-                    var detailsLoaded = false;
-                    detailButton.onclick = async function () {
-                        if (!detailsRow.hidden) {
-                            detailsRow.hidden = true;
-                            detailButton.textContent = '展开节点明细';
-                            detailButton.setAttribute('aria-expanded', 'false');
-                            return;
-                        }
-                        detailsRow.hidden = false;
-                        detailButton.textContent = '收起节点明细';
-                        detailButton.setAttribute('aria-expanded', 'true');
-                        if (detailsLoaded) return;
-                        detailContent.textContent = '正在加载节点明细…';
-                        try {
-                            var detailQuery = new URLSearchParams(Object.assign({}, activeFilters, {
-                                detail_user_id: item.user_id, detail_date: item.record_date
-                            }));
-                            var detailResponse = await fetch('/api/v1/' + window.settings.secure_path + '/serverUserTraffic/fetch?' + detailQuery, {
-                                headers: { authorization: localStorage.getItem('authorization') || '', Accept: 'application/json' },
-                                signal: controller.signal
-                            });
-                            var detailResult = await detailResponse.json();
-                            if (!detailResponse.ok) throw new Error(detailResult.errors ? Object.values(detailResult.errors)[0][0] : detailResult.message || '加载节点明细失败');
-                            if (controller.signal.aborted) return;
-                            detailContent.replaceChildren();
-                            if (!detailResult.data.length) {
-                                element('p', '该用户当天没有可显示的节点明细。', detailContent);
-                            } else {
-                                var detailTable = element('table', '', detailContent); detailTable.className = 'traffic-node-table';
-                                var detailHead = element('tr', '', element('thead', '', detailTable));
-                                ['节点', '类型 / ID', '上传', '下载', '实际合计', '倍率扣量'].forEach(function (label) {
-                                    element('th', label, detailHead).scope = 'col';
-                                });
-                                var detailBody = element('tbody', '', detailTable);
-                                detailResult.data.forEach(function (node) {
-                                    var detailRow = element('tr', '', detailBody);
-                                    element('td', node.server_name || '未命名节点', detailRow);
-                                    element('td', node.server_type + ' · ID ' + node.server_id, detailRow);
-                                    element('td', bytes(node.u), detailRow);
-                                    element('td', bytes(node.d), detailRow);
-                                    element('td', bytes(Number(node.u) + Number(node.d)), detailRow).className = 'traffic-total';
-                                    element('td', bytes(Number(node.billed_u) + Number(node.billed_d)), detailRow).className = 'traffic-billed';
-                                });
-                            }
-                            detailsLoaded = true;
-                        } catch (error) {
-                            if (!controller.signal.aborted) detailContent.textContent = error.message + '，重新展开可重试。';
-                        }
-                    };
                     element('td', bytes(item.u), row);
                     element('td', bytes(item.d), row);
                     element('td', bytes(Number(item.u) + Number(item.d)), row).className = 'traffic-total';

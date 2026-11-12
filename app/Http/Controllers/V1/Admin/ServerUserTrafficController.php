@@ -15,8 +15,6 @@ class ServerUserTrafficController extends Controller
     {
         $params = $request->validate([
             'user_id' => 'sometimes|nullable|integer|min:1',
-            'detail_user_id' => 'sometimes|integer|min:1',
-            'detail_date' => 'sometimes|date_format:Y-m-d',
             'email' => 'sometimes|nullable|string|max:254',
             'server_type' => 'sometimes|nullable|in:shadowsocks,vmess,trojan,tuic,hysteria,vless,anytls,v2node',
             'server_id' => 'sometimes|nullable|integer|min:1',
@@ -41,23 +39,6 @@ class ServerUserTrafficController extends Controller
             if (!empty($params[$filter])) $query->where('v2_stat_server_user.' . $filter, $params[$filter]);
         }
         if (!empty($params['email'])) $query->where('v2_user.email', $params['email']);
-        if (isset($params['detail_user_id']) || isset($params['detail_date'])) {
-            if (!isset($params['detail_user_id'], $params['detail_date'])) abort(422, '用户和日期不能为空');
-            $detailAt = CarbonImmutable::parse($params['detail_date'], $timezone)->startOfDay()->getTimestamp();
-            $details = (clone $query)->where('v2_stat_server_user.user_id', $params['detail_user_id'])
-                ->where('v2_stat_server_user.record_at', $detailAt)
-                ->selectRaw(
-                    'v2_stat_server_user.server_type, v2_stat_server_user.server_id, '
-                    . 'MAX(v2_stat_server_user.server_name) AS server_name, '
-                    . 'COALESCE(SUM(v2_stat_server_user.u), 0) AS u, '
-                    . 'COALESCE(SUM(v2_stat_server_user.d), 0) AS d, '
-                    . 'COALESCE(SUM(v2_stat_server_user.billed_u), 0) AS billed_u, '
-                    . 'COALESCE(SUM(v2_stat_server_user.billed_d), 0) AS billed_d'
-                )->groupBy('v2_stat_server_user.server_type', 'v2_stat_server_user.server_id')
-                ->orderByRaw('SUM(v2_stat_server_user.u) + SUM(v2_stat_server_user.d) DESC')->get();
-            return response(['data' => $details, 'user_id' => (int)$params['detail_user_id'],
-                'record_date' => $params['detail_date']]);
-        }
         $summary = (clone $query)->selectRaw(
             'COALESCE(SUM(v2_stat_server_user.u), 0) AS u, '
             . 'COALESCE(SUM(v2_stat_server_user.d), 0) AS d, '

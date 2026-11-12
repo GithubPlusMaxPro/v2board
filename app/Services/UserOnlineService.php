@@ -34,6 +34,11 @@ class UserOnlineService
     {
         $now = $now ?? time();
         $cache = Cache::get('ALIVE_IP_USER_' . $userId, []);
+        return $this->snapshot(is_array($cache) ? $cache : [], $now, true);
+    }
+
+    public function snapshot(array $cache, int $now, bool $resolveNames = false): array
+    {
         $items = []; $uniqueIps = []; $nodes = [];
         foreach (is_array($cache) ? $cache : [] as $key => $value) {
             if (!is_array($value) || !isset($value['aliveips'], $value['lastupdateAt']) || !is_array($value['aliveips'])) continue;
@@ -41,7 +46,8 @@ class UserOnlineService
             if (!preg_match('/^(shadowsocks|vmess|vless|trojan|hysteria|tuic|anytls|v2node)([1-9][0-9]*)$/', (string)$key, $match)) continue;
             $ips = self::normalizeIps($value['aliveips']);
             if (!$ips) continue;
-            $name = $value['server_name'] ?? DB::table('v2_server_' . $match[1])->where('id', (int)$match[2])->value('name');
+            $name = $value['server_name'] ?? null;
+            if ($name === null && $resolveNames) $name = DB::table('v2_server_' . $match[1])->where('id', (int)$match[2])->value('name');
             foreach ($ips as $ip) {
                 $items[] = ['ip' => $ip, 'server_type' => $match[1], 'server_id' => (int)$match[2],
                     'server_name' => $name ?: '未命名或已删除节点', 'last_seen' => (int)$value['lastupdateAt']];

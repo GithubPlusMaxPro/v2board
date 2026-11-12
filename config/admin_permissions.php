@@ -47,6 +47,7 @@ return [
         'system.log' => '查看系统日志',
     ],
     'actions' => [
+        'App\Http\Controllers\V1\Admin\UserOnlineController@fetch' => 'online.view',
         'App\Http\Controllers\V1\Admin\UserOnlineController@summary' => 'online.view',
         'App\Http\Controllers\V1\Admin\UserOnlineController@history' => 'online.view',
         'App\Http\Controllers\V1\Admin\UserOnlineController@traffic' => 'online.view',

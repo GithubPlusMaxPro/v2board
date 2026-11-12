@@ -34,7 +34,7 @@
 <div id="root"></div>
 <script src="/assets/admin/permissions.js?v={{$version}}-daily-traffic-1"></script>
 <script src="/assets/admin/subscription-log.js?v={{$version}}-subscription-audit-2"></script>
-<script src="/assets/admin/server-user-traffic.js?v={{$version}}-daily-traffic-1"></script>
+<script src="/assets/admin/server-user-traffic.js?v={{$version}}-node-id-filter-2"></script>
 <script src="/assets/admin/vendors.async.js?v={{$version}}"></script>
 <script src="/assets/admin/components.async.js?v={{$version}}"></script>
 <script src="/assets/admin/umi.js?v={{$version}}-daily-traffic-1"></script>

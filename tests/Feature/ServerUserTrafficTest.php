@@ -182,6 +182,27 @@ class ServerUserTrafficTest extends TestCase
         $this->getJson($this->url . '?user_id=99999')->assertOk()->assertJsonCount(0, 'data')->assertJsonPath('summary.total', 0);
     }
 
+    public function testNodeIdWorksWithoutTypeAndKeepsPaginationAndTotalsScoped(): void
+    {
+        $first = $this->account(); $second = $this->account();
+        $this->job([$first->id => [10, 20], $second->id => [30, 40]], 1, 'vmess')->handle();
+        $this->job([$first->id => [50, 60]], 1, 'vless')->handle();
+        $this->job([$first->id => [1000, 2000]], 2, 'vmess')->handle();
+        $this->job([$first->id => [3000, 4000]], 1, 'vmess', 1, $this->day - 1)->handle();
+        $this->authorize($this->account(true));
+        $this->getJson($this->url . '?server_id=1&page_size=2')->assertOk()
+            ->assertJsonPath('total', 3)->assertJsonCount(2, 'data')->assertJsonPath('summary.total', 210);
+        $this->getJson($this->url . '?server_id=1&page_size=2&current=2')->assertOk()
+            ->assertJsonCount(1, 'data')->assertJsonPath('summary.total', 210)->assertJsonPath('data.0.server_id', 1);
+        $this->getJson($this->url . '?server_id=1&server_type=')->assertOk()->assertJsonPath('total', 3);
+        $this->getJson($this->url . '?server_id=1&server_type=vmess')->assertOk()
+            ->assertJsonPath('total', 2)->assertJsonPath('summary.total', 100);
+        $this->getJson($this->url . '?server_id=1&user_id=' . $second->id)->assertOk()
+            ->assertJsonPath('total', 1)->assertJsonPath('summary.total', 70);
+        $this->getJson($this->url . '?server_id=99999')->assertOk()
+            ->assertJsonPath('total', 0)->assertJsonPath('summary.total', 0);
+    }
+
     public function testDedicatedPermissionLimitsRestrictedAdminsToOrdinaryUsers(): void
     {
         $user = $this->account(); $super = $this->account(true); $staff = $this->account(); $staff->update(['is_staff' => 1]);
@@ -192,6 +213,7 @@ class ServerUserTrafficTest extends TestCase
         $this->authorize($manager); $this->getJson($this->url)->assertForbidden();
         $manager->update(['admin_permissions' => ['traffic.view']]);
         $this->getJson($this->url)->assertOk()->assertJsonPath('total', 1)->assertJsonPath('summary.total', 30);
+        $this->getJson($this->url . '?server_id=1')->assertOk()->assertJsonPath('total', 1)->assertJsonPath('summary.total', 30);
         $this->getJson($this->url . '?user_id=' . $super->id)->assertOk()->assertJsonPath('total', 0);
         $this->authorize($super);
         $this->getJson($this->url)->assertOk()->assertJsonPath('total', 4)->assertJsonPath('summary.total', 3333);
@@ -201,7 +223,7 @@ class ServerUserTrafficTest extends TestCase
     public function testInvalidFiltersAndUnboundedDateRangesAreRejected(): void
     {
         $this->authorize($this->account(true));
-        foreach (['server_id=1', 'server_type=invalid', 'user_id=0', 'current=0', 'page_size=101',
+        foreach (['server_id=0', 'server_id=-1', 'server_id=invalid', 'server_type=invalid', 'user_id=0', 'current=0', 'page_size=101',
             'start_date=2026-02-30', 'start_date=bad', 'start_date=2026-11-12&end_date=2026-11-11',
             'start_date=2024-01-01&end_date=2026-01-01'] as $query) $this->getJson($this->url . '?' . $query)->assertUnprocessable();
     }

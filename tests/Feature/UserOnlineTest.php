@@ -29,7 +29,7 @@ class UserOnlineTest extends TestCase
         parent::setUp();
         config(['database.default' => 'sqlite', 'database.connections.sqlite.database' => ':memory:',
             'cache.default' => 'array', 'app.key' => str_repeat('k', 32), 'app.timezone' => 'Asia/Shanghai',
-            'v2board.server_token' => 'node-test-token', 'ip_lookup.enabled' => true]);
+            'v2board.server_token' => 'node-test-token', 'ip_lookup.enabled' => true, 'ip_lookup.provider' => 'geojs']);
         Cache::flush();
         $this->day = CarbonImmutable::now('Asia/Shanghai')->startOfDay()->getTimestamp();
         foreach (app('router')->getRoutes() as $route) {

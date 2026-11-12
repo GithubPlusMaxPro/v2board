@@ -36,7 +36,7 @@
 <div id="root"></div>
 <script src="/assets/admin/permissions.js?v={{$version}}-modern-permissions-2"></script>
 <script src="/assets/admin/subscription-log.js?v={{$version}}-modern-audit-1"></script>
-<script src="/assets/admin/server-user-traffic.js?v={{$version}}-user-aggregate-1"></script>
+<script src="/assets/admin/server-user-traffic.js?v={{$version}}-user-details-2"></script>
 <script src="/assets/admin/user-online.js?v={{$version}}-user-list-2"></script>
 <script src="/assets/admin/vendors.async.js?v={{$version}}"></script>
 <script src="/assets/admin/components.async.js?v={{$version}}"></script>

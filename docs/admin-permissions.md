@@ -136,13 +136,13 @@ php artisan horizon:terminate
 
 ### IP 归属地
 
-默认使用 [ip2region](https://github.com/lionsoul2014/ip2region) 本地离线数据库。仓库随代码分发官方 PHP 查询客户端，以及 `database/ip2region/ip2region_v4.xdb` / `ip2region_v6.xdb` 两份数据库，不需要上线时额外下载或安装 Composer 依赖。PHP 查询实现、数据库的上游固定版本和来源见 `database/ip2region/README.md`；许可文本随文件保留。官方开源数据不定期更新，城市级结果仍可能存在误差。
+固定使用 [ip2region](https://github.com/lionsoul2014/ip2region) 本地离线数据库。仓库随代码分发官方 PHP 查询客户端，以及 `database/ip2region/ip2region_v4.xdb` / `ip2region_v6.xdb` 两份数据库，不需要上线时额外下载或安装 Composer 依赖。PHP 查询实现、数据库的上游固定版本和来源见 `database/ip2region/README.md`；许可文本随文件保留。官方开源数据不定期更新，城市级结果仍可能存在误差。
 
-前端向本站 `userOnline/ipInfo` 查询；后台校验管理员权限、目标用户与 IP 关联后，选择 IPv4 或 IPv6 数据库查询，向界面返回国家、省份、城市和运营商。数据库格式为 `国家|省份|城市|ISP|国家代码`，未知字段 `0` 显示为空；自带库不含 ASN，因此该字段留空。默认流程不向外部 IP 查询网站发送请求。内网与保留地址仍本地标记，停用开关后不读取数据库；归属地失败不影响在线记录和流量查询。
+前端向本站 `userOnline/ipInfo` 查询；后台校验管理员权限、目标用户与 IP 关联后，选择 IPv4 或 IPv6 数据库查询，向界面返回国家、省份、城市和运营商。数据库格式为 `国家|省份|城市|ISP|国家代码`，未知字段 `0` 显示为空；自带库不含 ASN，因此该字段留空。归属地查询仅访问本地数据库。内网与保留地址仍本地标记，停用开关后不读取数据库；归属地失败不影响在线记录和流量查询。
 
-成功结果缓存 1 天、失败结果缓存 5 分钟，缓存键包含数据库路径、文件大小和修改时间，数据库替换后新请求使用新缓存。前端最多并发两个查询，同一 IP 在抽屉页签内复用结果，查询启动间隔至少 1.1 秒以兼顾后台每分钟 60 次限流。接口继续兼容旧版客户端提交的 `browser=1` 参数：使用 ip2region 时直接返回本地结果。
+成功结果缓存 1 天、失败结果缓存 5 分钟，缓存键包含数据库路径、文件大小和修改时间，数据库替换后新请求使用新缓存。前端最多并发两个查询，同一 IP 在抽屉页签内复用结果，查询启动间隔至少 1.1 秒以兼顾后台每分钟 60 次限流。旧版客户端多传的浏览器查询参数会被忽略，接口统一返回本地结果。
 
-默认 `IP_LOOKUP_PROVIDER=ip2region`；如果已有 `.env` 显式配置了 `ipsb`、`ipwhois` 或 `geojs`，需改为 `IP_LOOKUP_PROVIDER=ip2region`。更新后执行 `php artisan config:cache` 和 `php artisan view:clear`，并按部署方式重新加载常驻 HTTP 进程。仍保留旧服务商作为显式配置的兼容选项。`IP_LOOKUP_ENABLED=false` 可停用查询。通过 `IP2REGION_IPV4_PATH` / `IP2REGION_IPV6_PATH` 可指定自行维护的、相同字段格式的兼容数据库；更新数据时先完成下载，再原子替换对应文件。
+查询实现已删除服务商选择和全部外部 API 分支，旧配置缓存或环境变量中的服务商值不会影响查询；旧服务商的缓存也不会被读取，无需为切换服务商修改 `.env`。更新代码后执行 `php artisan config:cache` 和 `php artisan view:clear`，并按部署方式重新加载常驻 HTTP 进程／OPcache，确保线上实际执行新代码。`IP_LOOKUP_ENABLED=false` 可停用查询。通过 `IP2REGION_IPV4_PATH` / `IP2REGION_IPV6_PATH` 可指定自行维护的、相同字段格式的兼容数据库；更新数据时先完成下载，再原子替换对应文件。
 
 ### 部署
 

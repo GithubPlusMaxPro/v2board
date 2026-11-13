@@ -40,7 +40,7 @@
 <script src="/assets/admin/user-online.js?v={{$version}}-ip2region-parallel-5"></script>
 <script src="/assets/admin/vendors.async.js?v={{$version}}"></script>
 <script src="/assets/admin/components.async.js?v={{$version}}"></script>
-<script src="/assets/admin/umi.js?v={{$version}}-node-token-1"></script>
+<script src="/assets/admin/umi.js?v={{$version}}-node-token-2"></script>
 </body>
 
 </html>

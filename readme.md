@@ -10,10 +10,10 @@
 
 后台新建或编辑节点时，可填写“节点通讯密钥”（16–255 个字符）。留空或清空后使用系统配置中的全局通讯密钥；填写后，该节点只接受自己的密钥，全局密钥不再对该节点有效。修改后需要同步更新节点后端的 API Key / token；V2Node 安装命令会自动使用该节点当前有效的密钥。父节点与子节点各自按自己的配置校验。
 
-已有面板更新代码后，先执行新增字段迁移。当前 Docker 部署使用 `php81` 容器，项目目录为 `/www/sites/v2board/index`：
+已有面板更新代码后，先执行新增字段迁移。当前 Docker 部署使用 `php81` 容器，容器内目录为 `/www/sites/v2board/index`，宿主机目录为 `/opt/1panel/www/sites/v2board/index`：
 
 ```bash
-cd /www/sites/v2board/index && git pull origin master
+cd /opt/1panel/www/sites/v2board/index && git pull origin master
 docker exec php81 sh -c '
 cd /www/sites/v2board/index &&
 php artisan migrate --path=database/migrations/2026_11_13_000000_add_server_token_to_server_tables.php --force &&

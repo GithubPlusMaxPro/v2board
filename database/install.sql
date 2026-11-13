@@ -235,6 +235,7 @@ CREATE TABLE `v2_server_group` (
 
 DROP TABLE IF EXISTS `v2_server_tuic`;
 CREATE TABLE `v2_server_tuic` (
+  `server_token` varchar(255) DEFAULT NULL COMMENT '节点通讯密钥，留空使用全局密钥',
                                       `id` int(11) NOT NULL AUTO_INCREMENT,
                                       `group_id` varchar(255) NOT NULL,
                                       `route_id` varchar(255) DEFAULT NULL,
@@ -261,6 +262,7 @@ CREATE TABLE `v2_server_tuic` (
 
 DROP TABLE IF EXISTS `v2_server_hysteria`;
 CREATE TABLE `v2_server_hysteria` (
+  `server_token` varchar(255) DEFAULT NULL COMMENT '节点通讯密钥，留空使用全局密钥',
                                       `id` int(11) NOT NULL AUTO_INCREMENT,
                                       `version` int(11) NOT NULL,
                                       `group_id` varchar(255) NOT NULL,
@@ -301,6 +303,7 @@ CREATE TABLE `v2_server_route` (
 
 DROP TABLE IF EXISTS `v2_server_shadowsocks`;
 CREATE TABLE `v2_server_shadowsocks` (
+  `server_token` varchar(255) DEFAULT NULL COMMENT '节点通讯密钥，留空使用全局密钥',
                                          `id` int(11) NOT NULL AUTO_INCREMENT,
                                          `group_id` varchar(255) NOT NULL,
                                          `route_id` varchar(255) DEFAULT NULL,
@@ -324,6 +327,7 @@ CREATE TABLE `v2_server_shadowsocks` (
 
 DROP TABLE IF EXISTS `v2_server_trojan`;
 CREATE TABLE `v2_server_trojan` (
+  `server_token` varchar(255) DEFAULT NULL COMMENT '节点通讯密钥，留空使用全局密钥',
                                     `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '节点ID',
                                     `group_id` varchar(255) NOT NULL COMMENT '节点组',
                                     `route_id` varchar(255) DEFAULT NULL,
@@ -348,6 +352,7 @@ CREATE TABLE `v2_server_trojan` (
 
 DROP TABLE IF EXISTS `v2_server_vless`;
 CREATE TABLE `v2_server_vless` (
+  `server_token` varchar(255) DEFAULT NULL COMMENT '节点通讯密钥，留空使用全局密钥',
                                    `id` int(11) NOT NULL AUTO_INCREMENT,
                                    `group_id` text NOT NULL,
                                    `route_id` text,
@@ -375,6 +380,7 @@ CREATE TABLE `v2_server_vless` (
 
 DROP TABLE IF EXISTS `v2_server_vmess`;
 CREATE TABLE `v2_server_vmess` (
+  `server_token` varchar(255) DEFAULT NULL COMMENT '节点通讯密钥，留空使用全局密钥',
                                    `id` int(11) NOT NULL AUTO_INCREMENT,
                                    `group_id` varchar(255) NOT NULL,
                                    `route_id` varchar(255) DEFAULT NULL,
@@ -401,6 +407,7 @@ CREATE TABLE `v2_server_vmess` (
 
 DROP TABLE IF EXISTS `v2_server_anytls`;
 CREATE TABLE `v2_server_anytls` (
+  `server_token` varchar(255) DEFAULT NULL COMMENT '节点通讯密钥，留空使用全局密钥',
                                       `id` int(11) NOT NULL AUTO_INCREMENT,
                                       `group_id` varchar(255) NOT NULL,
                                       `route_id` varchar(255) DEFAULT NULL,
@@ -423,6 +430,7 @@ CREATE TABLE `v2_server_anytls` (
 
 DROP TABLE IF EXISTS `v2_server_v2node`;
 CREATE TABLE `v2_server_v2node` (
+  `server_token` varchar(255) DEFAULT NULL COMMENT '节点通讯密钥，留空使用全局密钥',
                                     `id` int(11) NOT NULL AUTO_INCREMENT,
                                     `group_id` varchar(255) NOT NULL,
                                     `route_id` varchar(255) DEFAULT NULL,

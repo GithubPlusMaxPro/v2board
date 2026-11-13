@@ -918,3 +918,12 @@ CREATE TABLE IF NOT EXISTS `v2_user_online_log` (
     KEY `user_online_user_last_seen` (`user_id`, `last_seen`),
     KEY `user_online_user_ip` (`user_id`, `ip`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `v2_server_vmess` ADD `server_token` varchar(255) DEFAULT NULL COMMENT '节点通讯密钥，留空使用全局密钥';
+ALTER TABLE `v2_server_vless` ADD `server_token` varchar(255) DEFAULT NULL COMMENT '节点通讯密钥，留空使用全局密钥';
+ALTER TABLE `v2_server_trojan` ADD `server_token` varchar(255) DEFAULT NULL COMMENT '节点通讯密钥，留空使用全局密钥';
+ALTER TABLE `v2_server_shadowsocks` ADD `server_token` varchar(255) DEFAULT NULL COMMENT '节点通讯密钥，留空使用全局密钥';
+ALTER TABLE `v2_server_tuic` ADD `server_token` varchar(255) DEFAULT NULL COMMENT '节点通讯密钥，留空使用全局密钥';
+ALTER TABLE `v2_server_hysteria` ADD `server_token` varchar(255) DEFAULT NULL COMMENT '节点通讯密钥，留空使用全局密钥';
+ALTER TABLE `v2_server_anytls` ADD `server_token` varchar(255) DEFAULT NULL COMMENT '节点通讯密钥，留空使用全局密钥';
+ALTER TABLE `v2_server_v2node` ADD `server_token` varchar(255) DEFAULT NULL COMMENT '节点通讯密钥，留空使用全局密钥';

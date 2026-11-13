@@ -80,7 +80,7 @@ class VmessController extends Controller
         if (!$server) {
             abort(500, '服务器不存在');
         }
-        if (!ServerVmess::create($server->toArray())) {
+        if (!ServerVmess::create($server->makeVisible('server_token')->toArray())) {
             abort(500, '复制失败');
         }
 

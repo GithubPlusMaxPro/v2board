@@ -302,6 +302,7 @@ class ServerService
     {
         $servers = ServerShadowsocks::orderBy('sort', 'ASC')
             ->get()
+            ->makeVisible('server_token')
             ->toArray();
         foreach ($servers as $k => $v) {
             $servers[$k]['type'] = 'shadowsocks';
@@ -313,6 +314,7 @@ class ServerService
     {
         $servers = ServerVmess::orderBy('sort', 'ASC')
             ->get()
+            ->makeVisible('server_token')
             ->toArray();
         foreach ($servers as $k => $v) {
             $servers[$k]['type'] = 'vmess';
@@ -324,6 +326,7 @@ class ServerService
     {
         $servers = ServerVless::orderBy('sort', 'ASC')
             ->get()
+            ->makeVisible('server_token')
             ->toArray();
         foreach ($servers as $k => $v) {
             $servers[$k]['type'] = 'vless';
@@ -335,6 +338,7 @@ class ServerService
     {
         $servers = ServerTrojan::orderBy('sort', 'ASC')
             ->get()
+            ->makeVisible('server_token')
             ->toArray();
         foreach ($servers as $k => $v) {
             $servers[$k]['type'] = 'trojan';
@@ -346,6 +350,7 @@ class ServerService
     {
         $servers = ServerTuic::orderBy('sort', 'ASC')
             ->get()
+            ->makeVisible('server_token')
             ->toArray();
         foreach ($servers as $k => $v) {
             $servers[$k]['type'] = 'tuic';
@@ -357,6 +362,7 @@ class ServerService
     {
         $servers = ServerHysteria::orderBy('sort', 'ASC')
             ->get()
+            ->makeVisible('server_token')
             ->toArray();
         foreach ($servers as $k => $v) {
             $servers[$k]['type'] = 'hysteria';
@@ -368,6 +374,7 @@ class ServerService
     {
         $servers = ServerAnytls::orderBy('sort', 'ASC')
             ->get()
+            ->makeVisible('server_token')
             ->toArray();
         foreach ($servers as $k => $v) {
             $servers[$k]['type'] = 'anytls';
@@ -382,6 +389,7 @@ class ServerService
     {
         $servers = ServerV2node::orderBy('sort', 'ASC')
             ->get()
+            ->makeVisible('server_token')
             ->toArray();
         foreach ($servers as $k => $v) {
             $servers[$k]['type'] = 'v2node';
@@ -390,7 +398,7 @@ class ServerService
             }
 
             $apiHost = config('v2board.server_api_url', config('v2board.app_url'));
-            $apiKey = config('v2board.server_token', '');
+            $apiKey = $this->getServerToken($v);
             $nodeId = (int) $v['id'];
             $apiHostArg = escapeshellarg((string) $apiHost);
             $apiKeyArg = escapeshellarg((string) $apiKey);
@@ -452,6 +460,21 @@ class ServerService
             if (is_array($array)) $routes[$k]['match'] = $array;
         }
         return $routes;
+    }
+
+    public function getServerToken($server): string
+    {
+        $token = $server['server_token'] ?? null;
+        return $token !== null && $token !== ''
+            ? (string) $token
+            : (string) config('v2board.server_token', '');
+    }
+
+    public function checkServerToken($server, $token): bool
+    {
+        $expected = $this->getServerToken($server);
+        return is_string($token) && $token !== '' && $expected !== ''
+            && hash_equals($expected, $token);
     }
 
     public function getServer($serverId, $serverType)

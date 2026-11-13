@@ -25,7 +25,9 @@ class DeepbworkController extends Controller
         if (empty($token)) {
             abort(500, 'token is null');
         }
-        if ($token !== config('v2board.server_token')) {
+        $server = ServerVmess::find($request->input('node_id'));
+        if (!$server) abort(500, 'server is not exist');
+        if (!(new ServerService())->checkServerToken($server, $token)) {
             abort(500, 'token is error');
         }
     }

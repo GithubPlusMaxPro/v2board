@@ -12522,7 +12522,16 @@
                     placeholder: "\u8bf7\u8f93\u5165\u8282\u70b9\u540d\u79f0",
                     value: e.name,
                     onChange: e=>this.formChange("name", e.target.value)
-                })), d.a.createElement("div", {
+                }), d.a.createElement("label", {
+                    style: { marginTop: 12 }
+                }, "节点通讯密钥"), d.a.createElement(s["a"], {
+                    type: "password",
+                    autoComplete: "new-password",
+                    maxLength: 255,
+                    placeholder: "留空使用全局密钥，自定义密钥至少16位",
+                    value: e.server_token || "",
+                    onChange: e=>this.formChange("server_token", e.target.value)
+                }), d.a.createElement("small", { className: "text-muted" }, "设置后仅使用此密钥，节点后端需同步修改；清空后恢复全局密钥")), d.a.createElement("div", {
                     className: "form-group col-4"
                 }, d.a.createElement("label", null, "\u500d\u7387"), d.a.createElement(s["a"], {
                     addonAfter: "x",
@@ -28276,7 +28285,16 @@
                     placeholder: "\u8bf7\u8f93\u5165\u8282\u70b9\u540d\u79f0",
                     value: e.name,
                     onChange: e=>this.formChange("name", e.target.value)
-                })), h.a.createElement("div", {
+                }), h.a.createElement("label", {
+                    style: { marginTop: 12 }
+                }, "节点通讯密钥"), h.a.createElement(s["a"], {
+                    type: "password",
+                    autoComplete: "new-password",
+                    maxLength: 255,
+                    placeholder: "留空使用全局密钥，自定义密钥至少16位",
+                    value: e.server_token || "",
+                    onChange: e=>this.formChange("server_token", e.target.value)
+                }), h.a.createElement("small", { className: "text-muted" }, "设置后仅使用此密钥，节点后端需同步修改；清空后恢复全局密钥")), h.a.createElement("div", {
                     className: "form-group col-4"
                 }, h.a.createElement("label", null, "\u500d\u7387"), h.a.createElement(s["a"], {
                     addonAfter: "x",
@@ -104487,7 +104505,16 @@
                     placeholder: "\u8bf7\u8f93\u5165\u8282\u70b9\u540d\u79f0",
                     value: e.name,
                     onChange: e=>this.formChange("name", e.target.value)
-                })), y.a.createElement("div", {
+                }), y.a.createElement("label", {
+                    style: { marginTop: 12 }
+                }, "节点通讯密钥"), y.a.createElement(s["a"], {
+                    type: "password",
+                    autoComplete: "new-password",
+                    maxLength: 255,
+                    placeholder: "留空使用全局密钥，自定义密钥至少16位",
+                    value: e.server_token || "",
+                    onChange: e=>this.formChange("server_token", e.target.value)
+                }), y.a.createElement("small", { className: "text-muted" }, "设置后仅使用此密钥，节点后端需同步修改；清空后恢复全局密钥")), y.a.createElement("div", {
                     className: "form-group col-4"
                 }, y.a.createElement("label", null, "\u500d\u7387"), y.a.createElement(s["a"], {
                     addonAfter: "x",
@@ -105217,7 +105244,16 @@
                     placeholder: "\u8bf7\u8f93\u5165\u8282\u70b9\u540d\u79f0",
                     value: e.name,
                     onChange: e=>this.formChange("name", e.target.value)
-                })), y.a.createElement("div", {
+                }), y.a.createElement("label", {
+                    style: { marginTop: 12 }
+                }, "节点通讯密钥"), y.a.createElement(s["a"], {
+                    type: "password",
+                    autoComplete: "new-password",
+                    maxLength: 255,
+                    placeholder: "留空使用全局密钥，自定义密钥至少16位",
+                    value: e.server_token || "",
+                    onChange: e=>this.formChange("server_token", e.target.value)
+                }), y.a.createElement("small", { className: "text-muted" }, "设置后仅使用此密钥，节点后端需同步修改；清空后恢复全局密钥")), y.a.createElement("div", {
                     className: "form-group col-4"
                 }, y.a.createElement("label", null, "\u500d\u7387"), y.a.createElement(s["a"], {
                     addonAfter: "x",
@@ -105506,7 +105542,16 @@
                     placeholder: "\u8bf7\u8f93\u5165\u8282\u70b9\u540d\u79f0",
                     value: e.name,
                     onChange: e=>this.formChange("name", e.target.value)
-                })), y.a.createElement("div", {
+                }), y.a.createElement("label", {
+                    style: { marginTop: 12 }
+                }, "节点通讯密钥"), y.a.createElement(s["a"], {
+                    type: "password",
+                    autoComplete: "new-password",
+                    maxLength: 255,
+                    placeholder: "留空使用全局密钥，自定义密钥至少16位",
+                    value: e.server_token || "",
+                    onChange: e=>this.formChange("server_token", e.target.value)
+                }), y.a.createElement("small", { className: "text-muted" }, "设置后仅使用此密钥，节点后端需同步修改；清空后恢复全局密钥")), y.a.createElement("div", {
                     className: "form-group col-4"
                 },
                 y.a.createElement("label", null, "\u500d\u7387"), y.a.createElement(s["a"], {
@@ -105875,7 +105920,16 @@
                     placeholder: "\u8bf7\u8f93\u5165\u8282\u70b9\u540d\u79f0",
                     value: e.name,
                     onChange: e=>this.formChange("name", e.target.value)
-                })), y.a.createElement("div", {
+                }), y.a.createElement("label", {
+                    style: { marginTop: 12 }
+                }, "节点通讯密钥"), y.a.createElement(s["a"], {
+                    type: "password",
+                    autoComplete: "new-password",
+                    maxLength: 255,
+                    placeholder: "留空使用全局密钥，自定义密钥至少16位",
+                    value: e.server_token || "",
+                    onChange: e=>this.formChange("server_token", e.target.value)
+                }), y.a.createElement("small", { className: "text-muted" }, "设置后仅使用此密钥，节点后端需同步修改；清空后恢复全局密钥")), y.a.createElement("div", {
                     className: "form-group col-4"
                 },
                 y.a.createElement("label", null, "\u500d\u7387"), y.a.createElement(s["a"], {
@@ -106294,7 +106348,16 @@
                     placeholder: "\u8bf7\u8f93\u5165\u8282\u70b9\u540d\u79f0",
                     value: e.name,
                     onChange: e=>this.formChange("name", e.target.value)
-                })), y.a.createElement("div", {
+                }), y.a.createElement("label", {
+                    style: { marginTop: 12 }
+                }, "节点通讯密钥"), y.a.createElement(s["a"], {
+                    type: "password",
+                    autoComplete: "new-password",
+                    maxLength: 255,
+                    placeholder: "留空使用全局密钥，自定义密钥至少16位",
+                    value: e.server_token || "",
+                    onChange: e=>this.formChange("server_token", e.target.value)
+                }), y.a.createElement("small", { className: "text-muted" }, "设置后仅使用此密钥，节点后端需同步修改；清空后恢复全局密钥")), y.a.createElement("div", {
                     className: "form-group col-4"
                 },
                 y.a.createElement("label", null, "\u500d\u7387"), y.a.createElement(s["a"], {
@@ -113711,7 +113774,16 @@
                     placeholder: "\u8bf7\u8f93\u5165\u8282\u70b9\u540d\u79f0",
                     value: e.name,
                     onChange: e=>this.formChange("name", e.target.value)
-                })), f.a.createElement("div", {
+                }), f.a.createElement("label", {
+                    style: { marginTop: 12 }
+                }, "节点通讯密钥"), f.a.createElement(l["a"], {
+                    type: "password",
+                    autoComplete: "new-password",
+                    maxLength: 255,
+                    placeholder: "留空使用全局密钥，自定义密钥至少16位",
+                    value: e.server_token || "",
+                    onChange: e=>this.formChange("server_token", e.target.value)
+                }), f.a.createElement("small", { className: "text-muted" }, "设置后仅使用此密钥，节点后端需同步修改；清空后恢复全局密钥")), f.a.createElement("div", {
                     className: "form-group col-4"
                 }, f.a.createElement("label", null, "\u500d\u7387"), f.a.createElement(l["a"], {
                     addonAfter: "x",

@@ -16,6 +16,7 @@ class VlessController extends Controller
             'group_id' => 'required',
             'route_id' => 'nullable|array',
             'name' => 'required',
+            'server_token' => 'nullable|string|min:16|max:255',
             'parent_id' => 'nullable|integer',
             'host' => 'required',
             'port' => 'required',
@@ -164,7 +165,7 @@ class VlessController extends Controller
         if (!$server) {
             abort(500, '服务器不存在');
         }
-        if (!ServerVless::create($server->toArray())) {
+        if (!ServerVless::create($server->makeVisible('server_token')->toArray())) {
             abort(500, '复制失败');
         }
 

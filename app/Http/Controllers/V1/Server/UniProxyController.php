@@ -25,9 +25,6 @@ class UniProxyController extends Controller
         if (empty($token)) {
             abort(500, 'token is null');
         }
-        if ($token !== config('v2board.server_token')) {
-            abort(500, 'token is error');
-        }
         $this->nodeType = $request->input('node_type');
         if ($this->nodeType === 'v2ray') $this->nodeType = 'vmess';
         if ($this->nodeType === 'hysteria2') $this->nodeType = 'hysteria';
@@ -35,6 +32,9 @@ class UniProxyController extends Controller
         $this->serverService = new ServerService();
         $this->nodeInfo = $this->serverService->getServer($this->nodeId, $this->nodeType);
         if (!$this->nodeInfo) abort(500, 'server is not exist');
+        if (!$this->serverService->checkServerToken($this->nodeInfo, $token)) {
+            abort(500, 'token is error');
+        }
     }
 
     // 后端获取用户

@@ -228,6 +228,56 @@ class ServerUserTrafficTest extends TestCase
             'start_date=2024-01-01&end_date=2026-01-01'] as $query) $this->getJson($this->url . '?' . $query)->assertUnprocessable();
     }
 
+    public function testNodeGroupsCombineDaysAndPaginateNodesBeforeExpandingUsers(): void
+    {
+        $first = $this->account(); $second = $this->account();
+        $this->job([$first->id => [10, 20], $second->id => [30, 40]], 1, 'vmess', 2)->handle();
+        $this->job([$first->id => [50, 60]], 1, 'vmess', 3, $this->day - 1)->handle();
+        $this->job([$first->id => [1, 2]], 1, 'vless')->handle();
+        $this->job([$first->id => [3, 4]], 2)->handle();
+        $this->authorize($this->account(true));
+        $range = '?start_date=2026-11-11&end_date=2026-11-12';
+        $this->getJson($this->url . $range . '&group_by=server&page_size=1')->assertOk()
+            ->assertJsonPath('total', 3)->assertJsonCount(1, 'data')->assertJsonPath('group_by', 'server')
+            ->assertJsonPath('data.0.server_type', 'vmess')->assertJsonPath('data.0.server_id', 1)
+            ->assertJsonPath('data.0.user_count', 2)->assertJsonPath('data.0.record_count', 3)
+            ->assertJsonPath('data.0.u', 90)->assertJsonPath('data.0.d', 120)
+            ->assertJsonPath('data.0.billed_u', 230)->assertJsonPath('data.0.billed_d', 300)
+            ->assertJsonPath('summary.total', 220)->assertJsonPath('summary.billed_total', 540);
+        $this->getJson($this->url . $range . '&group_by=server&page_size=1&current=2')->assertOk()
+            ->assertJsonPath('data.0.server_id', 2)->assertJsonPath('summary.total', 220);
+        $this->getJson($this->url . $range . '&group_by=user&server_type=vmess&server_id=1&page_size=1')->assertOk()
+            ->assertJsonPath('total', 2)->assertJsonPath('data.0.user_id', $first->id)
+            ->assertJsonPath('data.0.email', $first->email)->assertJsonPath('data.0.u', 60)
+            ->assertJsonPath('data.0.d', 80)->assertJsonPath('data.0.billed_u', 170)
+            ->assertJsonPath('summary.total', 210)->assertJsonPath('summary.billed_total', 530);
+        $this->getJson($this->url . $range . '&group_by=user&server_type=vmess&server_id=1&page_size=1&current=2')->assertOk()
+            ->assertJsonPath('data.0.user_id', $second->id)->assertJsonPath('data.0.u', 30);
+        $this->getJson($this->url . $range . '&group_by=server&email=' . urlencode($second->email))->assertOk()
+            ->assertJsonPath('total', 1)->assertJsonPath('data.0.user_count', 1)->assertJsonPath('summary.total', 70);
+        $this->getJson($this->url . '?group_by=server&server_id=99999')->assertOk()
+            ->assertJsonPath('total', 0)->assertJsonCount(0, 'data')->assertJsonPath('summary.total', 0);
+        $this->getJson($this->url . '?group_by=invalid')->assertUnprocessable();
+    }
+
+    public function testGroupedTrafficKeepsRestrictedUserVisibilityAndDeletedUserSnapshots(): void
+    {
+        $user = $this->account(); $super = $this->account(true); $staff = $this->account(); $staff->update(['is_staff' => 1]);
+        $this->job([$user->id => [10, 20], $super->id => [100, 200], $staff->id => [1000, 2000], 99999 => [1, 2]])->handle();
+        $this->authorize($this->account(true, ['traffic.view']));
+        foreach (['server', 'user'] as $group) {
+            $response = $this->getJson($this->url . '?group_by=' . $group)->assertOk()
+                ->assertJsonPath('total', 1)->assertJsonPath('data.0.user_count', 1)->assertJsonPath('summary.total', 30);
+            foreach (['password', 'token', 'uuid', 'admin_permissions'] as $key) $this->assertArrayNotHasKey($key, $response->json('data.0'));
+        }
+        $this->getJson($this->url . '?group_by=server&user_id=' . $super->id)->assertOk()->assertJsonPath('total', 0);
+        $this->authorize($super);
+        $this->getJson($this->url . '?group_by=server')->assertOk()
+            ->assertJsonPath('data.0.user_count', 4)->assertJsonPath('summary.total', 3333);
+        $this->getJson($this->url . '?group_by=user&user_id=99999')->assertOk()
+            ->assertJsonPath('total', 1)->assertJsonPath('data.0.email', null)->assertJsonPath('data.0.server_name', 'Node 1');
+    }
+
     public function testRepeatingMigrationDoesNotRemoveExistingStatistics(): void
     {
         $this->job([1 => [10, 20]])->handle();

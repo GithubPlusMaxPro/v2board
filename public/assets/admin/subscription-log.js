@@ -135,7 +135,7 @@
                     element('td', item.ip || '—', row).className = 'audit-ip';
                     var agent = element('td', '', row); agent.className = 'subscription-log-agent'; agent.title = item.user_agent || '';
                     var ua = (item.user_agent || '').toLowerCase(), client = '其他客户端';
-                    [['clash', 'Clash'], ['sing', 'Sing-box'], ['surge', 'Surge'], ['stash', 'Stash'], ['shadowrocket', 'Shadowrocket']].some(function (pair) { if (ua.indexOf(pair[0]) !== -1) { client = pair[1]; return true; } return false; });
+                    [['v2rayng', 'v2rayNG'], ['v2rayn', 'v2rayN'], ['loon', 'Loon'], ['egern', 'Egern'], ['clash', 'Clash'], ['sing', 'Sing-box'], ['surge', 'Surge'], ['stash', 'Stash'], ['shadowrocket', 'Shadowrocket']].some(function (pair) { if (ua.indexOf(pair[0]) !== -1) { client = pair[1]; return true; } return false; });
                     element('strong', client, agent); element('small', item.user_agent || '未提供 User-Agent', agent);
                     var code = Number(item.status_code);
                     element('span', String(item.status_code), element('td', '', row)).className = 'audit-chip ' + (code >= 400 ? 'audit-chip-red' : code >= 200 && code < 300 ? 'audit-chip-green' : 'audit-chip-blue');

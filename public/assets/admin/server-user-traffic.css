@@ -1,7 +1,12 @@
 .server-user-traffic-panel .audit-summary > div:nth-child(3) strong { color: #526ec6; }
 .server-user-traffic-panel .audit-summary > div:nth-child(4) strong { color: #8b71bb; }
-.server-user-traffic-panel td:first-child, .server-user-traffic-panel td:nth-child(n+4) { white-space: nowrap; }
+.server-user-traffic-panel td:nth-child(n+2) { white-space: nowrap; }
 .server-user-traffic-panel .traffic-total { font-size: 14px; font-weight: 650; color: #386cd0; font-variant-numeric: tabular-nums; }
 .server-user-traffic-panel .traffic-billed { font-size: 13px; font-weight: 600; color: #9273b5; font-variant-numeric: tabular-nums; }
-.server-user-traffic-panel td:nth-child(2) { min-width: 160px; }
-.server-user-traffic-panel td:nth-child(3) { min-width: 210px; }
+.server-user-traffic-panel > .audit-table-wrap > table > tbody > tr > td:first-child { min-width: 210px; }
+.server-user-traffic-panel .traffic-detail-row > td { padding: 0 18px 18px; white-space: normal; }
+.server-user-traffic-panel .traffic-user-details { padding: 18px; border: 1px solid #e5eaf3; border-radius: 12px; background: #f7f9fd; }
+.server-user-traffic-panel .traffic-user-details h4 { margin: 0 0 8px; }
+.server-user-traffic-panel .traffic-user-details p { margin: 8px 0 14px; color: #64748b; }
+.server-user-traffic-panel .traffic-user-details td:first-child { min-width: 210px; white-space: normal; }
+.server-user-traffic-panel .traffic-detail-row[hidden] { display: none; }

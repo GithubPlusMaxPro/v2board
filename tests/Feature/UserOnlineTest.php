@@ -159,6 +159,27 @@ class UserOnlineTest extends TestCase
         $this->getJson($this->base . 'summary?user_id=99999')->assertNotFound();
     }
 
+    public function testOnlineOnlyPermissionKeepsHistoricalTrafficDetailsAndPagination(): void
+    {
+        $user = $this->account(); $other = $this->account();
+        $this->authorize($this->account(true, ['online.view']));
+        (new StatServerUserJob([$user->id => [10, 20], $other->id => [1000, 2000]],
+            ['id' => 1, 'name' => 'Node A', 'rate' => 2], 'vmess', $this->day + 100))->handle();
+        (new StatServerUserJob([$user->id => [30, 40]],
+            ['id' => 1, 'name' => 'Node A', 'rate' => 3], 'vmess', $this->day - 1))->handle();
+        $start = CarbonImmutable::createFromTimestamp($this->day - 86400, 'Asia/Shanghai')->toDateString();
+        $end = CarbonImmutable::createFromTimestamp($this->day, 'Asia/Shanghai')->toDateString();
+        $url = $this->base . 'traffic?user_id=' . $user->id . '&start_date=' . $start . '&end_date=' . $end
+            . '&server_id=1&page_size=1&group_by=server';
+        $this->getJson($url)->assertOk()->assertJsonPath('group_by', 'detail')->assertJsonPath('total', 2)
+            ->assertJsonCount(1, 'data')->assertJsonPath('data.0.record_date', $end)
+            ->assertJsonPath('data.0.user_id', $user->id)->assertJsonPath('summary.total', 100)
+            ->assertJsonPath('summary.billed_total', 270);
+        $this->getJson($url . '&current=2')->assertOk()->assertJsonPath('data.0.record_date', $start)
+            ->assertJsonPath('data.0.u', 30)->assertJsonPath('summary.total', 100);
+        $this->getJson($url . '&server_type=vless')->assertOk()->assertJsonPath('total', 0);
+    }
+
     public function testPublicIpLookupsAreCachedAndRequireAssociationWithSelectedUser(): void
     {
         Http::fake(['https://get.geojs.io/*' => Http::response(['ip' => '8.8.8.8', 'country' => 'United States',

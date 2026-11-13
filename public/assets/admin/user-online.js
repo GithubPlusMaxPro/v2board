@@ -38,48 +38,7 @@
     }
     function message(body, text, columns) { body.replaceChildren(); el('td', text, el('tr', '', body)).colSpan = columns; }
 
-    var geoCache = new Map(), geoCooldownUntil = 0, geoNextRequestAt = 0;
-    async function browserGeoLookup(options, signal) {
-        if (signal.aborted) throw new Error('查询已取消');
-        var ip = options.ip, cached = geoCache.get(ip);
-        if (cached && cached.expires > Date.now()) return cached.data;
-        var result = {ip: ip, status: 'unavailable', provider: 'IP.SB'};
-        if (Date.now() < geoCooldownUntil) return result;
-        var controller = new AbortController();
-        function abort() { controller.abort(); }
-        signal.addEventListener('abort', abort, {once: true});
-        var timer = setTimeout(abort, Math.max(1, options.timeout || 3) * 1000);
-        function text(value) { return typeof value === 'string' || typeof value === 'number' ? String(value).slice(0, 255) : ''; }
-        try {
-            var response = await fetch('https://api.ip.sb/geoip/' + encodeURIComponent(ip), {
-                method: 'GET', mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer', redirect: 'error',
-                headers: {Accept: 'application/json'}, signal: controller.signal
-            });
-            if (response.status === 429) {
-                var retryAfter = Number(response.headers.get('Retry-After')) || 300;
-                geoCooldownUntil = Date.now() + Math.max(60, Math.min(86400, retryAfter)) * 1000;
-            }
-            if (!response.ok) throw new Error('归属地查询失败');
-            var data = await response.json();
-            var matches = data && typeof data.ip === 'string' && data.ip.toLowerCase() === ip.toLowerCase();
-            if (!matches && data && typeof data.ip === 'string' && ip.indexOf(':') !== -1) {
-                matches = new URL('http://[' + data.ip + ']/').hostname === new URL('http://[' + ip + ']/').hostname;
-            }
-            if (!matches) throw new Error('归属地 IP 不匹配');
-            result.status = 'ok';
-            ['country', 'country_code', 'region', 'city', 'asn'].forEach(function (key) { result[key] = text(data[key]); });
-            result.organization_name = text(data.isp || data.organization || data.asn_organization);
-        } catch (error) {
-            if (signal.aborted) throw error;
-        } finally {
-            clearTimeout(timer); signal.removeEventListener('abort', abort);
-        }
-        var lifetime = result.status === 'ok' ? options.cache_seconds : options.failure_cache_seconds;
-        if (geoCache.size >= 2000) geoCache.delete(geoCache.keys().next().value);
-        geoCache.set(ip, {data: result, expires: Date.now() + Math.max(0, Number(lifetime) || 0) * 1000});
-        return result;
-    }
-
+    var geoNextRequestAt = 0;
     function geoRenderer(userId, signal) {
         var pending = new Map(), queue = [], running = 0, automatic = 0, pumpTimer = null;
         signal.addEventListener('abort', function () { clearTimeout(pumpTimer); queue = []; }, {once: true});
@@ -90,9 +49,8 @@
                 geoNextRequestAt = Date.now() + 1100;
                 var task = queue.shift(); running++;
                 (function (task) {
-                    request('ipInfo', {user_id: userId, ip: task.ip, browser: 1}, signal)
-                        .then(function (result) { return result.data.status === 'browser' ? browserGeoLookup(result.data, signal) : result.data; })
-                        .then(function (data) { task.resolve(data); })
+                    request('ipInfo', {user_id: userId, ip: task.ip}, signal)
+                        .then(function (result) { task.resolve(result.data); })
                         .catch(function () { task.resolve({status: 'unavailable'}); })
                         .finally(function () { running--; pump(); });
                 }(task));
@@ -117,7 +75,7 @@
                 else if (data.status === 'disabled') { info.textContent = '归属地查询未启用'; button.remove(); }
                 else { info.textContent = '归属地暂不可用'; button.textContent = '重试'; button.disabled = false; }
             }
-            button.onclick = function () { if (button.textContent === '重试') { pending.delete(ip); geoCache.delete(ip); } load(); };
+            button.onclick = function () { if (button.textContent === '重试') pending.delete(ip); load(); };
             if (automatic++ < 20) load();
         };
     }
@@ -303,7 +261,7 @@
                     nodeCell(row, item); el('td', time(item.last_seen), row);
                 });
                 if (!data.current.items.length) message(current.body, '暂无近期在线 IP；节点未上报时无法判断当前在线情况。', 3);
-                el('p', '归属地由在线 IP 库提供，为近似信息。', panels[0]);
+                el('p', 'IP 归属地来自数据库匹配，为近似信息。', panels[0]);
                 loaders[1] = paged(panels[1], 'history', data.user, data.date, signal, geo);
                 loaders[2] = paged(panels[2], 'traffic', data.user, data.date, signal, geo);
                 function select(index) {

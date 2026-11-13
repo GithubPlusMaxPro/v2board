@@ -12344,7 +12344,7 @@
             constructor(e) {
                 super(e),
                 this.state = {
-                    server: this.props.record || {
+                    server: this.props.record ? JSON.parse(JSON.stringify(this.props.record)) : {
                         tls: 0,
                         rate: 1
                     },
@@ -12355,6 +12355,18 @@
                 }
             }
             onShow() {
+                if (!this.state.visible && this.props.record) {
+                    var record = (this.props.serverManage.servers || []).find(node=>
+                        node.id === this.props.record.id && node.type === this.props.record.type
+                    ) || this.props.record;
+                    var server = JSON.parse(JSON.stringify(record));
+                    ["networkSettings", "network_settings"].forEach(key=>{
+                        if (server[key] && "object" === typeof server[key]) server[key] = JSON.stringify(server[key], null, 2);
+                    });
+                    this.savedServerToken = server.server_token;
+                    this.setState({ server: server, visible: !0 });
+                    return;
+                }
                 if (this.setState({
                     visible: !this.state.visible
                 }),
@@ -12371,7 +12383,6 @@
                     var e, t, n = this.state.server;
                     n.networkSettings = n.networkSettings ? "string" === typeof n.networkSettings && JSON.parse(n.networkSettings) : null,
                     (null === (e = n.dnsSettings) || void 0 === e ? void 0 : null === (t = e.servers) || void 0 === t ? void 0 : t.length) || (n.dnsSettings = null),
-                    console.log(n),
                     this.props.dispatch({
                         type: "serverVmess/save",
                         params: n,
@@ -28180,7 +28191,7 @@
             constructor(e) {
                 super(e),
                 this.state = {
-                    server: this.props.record || {
+                    server: this.props.record ? JSON.parse(JSON.stringify(this.props.record)) : {
                         cipher: "chacha20-ietf-poly1305",
                         rate: 1
                     },
@@ -28191,6 +28202,18 @@
                 }
             }
             onShow() {
+                if (!this.state.visible && this.props.record) {
+                    var record = (this.props.serverManage.servers || []).find(node=>
+                        node.id === this.props.record.id && node.type === this.props.record.type
+                    ) || this.props.record;
+                    var server = JSON.parse(JSON.stringify(record));
+                    ["networkSettings", "network_settings"].forEach(key=>{
+                        if (server[key] && "object" === typeof server[key]) server[key] = JSON.stringify(server[key], null, 2);
+                    });
+                    this.savedServerToken = server.server_token;
+                    this.setState({ server: server, visible: !0 });
+                    return;
+                }
                 this.setState({
                     visible: !this.state.visible
                 })
@@ -28267,9 +28290,7 @@
                   , l = this.props.serverGroup.groups
                   , c = this.props.serverRoute.routes;
                 return h.a.createElement(h.a.Fragment, null, h.a.cloneElement(this.props.children, {
-                    onClick: ()=>this.setState({
-                        visible: !0
-                    })
+                    onClick: ()=>this.onShow()
                 }), h.a.createElement(r["a"], {
                     id: "server",
                     maskClosable: !0,
@@ -104431,7 +104452,7 @@
             constructor(e) {
                 super(e),
                 this.state = {
-                    server: this.props.record || {
+                    server: this.props.record ? JSON.parse(JSON.stringify(this.props.record)) : {
                         insecure: 0,
                         version: 1,
                         rate: 1
@@ -104443,6 +104464,18 @@
                 }
             }
             onShow() {
+                if (!this.state.visible && this.props.record) {
+                    var record = (this.props.serverManage.servers || []).find(node=>
+                        node.id === this.props.record.id && node.type === this.props.record.type
+                    ) || this.props.record;
+                    var server = JSON.parse(JSON.stringify(record));
+                    ["networkSettings", "network_settings"].forEach(key=>{
+                        if (server[key] && "object" === typeof server[key]) server[key] = JSON.stringify(server[key], null, 2);
+                    });
+                    this.savedServerToken = server.server_token;
+                    this.setState({ server: server, visible: !0 });
+                    return;
+                }
                 this.setState({
                     visible: !this.state.visible
                 })
@@ -104487,9 +104520,7 @@
                   , r = this.props.serverGroup.groups
                   , i = this.props.serverRoute.routes;
                 return y.a.createElement(y.a.Fragment, null, y.a.cloneElement(this.props.children, {
-                    onClick: ()=>this.setState({
-                        visible: !0
-                    })
+                    onClick: ()=>this.onShow()
                 }), y.a.createElement(R["a"], {
                     id: "server",
                     maskClosable: !0,
@@ -105069,7 +105100,7 @@
             constructor(e) {
                 super(e),
                 this.state = {
-                    server: this.props.record || {
+                    server: this.props.record ? JSON.parse(JSON.stringify(this.props.record)) : {
                         tls: 0,
                         rate: 1,
                         flow: null
@@ -105081,6 +105112,18 @@
                 }
             }
             onShow() {
+                if (!this.state.visible && this.props.record) {
+                    var record = (this.props.serverManage.servers || []).find(node=>
+                        node.id === this.props.record.id && node.type === this.props.record.type
+                    ) || this.props.record;
+                    var server = JSON.parse(JSON.stringify(record));
+                    ["networkSettings", "network_settings"].forEach(key=>{
+                        if (server[key] && "object" === typeof server[key]) server[key] = JSON.stringify(server[key], null, 2);
+                    });
+                    this.savedServerToken = server.server_token;
+                    this.setState({ server: server, visible: !0 });
+                    return;
+                }
                 if (this.setState({
                     visible: !this.state.visible
                 }),
@@ -105468,7 +105511,7 @@
             constructor(e) {
                 super(e),
                 this.state = {
-                    server: this.props.record || {
+                    server: this.props.record ? JSON.parse(JSON.stringify(this.props.record)) : {
                         insecure: 0,
                         disable_sni: 0,
                         udp_relay_mode: "native",
@@ -105483,6 +105526,18 @@
                 }
             }
             onShow() {
+                if (!this.state.visible && this.props.record) {
+                    var record = (this.props.serverManage.servers || []).find(node=>
+                        node.id === this.props.record.id && node.type === this.props.record.type
+                    ) || this.props.record;
+                    var server = JSON.parse(JSON.stringify(record));
+                    ["networkSettings", "network_settings"].forEach(key=>{
+                        if (server[key] && "object" === typeof server[key]) server[key] = JSON.stringify(server[key], null, 2);
+                    });
+                    this.savedServerToken = server.server_token;
+                    this.setState({ server: server, visible: !0 });
+                    return;
+                }
                 this.setState({
                     visible: !this.state.visible
                 })
@@ -105521,9 +105576,7 @@
                 r = this.props.serverGroup.groups,
                 i = this.props.serverRoute.routes;
                 return y.a.createElement(y.a.Fragment, null, y.a.cloneElement(this.props.children, {
-                    onClick: ()=>this.setState({
-                        visible: !0
-                    })
+                    onClick: ()=>this.onShow()
                 }), y.a.createElement(R["a"], {
                     id: "server",
                     maskClosable: !0,
@@ -105810,7 +105863,7 @@
             constructor(e) {
                 super(e),
                 this.state = {
-                    server: this.props.record || {
+                    server: this.props.record ? JSON.parse(JSON.stringify(this.props.record)) : {
                         insecure: 0,
                         rate: 1
                     },
@@ -105821,6 +105874,18 @@
                 }
             }
             onShow() {
+                if (!this.state.visible && this.props.record) {
+                    var record = (this.props.serverManage.servers || []).find(node=>
+                        node.id === this.props.record.id && node.type === this.props.record.type
+                    ) || this.props.record;
+                    var server = JSON.parse(JSON.stringify(record));
+                    ["networkSettings", "network_settings"].forEach(key=>{
+                        if (server[key] && "object" === typeof server[key]) server[key] = JSON.stringify(server[key], null, 2);
+                    });
+                    this.savedServerToken = server.server_token;
+                    this.setState({ server: server, visible: !0 });
+                    return;
+                }
                 this.setState({
                     visible: !this.state.visible
                 })
@@ -105899,9 +105964,7 @@
                 r = this.props.serverGroup.groups,
                 i = this.props.serverRoute.routes;
                 return y.a.createElement(y.a.Fragment, null, y.a.cloneElement(this.props.children, {
-                    onClick: ()=>this.setState({
-                        visible: !0
-                    })
+                    onClick: ()=>this.onShow()
                 }), y.a.createElement(R["a"], {
                     id: "server",
                     maskClosable: !0,
@@ -106122,7 +106185,7 @@
             constructor(e) {
                 super(e),
                 this.state = {
-                    server: this.props.record || {
+                    server: this.props.record ? JSON.parse(JSON.stringify(this.props.record)) : {
                         tls: 0,
                         rate: 1,
                         network: "tcp",
@@ -106137,6 +106200,18 @@
                 }
             }
             onShow() {
+                if (!this.state.visible && this.props.record) {
+                    var record = (this.props.serverManage.servers || []).find(node=>
+                        node.id === this.props.record.id && node.type === this.props.record.type
+                    ) || this.props.record;
+                    var server = JSON.parse(JSON.stringify(record));
+                    ["networkSettings", "network_settings"].forEach(key=>{
+                        if (server[key] && "object" === typeof server[key]) server[key] = JSON.stringify(server[key], null, 2);
+                    });
+                    this.savedServerToken = server.server_token;
+                    this.setState({ server: server, visible: !0 });
+                    return;
+                }
                 this.setState({
                     visible: !this.state.visible
                 });
@@ -106149,7 +106224,7 @@
                 }
             }
             save() {
-                e = JSON.parse(JSON.stringify(this.state.server));
+                var e = JSON.parse(JSON.stringify(this.state.server));
                 e.network_settings = e.network_settings ? ("string" === typeof e.network_settings ? JSON.parse(e.network_settings) : e.network_settings) : null;
                 delete e.install_command;
                 this.props.dispatch({
@@ -106327,9 +106402,7 @@
                 r = this.props.serverGroup.groups,
                 i = this.props.serverRoute.routes;
                 return y.a.createElement(y.a.Fragment, null, y.a.cloneElement(this.props.children, {
-                    onClick: ()=>this.setState({
-                        visible: !0
-                    })
+                    onClick: ()=>this.onShow()
                 }), y.a.createElement(R["a"], {
                     id: "server",
                     maskClosable: !0,
@@ -106761,7 +106834,9 @@
                 }))), y.a.createElement("div", {
                     className: "form-group"
                 }, y.a.createElement("label", null, "\u4e00\u952e\u5b89\u88c5\u6307\u4ee4"), y.a.createElement(s["a"].TextArea, {
-                    value: e.install_command,
+                    value: (e.server_token || "") === (this.savedServerToken || "")
+                        ? e.install_command || ""
+                        : "请先保存节点通讯密钥，再重新打开节点复制安装命令",
                     rows: 4,
                     readOnly: true,
                     style: {
@@ -113649,7 +113724,7 @@
             constructor(e) {
                 super(e),
                 this.state = {
-                    server: this.props.record || {
+                    server: this.props.record ? JSON.parse(JSON.stringify(this.props.record)) : {
                         tls: 0,
                         rate: 1
                     },
@@ -113660,6 +113735,18 @@
                 }
             }
             onShow() {
+                if (!this.state.visible && this.props.record) {
+                    var record = (this.props.serverManage.servers || []).find(node=>
+                        node.id === this.props.record.id && node.type === this.props.record.type
+                    ) || this.props.record;
+                    var server = JSON.parse(JSON.stringify(record));
+                    ["networkSettings", "network_settings"].forEach(key=>{
+                        if (server[key] && "object" === typeof server[key]) server[key] = JSON.stringify(server[key], null, 2);
+                    });
+                    this.savedServerToken = server.server_token;
+                    this.setState({ server: server, visible: !0 });
+                    return;
+                }
                 if (this.setState({
                     visible: !this.state.visible
                 }),

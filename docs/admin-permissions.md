@@ -136,9 +136,11 @@ php artisan horizon:terminate
 
 ### IP 归属地
 
-默认接入 [ipwho.is / IPWhois API](https://ipwhois.io/documentation)，经后台 HTTPS 请求查询公网 IP，显示提供方返回的国家、地区、城市、运营商及 ASN。免费接口无需密钥，官方当前额度为每个请求源 IP 每天 1,000 次；发生 HTTP 429 时按 Retry-After 进入服务商级冷却，避免重复请求。字段可能为空，结果是近似归属地，不能当作设备的准确物理位置。IPv4 / IPv6 均支持，不需要 API 密钥。仅发送查询的公网 IP，不附带用户邮箱、ID 或订阅凭证。内网和保留 IP 本地标记，不发送外部请求。接口地址固定，前端不能指定任意目标 URL。
+默认接入 [IP.SB GeoIP API](https://ip.sb/api/)（`https://api.ip.sb/geoip/{ip}`），由管理员浏览器直接发送 HTTPS GET 请求，使用浏览器自身的 User-Agent。浏览器先向后台 `ipInfo?browser=1` 请求查询许可，后台继续校验管理员权限、目标用户及 IP 关联，处理查询开关与内网／保留 IP；通过后只返回规范化 IP、缓存时长和超时配置，不向 IP.SB 发起请求。浏览器仅向 IP.SB 发送待查询 IP，不携带本站 Authorization、Cookie、用户 ID、邮箱或 Referer。页面显示国家、地区、城市、运营商及 ASN，IPv4 / IPv6 均支持，缺失字段留空。归属地为近似信息。
 
-成功查询缓存 1 天，失败缓存 5 分钟；请求超时 3 秒，不跟随重定向。前端按需异步加载、最多同时请求两个归属地，同一 IP 在页签之间复用结果，不阻塞在线与流量查询。归属地接口限制每分钟 60 次，并校验 IP 确实属于目标用户的当前 IP 或历史记录。`config/ip_lookup.php` 提供服务商、超时和缓存配置；默认 `IP_LOOKUP_PROVIDER=ipwhois`，也可设为 `geojs` 切回旧服务商。服务商切换后使用独立缓存，不会继续展示旧 GeoJS 缓存；在 `.env` 设置 `IP_LOOKUP_ENABLED=false` 并重新生成配置缓存可以停用外部查询。
+IP.SB 提供 CORS，无需 API 密钥。官方当前公开限额为每个请求源 IP 每分钟 100 次、每秒最多 5 次；官方[方案说明](https://ip.sb/pricing/)将免费版列为个人／评估用途，商用及生产用途列在企业方案中。前端最多并发两个查询，任务启动间隔至少 1.1 秒，以兼顾后台查询许可接口的限流，同一 IP 在页签间复用结果。浏览器页面内缓存成功结果 1 天、失败结果 5 分钟，页面刷新后清除；超时默认 3 秒，关闭抽屉会取消未完成的查询。遇到 HTTP 429 时暂停外部查询，按可读取的 Retry-After 冷却，未提供或未开放该响应头时默认 5 分钟。外部查询失败不影响在线记录和流量用量，可点击重试。
+
+`config/ip_lookup.php` 提供服务商、超时和缓存配置，默认 `IP_LOOKUP_PROVIDER=ipsb`。已有 `.env` 若显式指定旧服务商，需要改成 `IP_LOOKUP_PROVIDER=ipsb`；更新后执行 `php artisan config:cache`，并按部署方式重新加载常驻 HTTP 进程。设为 `ipwhois` 或 `geojs` 时仍由后台查询；旧客户端未传 `browser=1` 的 `ipInfo` 请求继续兼容后台查询。后台接口保留每分钟 60 次限流及权限检查。设置 `IP_LOOKUP_ENABLED=false` 并刷新配置缓存后，浏览器不会发送外部归属地查询。
 
 ### 部署
 

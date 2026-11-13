@@ -16,6 +16,7 @@ class V2nodeController extends Controller
             'group_id' => 'required',
             'route_id' => 'nullable|array',
             'name' => 'required',
+            'server_token' => 'nullable|string|min:16|max:255',
             'parent_id' => 'nullable|integer',
             'host' => 'required',
             'listen_ip' => 'nullable',
@@ -296,7 +297,7 @@ class V2nodeController extends Controller
         if (!$server) {
             abort(500, '服务器不存在');
         }
-        if (!ServerV2node::create($server->toArray())) {
+        if (!ServerV2node::create($server->makeVisible('server_token')->toArray())) {
             abort(500, '复制失败');
         }
 

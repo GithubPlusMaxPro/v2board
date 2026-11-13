@@ -14,6 +14,7 @@ class HysteriaController extends Controller
         $params = $request->validate([
             'show' => '',
             'name' => 'required',
+            'server_token' => 'nullable|string|min:16|max:255',
             'version' => 'required|in:1,2',
             'group_id' => 'required|array',
             'route_id' => 'nullable|array',
@@ -115,7 +116,7 @@ class HysteriaController extends Controller
         if (!$server) {
             abort(500, '服务器不存在');
         }
-        if (!ServerHysteria::create($server->toArray())) {
+        if (!ServerHysteria::create($server->makeVisible('server_token')->toArray())) {
             abort(500, '复制失败');
         }
 

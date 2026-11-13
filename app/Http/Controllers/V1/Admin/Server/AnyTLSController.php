@@ -13,6 +13,7 @@ class AnyTLSController extends Controller
         $params = $request->validate([
             'show' => '',
             'name' => 'required',
+            'server_token' => 'nullable|string|min:16|max:255',
             'group_id' => 'required|array',
             'route_id' => 'nullable|array',
             'parent_id' => 'nullable|integer',
@@ -101,7 +102,7 @@ class AnyTLSController extends Controller
         if (!$server) {
             abort(500, '服务器不存在');
         }
-        if (!ServerAnytls::create($server->toArray())) {
+        if (!ServerAnytls::create($server->makeVisible('server_token')->toArray())) {
             abort(500, '复制失败');
         }
 

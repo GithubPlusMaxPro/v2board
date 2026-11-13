@@ -5,6 +5,7 @@ namespace App\Http\Controllers\V2\Server;
 use App\Http\Controllers\Controller;
 use App\Services\ServerService;
 use Illuminate\Http\Request;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use App\Utils\Helper;
 
 class ServerController extends Controller
@@ -17,22 +18,12 @@ class ServerController extends Controller
     {
         $token = $request->input('token');
 
-        // token 为空（业务失败，不抛异常）
+        // token 为空（保持 HTTP 200 业务失败响应）
         if (empty($token)) {
-            response()->json([
+            throw new HttpResponseException(response()->json([
                 'status' => 'fail',
                 'message' => 'token is null'
-            ], 200)->send();
-            exit;
-        }
-
-        // token 错误
-        if ($token !== config('v2board.server_token')) {
-            response()->json([
-                'status' => 'fail',
-                'message' => 'token is error'
-            ], 200)->send();
-            exit;
+            ], 200));
         }
 
         $this->nodeId = $request->input('node_id');
@@ -41,11 +32,18 @@ class ServerController extends Controller
 
         // 节点不存在
         if (!$this->nodeInfo) {
-            response()->json([
+            throw new HttpResponseException(response()->json([
                 'status' => 'fail',
                 'message' => 'server is not exist'
-            ], 200)->send();
-            exit;
+            ], 200));
+        }
+
+        // token 错误
+        if (!$this->serverService->checkServerToken($this->nodeInfo, $token)) {
+            throw new HttpResponseException(response()->json([
+                'status' => 'fail',
+                'message' => 'token is error'
+            ], 200));
         }
     }
 

@@ -13,6 +13,7 @@ class TuicController extends Controller
         $params = $request->validate([
             'show' => '',
             'name' => 'required',
+            'server_token' => 'nullable|string|min:16|max:255',
             'group_id' => 'required|array',
             'route_id' => 'nullable|array',
             'parent_id' => 'nullable|integer',
@@ -100,7 +101,7 @@ class TuicController extends Controller
         if (!$server) {
             abort(500, '服务器不存在');
         }
-        if (!ServerTuic::create($server->toArray())) {
+        if (!ServerTuic::create($server->makeVisible('server_token')->toArray())) {
             abort(500, '复制失败');
         }
 

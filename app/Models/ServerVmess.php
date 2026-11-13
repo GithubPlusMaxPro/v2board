@@ -9,6 +9,7 @@ class ServerVmess extends Model
     protected $table = 'v2_server_vmess';
     protected $dateFormat = 'U';
     protected $guarded = ['id'];
+    protected $hidden = ['server_token'];
     protected $casts = [
         'created_at' => 'timestamp',
         'updated_at' => 'timestamp',

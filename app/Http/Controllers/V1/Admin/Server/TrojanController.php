@@ -80,7 +80,7 @@ class TrojanController extends Controller
         if (!$server) {
             abort(500, '服务器不存在');
         }
-        if (!ServerTrojan::create($server->toArray())) {
+        if (!ServerTrojan::create($server->makeVisible('server_token')->toArray())) {
             abort(500, '复制失败');
         }
 

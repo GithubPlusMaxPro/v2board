@@ -127,7 +127,7 @@ class AdminRoute
             $router->get('/userOnline/summary', 'V1\\Admin\\UserOnlineController@summary');
             $router->get('/userOnline/history', 'V1\\Admin\\UserOnlineController@history');
             $router->get('/userOnline/traffic', 'V1\\Admin\\UserOnlineController@traffic');
-            $router->get('/userOnline/ipInfo', 'V1\\Admin\\UserOnlineController@ipInfo')->middleware('throttle:60,1');
+            $router->get('/userOnline/ipInfo', 'V1\\Admin\\UserOnlineController@ipInfo')->middleware('throttle:300,1');
             // Stat
             $router->get ('/stat/getStat', 'V1\\Admin\\StatController@getStat');
             $router->get ('/stat/getOverride', 'V1\\Admin\\StatController@getOverride');

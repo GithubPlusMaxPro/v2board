@@ -136,11 +136,13 @@ php artisan horizon:terminate
 
 ### IP 归属地
 
-默认接入 [IP.SB GeoIP API](https://ip.sb/api/)（`https://api.ip.sb/geoip/{ip}`），由管理员浏览器直接发送 HTTPS GET 请求，使用浏览器自身的 User-Agent。浏览器先向后台 `ipInfo?browser=1` 请求查询许可，后台继续校验管理员权限、目标用户及 IP 关联，处理查询开关与内网／保留 IP；通过后只返回规范化 IP、缓存时长和超时配置，不向 IP.SB 发起请求。浏览器仅向 IP.SB 发送待查询 IP，不携带本站 Authorization、Cookie、用户 ID、邮箱或 Referer。页面显示国家、地区、城市、运营商及 ASN，IPv4 / IPv6 均支持，缺失字段留空。归属地为近似信息。
+默认使用 [ip2region](https://github.com/lionsoul2014/ip2region) 本地离线数据库。仓库随代码分发官方 PHP 查询客户端，以及 `database/ip2region/ip2region_v4.xdb` / `ip2region_v6.xdb` 两份数据库，不需要上线时额外下载或安装 Composer 依赖。PHP 查询实现、数据库的上游固定版本和来源见 `database/ip2region/README.md`；许可文本随文件保留。官方开源数据不定期更新，城市级结果仍可能存在误差。
 
-IP.SB 提供 CORS，无需 API 密钥。官方当前公开限额为每个请求源 IP 每分钟 100 次、每秒最多 5 次；官方[方案说明](https://ip.sb/pricing/)将免费版列为个人／评估用途，商用及生产用途列在企业方案中。前端最多并发两个查询，任务启动间隔至少 1.1 秒，以兼顾后台查询许可接口的限流，同一 IP 在页签间复用结果。浏览器页面内缓存成功结果 1 天、失败结果 5 分钟，页面刷新后清除；超时默认 3 秒，关闭抽屉会取消未完成的查询。遇到 HTTP 429 时暂停外部查询，按可读取的 Retry-After 冷却，未提供或未开放该响应头时默认 5 分钟。外部查询失败不影响在线记录和流量用量，可点击重试。
+前端向本站 `userOnline/ipInfo` 查询；后台校验管理员权限、目标用户与 IP 关联后，选择 IPv4 或 IPv6 数据库查询，向界面返回国家、省份、城市和运营商。数据库格式为 `国家|省份|城市|ISP|国家代码`，未知字段 `0` 显示为空；自带库不含 ASN，因此该字段留空。默认流程不向外部 IP 查询网站发送请求。内网与保留地址仍本地标记，停用开关后不读取数据库；归属地失败不影响在线记录和流量查询。
 
-`config/ip_lookup.php` 提供服务商、超时和缓存配置，默认 `IP_LOOKUP_PROVIDER=ipsb`。已有 `.env` 若显式指定旧服务商，需要改成 `IP_LOOKUP_PROVIDER=ipsb`；更新后执行 `php artisan config:cache`，并按部署方式重新加载常驻 HTTP 进程。设为 `ipwhois` 或 `geojs` 时仍由后台查询；旧客户端未传 `browser=1` 的 `ipInfo` 请求继续兼容后台查询。后台接口保留每分钟 60 次限流及权限检查。设置 `IP_LOOKUP_ENABLED=false` 并刷新配置缓存后，浏览器不会发送外部归属地查询。
+成功结果缓存 1 天、失败结果缓存 5 分钟，缓存键包含数据库路径、文件大小和修改时间，数据库替换后新请求使用新缓存。前端最多并发两个查询，同一 IP 在抽屉页签内复用结果，查询启动间隔至少 1.1 秒以兼顾后台每分钟 60 次限流。接口继续兼容旧版客户端提交的 `browser=1` 参数：使用 ip2region 时直接返回本地结果。
+
+默认 `IP_LOOKUP_PROVIDER=ip2region`；如果已有 `.env` 显式配置了 `ipsb`、`ipwhois` 或 `geojs`，需改为 `IP_LOOKUP_PROVIDER=ip2region`。更新后执行 `php artisan config:cache` 和 `php artisan view:clear`，并按部署方式重新加载常驻 HTTP 进程。仍保留旧服务商作为显式配置的兼容选项。`IP_LOOKUP_ENABLED=false` 可停用查询。通过 `IP2REGION_IPV4_PATH` / `IP2REGION_IPV6_PATH` 可指定自行维护的、相同字段格式的兼容数据库；更新数据时先完成下载，再原子替换对应文件。
 
 ### 部署
 

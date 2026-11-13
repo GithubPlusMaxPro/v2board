@@ -122,12 +122,12 @@ class UserOnlineController extends Controller
     public function ipInfo(Request $request)
     {
         $user = $this->findUser($request);
-        $params = $request->validate(['ip' => 'required|ip', 'browser' => 'sometimes|boolean']);
+        $params = $request->validate(['ip' => 'required|ip']);
         $ip = UserOnlineService::normalizeIp($params['ip']);
         $current = app(UserOnlineService::class)->current($user->id);
         $allowed = in_array($ip, array_column($current['items'], 'ip'), true)
             || UserOnlineLog::where('user_id', $user->id)->where('ip', $ip)->exists();
         if (!$allowed) abort(404, '该用户没有此 IP 记录');
-        return response(['data' => app(IpLookupService::class)->lookup($ip, (bool)($params['browser'] ?? false))]);
+        return response(['data' => app(IpLookupService::class)->lookup($ip)]);
     }
 }

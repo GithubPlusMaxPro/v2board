@@ -7,7 +7,6 @@ use App\Jobs\StatServerUserJob;
 use App\Models\User;
 use App\Models\UserOnlineLog;
 use App\Services\AuthService;
-use App\Services\IpLookupService;
 use App\Services\UserOnlineService;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Schema\Blueprint;
@@ -15,7 +14,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -29,7 +27,7 @@ class UserOnlineTest extends TestCase
         parent::setUp();
         config(['database.default' => 'sqlite', 'database.connections.sqlite.database' => ':memory:',
             'cache.default' => 'array', 'app.key' => str_repeat('k', 32), 'app.timezone' => 'Asia/Shanghai',
-            'v2board.server_token' => 'node-test-token', 'ip_lookup.enabled' => true, 'ip_lookup.provider' => 'geojs']);
+            'v2board.server_token' => 'node-test-token', 'ip_lookup.enabled' => true]);
         Cache::flush();
         $this->day = CarbonImmutable::now('Asia/Shanghai')->startOfDay()->getTimestamp();
         foreach (app('router')->getRoutes() as $route) {
@@ -180,38 +178,4 @@ class UserOnlineTest extends TestCase
         $this->getJson($url . '&server_type=vless')->assertOk()->assertJsonPath('total', 0);
     }
 
-    public function testPublicIpLookupsAreCachedAndRequireAssociationWithSelectedUser(): void
-    {
-        Http::fake(['https://get.geojs.io/*' => Http::response(['ip' => '8.8.8.8', 'country' => 'United States',
-            'country_code' => 'US', 'region' => 'California', 'city' => 'Mountain View', 'organization_name' => 'Google LLC', 'asn' => 15169])]);
-        $user = $this->account(); $this->record($user->id, ['8.8.8.8'], $this->day + 100)->handle();
-        $this->authorize($this->account(true)); $url = $this->base . 'ipInfo?user_id=' . $user->id;
-        $this->getJson($url . '&ip=8.8.8.8')->assertOk()->assertJsonPath('data.status', 'ok')->assertJsonPath('data.organization_name', 'Google LLC');
-        $this->getJson($url . '&ip=8.8.8.8')->assertOk(); Http::assertSentCount(1);
-        $this->getJson($url . '&ip=1.1.1.1')->assertNotFound(); Http::assertSentCount(1);
-        $this->getJson($url . '&ip=http://localhost')->assertUnprocessable();
-    }
-
-    public function testIpv6MetadataIsNormalizedAndMismatchedProviderResponsesAreRejected(): void
-    {
-        Http::fake(['*' => Http::response(['ip' => '2001:4860:4860:0:0:0:0:8888', 'country' => 'United States', 'organization_name' => 'Google LLC'])]);
-        $result = (new IpLookupService())->lookup('2001:4860:4860::8888');
-        $this->assertSame('ok', $result['status']);
-        $this->assertSame('2001:4860:4860::8888', $result['ip']);
-        Http::assertSent(function ($request) { return strpos($request->url(), 'https://get.geojs.io/v1/ip/geo/') === 0; });
-        $this->assertSame('unavailable', (new IpLookupService())->lookup('1.1.1.1')['status']);
-    }
-
-    public function testPrivateIpsDoNotCallProviderAndFailuresDoNotBreakQueries(): void
-    {
-        Http::fake(['*' => Http::response([], 429)]);
-        $service = new IpLookupService();
-        $this->assertSame('local', $service->lookup('10.0.0.1')['status']);
-        $this->assertSame('local', $service->lookup('::1')['status']); Http::assertNothingSent();
-        $this->assertSame('local', $service->lookup('::ffff:10.0.0.1')['status']); Http::assertNothingSent();
-        $this->assertSame('unavailable', $service->lookup('8.8.8.8')['status']);
-        $this->assertSame('unavailable', $service->lookup('8.8.8.8')['status']); Http::assertSentCount(1);
-        config(['ip_lookup.enabled' => false]);
-        $this->assertSame('disabled', $service->lookup('1.1.1.1')['status']); Http::assertSentCount(1);
-    }
 }

@@ -115,7 +115,7 @@ class UserOnlineController extends Controller
     public function traffic(Request $request)
     {
         $user = $this->findUser($request);
-        $request->merge(['user_id' => $user->id, 'email' => $user->email]);
+        $request->merge(['user_id' => $user->id, 'email' => $user->email, 'group_by' => 'detail']);
         return app(ServerUserTrafficController::class)->fetch($request);
     }
 

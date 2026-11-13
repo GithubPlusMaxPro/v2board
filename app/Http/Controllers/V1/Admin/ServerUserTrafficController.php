@@ -7,12 +7,14 @@ use App\Models\StatServerUser;
 use App\Services\AdminPermissionService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ServerUserTrafficController extends Controller
 {
     public function fetch(Request $request)
     {
         $params = $request->validate([
+            'group_by' => 'sometimes|in:detail,server,user',
             'user_id' => 'sometimes|nullable|integer|min:1',
             'email' => 'sometimes|nullable|string|max:254',
             'server_type' => 'sometimes|nullable|in:shadowsocks,vmess,trojan,tuic,hysteria,vless,anytls,v2node',
@@ -49,13 +51,39 @@ class ServerUserTrafficController extends Controller
         foreach (['u', 'd', 'billed_u', 'billed_d'] as $column) $totals[$column] = (int)$summary->{$column};
         $totals['total'] = $totals['u'] + $totals['d'];
         $totals['billed_total'] = $totals['billed_u'] + $totals['billed_d'];
-        $rows = $query->select('v2_stat_server_user.*', 'v2_user.email')
-            ->orderBy('v2_stat_server_user.record_at', 'DESC')->orderBy('v2_stat_server_user.id', 'DESC')
-            ->forPage($current, $pageSize)->get();
-        foreach ($rows as $row) {
-            $row->setAttribute('record_date', CarbonImmutable::createFromTimestamp($row->record_at, $timezone)->toDateString());
+        $groupBy = $params['group_by'] ?? 'detail';
+        $total = (int)$summary->count;
+        if ($groupBy === 'detail') {
+            $rows = $query->select('v2_stat_server_user.*', 'v2_user.email')
+                ->orderBy('v2_stat_server_user.record_at', 'DESC')->orderBy('v2_stat_server_user.id', 'DESC')
+                ->forPage($current, $pageSize)->get();
+            foreach ($rows as $row) {
+                $row->setAttribute('record_date', CarbonImmutable::createFromTimestamp($row->record_at, $timezone)->toDateString());
+            }
+        } else {
+            $groups = ['v2_stat_server_user.server_type', 'v2_stat_server_user.server_id'];
+            if ($groupBy === 'user') $groups[] = 'v2_stat_server_user.user_id';
+            $grouped = (clone $query)->toBase()->select($groups)->groupBy($groups)
+                ->selectRaw('MAX(v2_stat_server_user.id) AS latest_id, COUNT(*) AS record_count, '
+                    . 'COUNT(DISTINCT v2_stat_server_user.user_id) AS user_count, '
+                    . 'SUM(v2_stat_server_user.u) AS u, SUM(v2_stat_server_user.d) AS d, '
+                    . 'SUM(v2_stat_server_user.billed_u) AS billed_u, SUM(v2_stat_server_user.billed_d) AS billed_d');
+            if ($groupBy === 'user') $grouped->selectRaw('MAX(v2_user.email) AS email');
+            $total = DB::query()->fromSub(clone $grouped, 'traffic_groups')->count();
+            $rows = $grouped->orderByRaw('(SUM(v2_stat_server_user.u) + SUM(v2_stat_server_user.d)) DESC')
+                ->orderBy('v2_stat_server_user.server_type')->orderBy('v2_stat_server_user.server_id');
+            if ($groupBy === 'user') $rows->orderBy('v2_stat_server_user.user_id');
+            $rows = $rows->forPage($current, $pageSize)->get();
+            $names = StatServerUser::whereIn('id', $rows->pluck('latest_id'))->pluck('server_name', 'id');
+            foreach ($rows as $row) {
+                $row->server_name = $names[$row->latest_id] ?? null;
+                unset($row->latest_id);
+                foreach (['server_id', 'user_id', 'record_count', 'user_count', 'u', 'd', 'billed_u', 'billed_d'] as $column) {
+                    if (isset($row->{$column})) $row->{$column} = (int)$row->{$column};
+                }
+            }
         }
-        return response(['data' => $rows, 'total' => (int)$summary->count, 'summary' => $totals,
+        return response(['data' => $rows, 'total' => $total, 'summary' => $totals, 'group_by' => $groupBy,
             'current' => $current, 'page_size' => $pageSize, 'start_date' => $start->toDateString(),
             'end_date' => $end->toDateString(), 'timezone' => $timezone]);
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\V1\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SubscriptionLog;
 use App\Services\AdminPermissionService;
+use App\Services\IpLookupService;
 use Illuminate\Http\Request;
 
 class SubscriptionLogController extends Controller
@@ -40,6 +41,22 @@ class SubscriptionLogController extends Controller
         $total = $query->count();
         $logs = $query->select('v2_subscription_log.*', 'v2_user.email')
             ->orderBy('v2_subscription_log.id', 'DESC')->forPage($current, $pageSize)->get();
+        $ipInfo = [];
+        $lookup = app(IpLookupService::class);
+        foreach ($logs as $log) {
+            $ip = (string)$log->ip;
+            if (!array_key_exists($ip, $ipInfo)) {
+                $ipInfo[$ip] = ['ip' => $ip, 'status' => 'unavailable', 'provider' => 'ip2region'];
+                if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                    try {
+                        $ipInfo[$ip] = $lookup->lookup($ip);
+                    } catch (\Throwable $e) {
+                        // Optional location metadata must not interrupt subscription records.
+                    }
+                }
+            }
+            $log->setAttribute('ip_info', $ipInfo[$ip]);
+        }
         return response([
             'data' => $logs,
             'total' => $total,

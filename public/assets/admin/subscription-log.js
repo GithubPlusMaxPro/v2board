@@ -84,7 +84,7 @@
         scroll.className = 'subscription-log-scroll audit-table-wrap';
         var table = element('table', '', scroll);
         var heading = element('tr', '', element('thead', '', table));
-        ['时间', '用户', '访问类型', '来源 IP', '客户端', 'HTTP 响应'].forEach(function (title) {
+        ['时间', '用户', '访问类型', '来源 IP / 归属地', '客户端', 'HTTP 响应'].forEach(function (title) {
             element('th', title, heading).scope = 'col';
         });
         var body = element('tbody', '', table);
@@ -132,7 +132,17 @@
                     element('span', item.email ? item.email.charAt(0).toUpperCase() : '?', identity).className = 'audit-avatar';
                     var account = element('div', '', identity); element('span', item.email || '用户已删除', account); element('small', 'ID ' + item.user_id, account);
                     element('span', item.action === 'address' ? '获取地址' : '拉取订阅', element('td', '', row)).className = 'audit-chip ' + (item.action === 'address' ? 'audit-chip-purple' : 'audit-chip-blue');
-                    element('td', item.ip || '—', row).className = 'audit-ip';
+                    var ipCell = element('td', '', row); ipCell.className = 'subscription-log-ip';
+                    element('span', item.ip || '—', ipCell).className = 'audit-ip';
+                    if (item.ip) {
+                        var location = item.ip_info || {}, locationLabel = '归属地暂不可用';
+                        if (location.status === 'ok') {
+                            locationLabel = [location.country, location.region, location.city].filter(function (part, index, all) { return part && all.indexOf(part) === index; }).join(' / ') || '暂无地区信息';
+                        } else if (location.status === 'local') locationLabel = '内网或保留地址';
+                        else if (location.status === 'disabled') locationLabel = '归属地查询未启用';
+                        element('small', locationLabel, ipCell);
+                        if (location.status === 'ok' && location.organization_name) element('small', location.organization_name, ipCell);
+                    }
                     var agent = element('td', '', row); agent.className = 'subscription-log-agent'; agent.title = item.user_agent || '';
                     var ua = (item.user_agent || '').toLowerCase(), client = '其他客户端';
                     [['v2rayng', 'v2rayNG'], ['v2rayn', 'v2rayN'], ['loon', 'Loon'], ['egern', 'Egern'], ['clash', 'Clash'], ['sing', 'Sing-box'], ['surge', 'Surge'], ['stash', 'Stash'], ['shadowrocket', 'Shadowrocket']].some(function (pair) { if (ua.indexOf(pair[0]) !== -1) { client = pair[1]; return true; } return false; });

@@ -38,15 +38,11 @@
     }
     function message(body, text, columns) { body.replaceChildren(); el('td', text, el('tr', '', body)).colSpan = columns; }
 
-    var geoNextRequestAt = 0;
     function geoRenderer(userId, signal) {
-        var pending = new Map(), queue = [], running = 0, automatic = 0, pumpTimer = null;
-        signal.addEventListener('abort', function () { clearTimeout(pumpTimer); queue = []; }, {once: true});
+        var pending = new Map(), queue = [], running = 0, automatic = 0;
+        signal.addEventListener('abort', function () { queue = []; }, {once: true});
         function pump() {
-            while (!signal.aborted && running < 2 && queue.length) {
-                var delay = geoNextRequestAt - Date.now();
-                if (delay > 0) { clearTimeout(pumpTimer); pumpTimer = setTimeout(pump, delay); return; }
-                geoNextRequestAt = Date.now() + 1100;
+            while (!signal.aborted && running < 6 && queue.length) {
                 var task = queue.shift(); running++;
                 (function (task) {
                     request('ipInfo', {user_id: userId, ip: task.ip}, signal)

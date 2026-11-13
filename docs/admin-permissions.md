@@ -87,7 +87,7 @@ php artisan view:clear
 
 该迁移可兼容已经通过 SQL 更新流程创建的同名表。`database/install.sql` 和 `database/update.sql` 也包含建表语句；使用现有安装／更新流程的实例无需另建数据库。按部署方式重启常驻 PHP 进程。后台模板会加载 `subscription-log.js`、`subscription-log.css`，并更新 `umi.js` 的缓存标记；以后替换后台构建文件时需保留独立菜单和页面路由的接入。此次菜单调整沿用已创建的记录表，无需新增迁移。
 
-审查接口为 `GET /api/v1/{secure_path}/subscriptionLog/fetch`，不指定用户时查询所有有权查看的记录。可传 `user_id`、`email`（完整邮箱）、`current`（默认 1）、`page_size`（默认 20，最多 100）、`action`（`address` 或 `download`）、`ip`（完整 IP）、`start_at` / `end_at`（Unix 秒，含边界）。响应含 `data`、`total`、`current`、`page_size`，每条记录包含关联用户邮箱，按记录 ID 倒序返回。后台按浏览器本地时区显示时间。旧的 `user/getSubscribeLog?id=用户ID` 接口保留兼容。
+审查接口为 `GET /api/v1/{secure_path}/subscriptionLog/fetch`，不指定用户时查询所有有权查看的记录。可传 `user_id`、`email`（完整邮箱）、`current`（默认 1）、`page_size`（默认 20，最多 100）、`action`（`address` 或 `download`）、`ip`（完整 IP）、`start_at` / `end_at`（Unix 秒，含边界）。响应含 `data`、`total`、`current`、`page_size`，每条记录包含关联用户邮箱及 `ip_info` 归属地信息，按记录 ID 倒序返回。来源 IP 下方显示国家、省份、城市和运营商，复用 ip2region 本地查询与缓存，同页相同 IP 只查询一次，随列表响应一并返回；无需浏览器为每条记录另发查询请求，也不需要额外的 `online.view` 权限。内网／保留地址、查询停用或失败会显示对应状态，不影响访问记录列表。后台按浏览器本地时区显示时间。旧的 `user/getSubscribeLog?id=用户ID` 接口保留兼容。
 
 验证：`php -d disable_functions= vendor/bin/phpunit tests/Feature/SubscriptionLogTest.php`。测试使用 SQLite 内存数据库，不连接业务数据库。
 

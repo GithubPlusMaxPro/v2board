@@ -35,7 +35,7 @@
 <body>
 <div id="root"></div>
 <script src="/assets/admin/permissions.js?v={{$version}}-admin-2fa-1"></script>
-<script src="/assets/admin/account-activity.js?v={{$version}}-historical-json-1"></script>
+<script src="/assets/admin/account-activity.js?v={{$version}}-audited-details-1"></script>
 <script src="/assets/admin/two-factor.js?v={{$version}}-admin-2fa-1"></script>
 <script src="/assets/admin/subscription-log.js?v={{$version}}-subscription-geo-3"></script>
 <script src="/assets/admin/server-user-traffic.js?v={{$version}}-node-users-2"></script>

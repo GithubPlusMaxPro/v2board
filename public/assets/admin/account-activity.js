@@ -188,7 +188,7 @@
             element('strong', label + result, operation);
             element('small', item.method + ' /' + item.action, operation);
             if (item.target_id) element('small', '目标 ID ' + item.target_id, operation);
-            if (item.scope === 'legacy') showDetails(operation, item.id);
+            if (Number(item.has_details)) showDetails(operation, item.id);
             element('td', item.ip || '—', row).className = 'audit-ip';
             element('td', item.user_agent || '—', row);
             const response = element('td', item.status_code === null ? '—' : '', row);

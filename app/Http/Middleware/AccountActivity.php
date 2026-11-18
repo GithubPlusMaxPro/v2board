@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Log as LogModel;
+use App\Services\AccountActivityDetails;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -32,6 +33,16 @@ class AccountActivity
             $login = new \stdClass();
             $request->attributes->set('account_activity_login', $login);
         }
+        $details = [];
+        $configAudit = null;
+        if ($scope !== 'login' && $method === 'POST') {
+            $details = AccountActivityDetails::fields($request->all());
+            if ($scope === 'admin' && $action === 'config/save') {
+                // The FormRequest and the middleware share this object.
+                $configAudit = new \stdClass();
+                $request->attributes->set('account_activity_details', $configAudit);
+            }
+        }
         $user = $login ? null : $request->input('user');
         $authorization = $request->input('auth_data') ?? $request->header('authorization');
         $target = $scope === 'admin' ? $request->input('id') : null;
@@ -49,7 +60,9 @@ class AccountActivity
             try {
                 if ($login) $user = $login->account ?? null;
                 $email = $user['email'] ?? ($scope === 'login' && $action === 'auth/login' ? $request->input('email') : null);
+                if (isset($configAudit->changes)) $details['changes'] = (object)$configAudit->changes;
                 LogModel::create([
+                    'data' => $details ? json_encode($details) : null,
                     'title' => $method . ' /' . $action,
                     'uri' => '/' . $action,
                     'level' => 'INFO',

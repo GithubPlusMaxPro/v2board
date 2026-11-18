@@ -47,6 +47,12 @@ return [
         'system.log' => '查看系统日志',
     ],
     'actions' => [
+        'App\\Http\\Controllers\\V1\\Admin\\TwoFactorController@policy' => 'account.two_factor',
+        'App\\Http\\Controllers\\V1\\Admin\\TwoFactorController@reset' => 'account.two_factor',
+        'App\\Http\\Controllers\\V1\\Admin\\TwoFactorController@status' => 'account.two_factor',
+        'App\\Http\\Controllers\\V1\\Admin\\TwoFactorController@begin' => 'account.two_factor',
+        'App\\Http\\Controllers\\V1\\Admin\\TwoFactorController@enable' => 'account.two_factor',
+        'App\\Http\\Controllers\\V1\\Admin\\TwoFactorController@disable' => 'account.two_factor',
         // Login and operation history is available only to super admins.
         'App\\Http\\Controllers\\V1\\Admin\\AccountActivityController@fetch' => null,
         'App\Http\Controllers\V1\Admin\UserOnlineController@fetch' => 'online.view',

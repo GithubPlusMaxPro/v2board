@@ -15,6 +15,12 @@ class AdminRoute
             $router->get('/permission/current', 'V1\\Admin\\PermissionController@current');
             $router->get('/permission/fetch', 'V1\\Admin\\PermissionController@fetch');
             $router->post('/permission/save', 'V1\\Admin\\PermissionController@save');
+            $router->get('/twoFactor/status', 'V1\\Admin\\TwoFactorController@status');
+            $router->post('/twoFactor/begin', 'V1\\Admin\\TwoFactorController@begin');
+            $router->post('/twoFactor/enable', 'V1\\Admin\\TwoFactorController@enable');
+            $router->post('/twoFactor/disable', 'V1\\Admin\\TwoFactorController@disable');
+            $router->post('/twoFactor/policy', 'V1\\Admin\\TwoFactorController@policy');
+            $router->post('/twoFactor/reset', 'V1\\Admin\\TwoFactorController@reset');
             // Config
             $router->get ('/config/fetch', 'V1\\Admin\\ConfigController@fetch');
             $router->post('/config/save', 'V1\\Admin\\ConfigController@save');

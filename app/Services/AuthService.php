@@ -19,13 +19,12 @@ class AuthService
         $this->user = $user;
     }
 
-    public function generateAuthData(Request $request)
+    public function generateAuthData(Request $request, ?string $twoFactorProof = null)
     {
         $guid = Helper::guid();
-        $authData = JWT::encode([
-            'id' => $this->user->id,
-            'session' => $guid,
-        ], config('app.key'), 'HS256');
+        $claims = ['id' => $this->user->id, 'session' => $guid];
+        if ($twoFactorProof !== null) $claims['two_factor'] = $twoFactorProof;
+        $authData = JWT::encode($claims, config('app.key'), 'HS256');
         self::addSession($this->user->id, $guid, [
             'ip' => $request->ip(),
             'login_at' => time(),
@@ -59,6 +58,7 @@ class AuthService
                 if (!self::checkSession($data['id'], $data['session'])) return false;
                 $user = User::select(['id', 'email', 'is_admin', 'is_staff', 'banned', 'admin_permissions'])->find($data['id']);
                 if (!$user || $user->banned) return false;
+                if ($user->is_admin && !(new AdminTwoFactor())->allowsSession($user->id, $data['two_factor'] ?? null)) return false;
                 return $user->toArray();
             }
             if (!Cache::has($jwt)) {
@@ -74,7 +74,8 @@ class AuthService
                 if (!$user) return false;
                 Cache::put($jwt, $user->toArray(), 3600);
             }
-            return Cache::get($jwt);
+            $cached = Cache::get($jwt);
+            return !empty($cached['is_admin']) ? self::decryptAuthData($jwt, true) : $cached;
         } catch (\Exception $e) {
             return false;
         }

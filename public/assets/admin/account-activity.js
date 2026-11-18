@@ -3,13 +3,17 @@
 
     const scopeLabels = { login: '登录', admin: '后台操作', user: '用户操作' };
     const actionLabels = {
-        login: { 'auth/login': '密码登录', 'auth/token2Login': '快捷登录' },
+        login: { 'auth/login': '密码登录', 'auth/token2Login': '快捷登录', 'auth/twoFactor/enroll': '首次绑定两步验证' },
         admin: {
             'config/save': '修改系统配置',
             'order/assign': '分配订单',
             'order/update': '修改订单',
             'payment/save': '保存支付配置',
             'permission/save': '修改管理员权限',
+            'twoFactor/enable': '开启两步验证',
+            'twoFactor/disable': '关闭两步验证',
+            'twoFactor/policy': '修改两步验证策略',
+            'twoFactor/reset': '重置两步验证',
             'user/ban': '封禁用户',
             'user/delUser': '删除用户',
             'user/dumpCSV': '导出用户',
@@ -142,7 +146,7 @@
             if (item.user_id) element('small', 'ID ' + item.user_id, account);
             const operation = element('td', '', row);
             const label = actionLabels[item.scope][item.action] || scopeLabels[item.scope];
-            const result = item.scope === 'login' ? (item.user_id ? '成功' : '失败') : '';
+            const result = item.scope === 'login' ? (item.user_id ? '成功' : item.status_code >= 400 ? '失败' : '未完成') : '';
             element('strong', label + result, operation);
             element('small', item.method + ' /' + item.action, operation);
             if (item.target_id) element('small', '目标 ID ' + item.target_id, operation);

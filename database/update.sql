@@ -863,6 +863,17 @@ ADD `trusted_x_forwarded_for` varchar(255) COLLATE 'utf8mb4_general_ci' NULL COM
 ALTER TABLE `v2_user`
 ADD `admin_permissions` text DEFAULT NULL COMMENT 'NULL: full admin, JSON array: restricted admin' AFTER `is_admin`;
 
+CREATE TABLE IF NOT EXISTS `v2_admin_two_factor` (
+    `user_id` int NOT NULL,
+    `secret` text NULL,
+    `last_step` bigint unsigned DEFAULT NULL,
+    `recovery_hashes` text NULL,
+    `required` tinyint(1) NOT NULL DEFAULT 1,
+    `revision` char(32) NOT NULL,
+    PRIMARY KEY (`user_id`),
+    CONSTRAINT `v2_admin_two_factor_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `v2_user` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS `v2_account_activity_log` (
     `id` bigint unsigned NOT NULL AUTO_INCREMENT,
     `user_id` int DEFAULT NULL,

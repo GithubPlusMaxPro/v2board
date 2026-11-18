@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="/assets/admin/umi.css?v={{$version}}">
     <link rel="stylesheet" href="/assets/admin/custom.css?v={{$version}}">
     <link rel="stylesheet" href="/assets/admin/permissions.css?v={{$version}}-modern-permissions-1">
-    <link rel="stylesheet" href="/assets/admin/login.css?v={{$version}}-user-frontend-1">
+    <link rel="stylesheet" href="/assets/admin/login.css?v={{$version}}-admin-2fa-1">
     <link rel="stylesheet" href="/assets/admin/audit.css?v={{$version}}-modern-audit-1">
     <link rel="stylesheet" href="/assets/admin/subscription-log.css?v={{$version}}-subscription-geo-3">
     <link rel="stylesheet" href="/assets/admin/server-user-traffic.css?v={{$version}}-node-users-2">
@@ -34,14 +34,15 @@
 
 <body>
 <div id="root"></div>
-<script src="/assets/admin/permissions.js?v={{$version}}-account-activity-1"></script>
-<script src="/assets/admin/account-activity.js?v={{$version}}-account-activity-1"></script>
+<script src="/assets/admin/permissions.js?v={{$version}}-admin-2fa-1"></script>
+<script src="/assets/admin/account-activity.js?v={{$version}}-admin-2fa-1"></script>
+<script src="/assets/admin/two-factor.js?v={{$version}}-admin-2fa-1"></script>
 <script src="/assets/admin/subscription-log.js?v={{$version}}-subscription-geo-3"></script>
 <script src="/assets/admin/server-user-traffic.js?v={{$version}}-node-users-2"></script>
 <script src="/assets/admin/user-online.js?v={{$version}}-ip2region-parallel-5"></script>
 <script src="/assets/admin/vendors.async.js?v={{$version}}"></script>
 <script src="/assets/admin/components.async.js?v={{$version}}"></script>
-<script src="/assets/admin/umi.js?v={{$version}}-account-activity-1"></script>
+<script src="/assets/admin/umi.js?v={{$version}}-admin-2fa-1"></script>
 </body>
 
 </html>

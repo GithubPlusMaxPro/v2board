@@ -21394,6 +21394,12 @@
                 }, o.a.createElement("a", {
                     className: "dropdown-item d-flex justify-content-between align-items-center",
                     href: "javascript:void(0);",
+                    onClick: ()=>window.AdminTwoFactor.open(()=>this.logout())
+                }, "两步验证", o.a.createElement("i", {
+                    className: "fa fa-fw fa-lock ml-1"
+                })), o.a.createElement("a", {
+                    className: "dropdown-item d-flex justify-content-between align-items-center",
+                    href: "javascript:void(0);",
                     onClick: ()=>this.logout()
                 }, "\u767b\u51fa", o.a.createElement("i", {
                     className: "fa fa-fw fa-sign-out-alt text-danger ml-1"
@@ -41553,7 +41559,8 @@
                 this.props.dispatch({
                     type: "passport/login",
                     email: this.refs.email.value,
-                    password: this.refs.password.value
+                    password: this.refs.password.value,
+                    otp: this.refs.otp.value
                 })
             }
             render() {
@@ -41590,6 +41597,11 @@
                                             a.a.createElement("button", {type: "button", className: "admin-login-reveal", "aria-controls": "admin-login-password",
                                                 "aria-label": this.state.showPassword ? "隐藏密码" : "显示密码", "aria-pressed": !!this.state.showPassword,
                                                 onClick: ()=>this.setState({showPassword: !this.state.showPassword})}, this.state.showPassword ? "隐藏" : "显示"))),
+                                    a.a.createElement("div", {className: "admin-login-field"},
+                                        a.a.createElement("label", {htmlFor: "admin-login-otp"}, "两步验证码或恢复码"),
+                                        a.a.createElement("input", {id: "admin-login-otp", name: "otp", type: "text", className: "admin-login-input",
+                                            placeholder: "仅已开启两步验证的账号填写", autoComplete: "one-time-code", autoCapitalize: "none",
+                                            spellCheck: false, maxLength: 20, ref: "otp"})),
                                     a.a.createElement("button", {disabled: e, type: "submit", className: "admin-login-submit"},
                                         e && a.a.createElement(i["a"], {type: "loading", "aria-hidden": true}), e ? "正在登录…" : "登录管理后台")),
                                 a.a.createElement("button", {type: "button", className: "admin-login-help", onClick: ()=>r["a"].info({
@@ -109218,6 +109230,7 @@
                 login(e, t) {
                     var n = e.email
                       , r = e.password
+                      , otp = e.otp
                       , i = t.put;
                     return c().mark(function e() {
                         var t;
@@ -109236,7 +109249,8 @@
                                     return e.next = 4,
                                     Object(o["b"])("/passport/auth/login", {
                                         email: n,
-                                        password: r
+                                        password: r,
+                                        otp: otp
                                     });
                                 case 4:
                                     return t = e.sent,
@@ -109254,6 +109268,10 @@
                                     }
                                     return e.abrupt("return");
                                 case 9:
+                                    if (t.data.two_factor_setup_required) {
+                                        window.AdminTwoFactor.enroll(t.data);
+                                        return e.abrupt("return");
+                                    }
                                     if (Object(l["h"])(t.data.auth_data),
                                     t.data.is_admin) {
                                         e.next = 12;

@@ -552,6 +552,7 @@ CREATE TABLE `v2_ticket_message` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
+DROP TABLE IF EXISTS `v2_admin_two_factor`;
 DROP TABLE IF EXISTS `v2_user`;
 CREATE TABLE `v2_user` (
                            `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -596,6 +597,17 @@ CREATE TABLE `v2_user` (
 
 
 -- 2025-09-12 10:05:00
+
+CREATE TABLE IF NOT EXISTS `v2_admin_two_factor` (
+    `user_id` int NOT NULL,
+    `secret` text NULL,
+    `last_step` bigint unsigned DEFAULT NULL,
+    `recovery_hashes` text NULL,
+    `required` tinyint(1) NOT NULL DEFAULT 1,
+    `revision` char(32) NOT NULL,
+    PRIMARY KEY (`user_id`),
+    CONSTRAINT `v2_admin_two_factor_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `v2_user` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `v2_account_activity_log` (
     `id` bigint unsigned NOT NULL AUTO_INCREMENT,

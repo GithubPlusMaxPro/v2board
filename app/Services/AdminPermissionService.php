@@ -28,7 +28,8 @@ class AdminPermissionService
         if ($action === 'App\\Http\\Controllers\\V1\\Admin\\ConfigController@fetch'
             && $request && $request->input('key') === 'site') return true;
         $permission = config('admin_permissions.actions', [])[$action] ?? null;
-        return $permission !== null && self::has($admin, $permission);
+        // Administrators can manage their own second factor.
+        return $permission === 'account.two_factor' || ($permission !== null && self::has($admin, $permission));
     }
 
     public static function access(array $admin): array

@@ -49,3 +49,12 @@
     .user-paused-card { padding: 30px; }
 }
 @media (prefers-reduced-motion: reduce) { .admin-login-input { transition: none; } }
+
+.admin-two-factor-dialog { width: min(480px, calc(100% - 24px)); max-height: calc(100% - 24px); max-height: calc(100dvh - 24px); overflow: auto; margin: auto; padding: 0; }
+.admin-two-factor-dialog::backdrop { background: #16294380; }
+.admin-two-factor-dialog .audit-header h2 { margin: 0; }
+.admin-two-factor-dialog .audit-filterbox p { margin: 0 0 14px; color: #52647e; }
+.admin-two-factor-dialog .admin-two-factor-form { grid-template-columns: minmax(0, 1fr); }
+.admin-two-factor-dialog .admin-two-factor-form input[type=checkbox] { width: auto; align-self: flex-start; }
+.admin-two-factor-dialog .audit-actions { flex-wrap: wrap; }
+.admin-two-factor-dialog pre { margin: 0; user-select: all; color: #152238; line-height: 1.8; }

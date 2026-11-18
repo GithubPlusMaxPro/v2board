@@ -10,6 +10,7 @@ use App\Jobs\SendEmailJob;
 use App\Models\InviteCode;
 use App\Models\Plan;
 use App\Models\User;
+use App\Services\AdminTwoFactor;
 use App\Services\AuthService;
 use App\Utils\CacheKey;
 use App\Utils\Dict;
@@ -136,7 +137,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function login(AuthLogin $request)
+    public function login(AuthLogin $request, AdminTwoFactor $twoFactor)
     {
         $email = $request->input('email');
         $password = $request->input('password');
@@ -174,13 +175,24 @@ class AuthController extends Controller
             abort(500, __('Your account has been suspended'));
         }
 
-        $authService = new AuthService($user);
         return response([
-            'data' => $authService->generateAuthData($request)
-        ]);
+            'data' => $twoFactor->login($request, $user)
+        ])->header('Cache-Control', 'private, no-store');
     }
 
-    public function token2Login(Request $request)
+    public function enrollTwoFactor(Request $request, AdminTwoFactor $twoFactor)
+    {
+        $data = $request->validate(['setup' => 'required|string|max:2048', 'otp' => 'required|string|regex:/^\d{6}$/D']);
+        $enrollment = $twoFactor->enroll($data['setup'], $data['otp']);
+        $activity = $request->attributes->get('account_activity_login');
+        if ($activity) {
+            $activity->account = ['id' => $enrollment['user']->id, 'email' => $enrollment['user']->email];
+        }
+        return response(['data' => ['recovery_codes' => $enrollment['recovery_codes']]])
+            ->header('Cache-Control', 'private, no-store');
+    }
+
+    public function token2Login(Request $request, AdminTwoFactor $twoFactor)
     {
         if ($request->input('token')) {
             $redirect = '/#/login?verify=' . $request->input('token') . '&redirect=' . ($request->input('redirect') ? $request->input('redirect') : 'dashboard');
@@ -205,11 +217,11 @@ class AuthController extends Controller
             if ($user->banned) {
                 abort(500, __('Your account has been suspended'));
             }
-            Cache::forget($key);
-            $authService = new AuthService($user);
             return response([
-                'data' => $authService->generateAuthData($request)
-            ]);
+                'data' => $twoFactor->login($request, $user, function () use ($key, $userId) {
+                    abort_unless(Cache::pull($key) === $userId, 422, __('Token error'));
+                })
+            ])->header('Cache-Control', 'private, no-store');
         }
     }
 

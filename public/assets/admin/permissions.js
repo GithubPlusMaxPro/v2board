@@ -82,6 +82,7 @@
         var previousFocus = document.activeElement;
         function close() { overlay.remove(); document.removeEventListener('keydown', onKey); if (previousFocus && previousFocus.isConnected) previousFocus.focus(); }
         function onKey(event) {
+            if (document.getElementById('admin-two-factor')) return;
             if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close(); }
             if (event.key === 'Tab') {
                 var focusable = Array.from(overlay.querySelectorAll('button,select,input')).filter(function (node) { return !node.disabled && node.getClientRects().length; });
@@ -107,6 +108,8 @@
         var modeBadge = element('span', '正在加载', accountHeading); modeBadge.className = 'admin-permission-mode';
         var select = element('select', '', account);
         select.setAttribute('aria-label', '选择管理员');
+        var twoFactor = element('button', '管理两步验证', account);
+        twoFactor.type = 'button'; twoFactor.disabled = true;
         element('p', '先在用户管理中将账号设为管理员，再在这里分配权限。新管理员默认没有操作权限。', account);
         var form = element('div', '', content);
         var footer = element('div', '', panel); footer.className = 'admin-permission-footer';
@@ -126,7 +129,9 @@
             function render() {
                 form.replaceChildren(); status.textContent = '';
                 var admin = admins.find(function (item) { return item.id === Number(select.value); });
+                twoFactor.disabled = !admin || admin.id === current.id;
                 if (!admin) { status.textContent = '没有可管理的管理员账号'; return; }
+                twoFactor.onclick = function () { window.AdminTwoFactor.manage(admin); };
                 var fullLabel = element('label', '', form);
                 fullLabel.className = 'admin-permission-full';
                 var full = element('input', '', fullLabel);

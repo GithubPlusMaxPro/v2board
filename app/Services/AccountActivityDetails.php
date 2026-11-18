@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Http\Requests\Admin\ConfigSave;
+use App\Models\ServerRoute;
 
 class AccountActivityDetails
 {
@@ -60,6 +61,45 @@ class AccountActivityDetails
             $changes[$key] = ['before' => $old, 'after' => $new];
         }
         return self::configDetails($changes);
+    }
+
+    public static function serverRoute(array $fields): array
+    {
+        $action = $fields['action'] ?? null;
+        if (!in_array($action, ServerRoute::ACTIONS, true)) return [];
+
+        $match = $action === 'default_out' ? [] : ($fields['match'] ?? []);
+        if (is_string($match)) $match = json_decode($match, true);
+        $match = is_array($match) ? array_filter($match, 'is_string') : [];
+        $rules = [];
+        $remaining = 60000; // v2_log.data is TEXT and also holds the other audit fields.
+        foreach ($match as $rule) {
+            $rule = self::routeText($rule);
+            $remaining -= strlen(json_encode($rule)) + 1;
+            if ($remaining < 0) break;
+            $rules[] = $rule;
+        }
+        $details = [
+            'action' => $action,
+            'match' => $rules,
+            'match_count' => max(count($match), is_int($fields['match_count'] ?? null) ? $fields['match_count'] : 0),
+        ];
+        if (is_string($fields['remarks'] ?? null)) {
+            $details['remarks'] = mb_strcut(self::routeText($fields['remarks']), 0, 1024, 'UTF-8');
+        }
+        $value = $fields['action_value'] ?? null;
+        if ($action === 'dns' && is_string($value) && filter_var($value, FILTER_VALIDATE_IP)) {
+            $details['action_value'] = $value;
+        } elseif (($value !== null && $value !== '') || ($fields['action_value_hidden'] ?? false) === true) {
+            $details['action_value_hidden'] = true;
+        }
+        return $details;
+    }
+
+    private static function routeText(string $value): string
+    {
+        $text = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+        return preg_replace('/[\x00-\x1F\x7F]/', ' ', $text);
     }
 
     public static function configDetails(array $changes): array

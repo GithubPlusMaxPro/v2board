@@ -4,8 +4,9 @@ namespace App\Http\Controllers\V1\Admin\Server;
 
 use App\Http\Controllers\Controller;
 use App\Models\ServerRoute;
+use App\Services\AccountActivityDetails;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Validation\Rule;
 
 class RouteController extends Controller
 {
@@ -26,7 +27,7 @@ class RouteController extends Controller
         $params = $request->validate([
             'remarks' => 'required',
             'match' => 'array|required_unless:action,default_out',
-            'action' => 'required|in:block,block_ip,block_port,protocol,dns,route,route_ip,default_out',
+            'action' => ['required', Rule::in(ServerRoute::ACTIONS)],
             'action_value' => 'nullable'
         ], [
             'remarks.required' => '备注不能为空',
@@ -44,14 +45,16 @@ class RouteController extends Controller
             try {
                 $route = ServerRoute::find($request->input('id'));
                 $route->update($params);
-                return [
-                    'data' => true
-                ];
             } catch (\Exception $e) {
                 abort(500, '保存失败');
             }
+        } else {
+            $route = ServerRoute::create($params);
+            if (!$route) abort(500, '创建失败');
         }
-        if (!ServerRoute::create($params)) abort(500, '创建失败');
+        $request->attributes->set('account_activity_route', [
+            'id' => (int)$route->id,
+        ] + AccountActivityDetails::serverRoute($route->getAttributes()));
         return [
             'data' => true
         ];

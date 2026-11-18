@@ -61,6 +61,13 @@ class AccountActivity
                 if ($login) $user = $login->account ?? null;
                 $email = $user['email'] ?? ($scope === 'login' && $action === 'auth/login' ? $request->input('email') : null);
                 if (isset($configAudit->changes)) $details['changes'] = (object)$configAudit->changes;
+                if ($scope === 'admin' && $action === 'server/route/save') {
+                    $route = $request->attributes->get('account_activity_route');
+                    if (is_array($route)) {
+                        $details = $route + $details;
+                        $targetId = $route['id'];
+                    }
+                }
                 LogModel::create([
                     'data' => $details ? json_encode($details) : null,
                     'title' => $method . ' /' . $action,

@@ -20,6 +20,9 @@ class AccountActivityController extends Controller
             $actor = AccountActivityDetails::fields(is_array($data) ? ($data['user'] ?? null) : null);
             if ($actor) $details['user'] = $actor;
         }
+        if (is_array($data) && in_array($log->scope, ['admin', 'legacy'], true) && $log->action === 'server/route/save') {
+            $details += AccountActivityDetails::serverRoute($data);
+        }
         if ($log->scope === 'admin' && $log->action === 'config/save' && isset($data['changes']) && is_array($data['changes'])) {
             $details['changes'] = (object)AccountActivityDetails::configDetails($data['changes']);
         }

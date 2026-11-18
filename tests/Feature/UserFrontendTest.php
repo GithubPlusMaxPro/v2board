@@ -3,9 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use App\Services\AuthService;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
@@ -106,7 +104,7 @@ class UserFrontendTest extends TestCase
         $user = $this->account();
         foreach ([0, 1] as $enabled) {
             config(['v2board.user_frontend_enable' => $enabled]);
-            $token = (new AuthService($user))->generateAuthData(Request::create('/'))['auth_data'];
+            $token = $this->authToken($user);
             $response = $this->withHeader('authorization', $token)->postJson('/api/v1/passport/auth/getQuickLoginUrl')->assertOk();
             $fragment = parse_url($response->json('data'), PHP_URL_FRAGMENT);
             parse_str(substr($fragment, strpos($fragment, '?') + 1), $query);
@@ -123,7 +121,7 @@ class UserFrontendTest extends TestCase
 
     public function testTheFrontendSettingIsExposedAndOnlyConfigManagersCanSaveIt(): void
     {
-        $admin = $this->account(true); $token = (new AuthService($admin))->generateAuthData(Request::create('/'))['auth_data'];
+        $admin = $this->account(true); $token = $this->authToken($admin);
         $this->withHeader('authorization', $token)->getJson($this->adminBase . 'config/fetch?key=site')->assertOk()
             ->assertJsonPath('data.site.user_frontend_enable', 0);
         File::partialMock()->shouldReceive('put')->once()->withArgs(function ($path, $content) {
@@ -133,7 +131,7 @@ class UserFrontendTest extends TestCase
         $this->postJson($this->adminBase . 'config/save', ['user_frontend_enable' => 1])->assertOk();
         $this->postJson($this->adminBase . 'config/save', ['user_frontend_enable' => 2])->assertUnprocessable();
         $viewer = $this->account(true, ['config.view']);
-        $token = (new AuthService($viewer))->generateAuthData(Request::create('/'))['auth_data'];
+        $token = $this->authToken($viewer);
         $this->withHeader('authorization', $token)->postJson($this->adminBase . 'config/save', ['user_frontend_enable' => 1])->assertForbidden();
     }
 }

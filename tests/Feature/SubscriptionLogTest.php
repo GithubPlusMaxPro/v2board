@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Http\Middleware\SubscriptionLog as SubscriptionLogMiddleware;
 use App\Models\SubscriptionLog;
 use App\Models\User;
-use App\Services\AuthService;
 use App\Utils\Helper;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
@@ -59,7 +58,7 @@ class SubscriptionLogTest extends TestCase
 
     private function auth(User $user): string
     {
-        return (new AuthService($user))->generateAuthData(Request::create('/'))['auth_data'];
+        return $this->authToken($user);
     }
 
     public function testAddressAndDownloadAreStoredSeparatelyWithoutCredentials(): void

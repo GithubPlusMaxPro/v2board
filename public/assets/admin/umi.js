@@ -71808,7 +71808,7 @@
                                     });
                                 case 2:
                                     return e.next = 4,
-                                    Object(o["b"])("/passport/auth/login", n);
+                                    Object(o["b"])("/passport/auth/adminLogin", n);
                                 case 4:
                                     return t = e.sent,
                                     e.next = 7,
@@ -82374,7 +82374,7 @@
                 i.a.createElement("h2", null, "尚未分配管理权限"),
                 i.a.createElement("p", null, "请联系完整权限管理员，为此账号分配需要的功能。"),
                 i.a.createElement("button", {onClick: function () { window.location.href = window.location.pathname; }}, "重新检查权限"),
-                i.a.createElement("button", {style: {marginLeft: "12px"}, onClick: function () { localStorage.removeItem("authorization"); window.location.href = window.location.pathname + "#/login"; }}, "退出登录")); }
+                i.a.createElement("button", {style: {marginLeft: "12px"}, onClick: function () { localStorage.removeItem("admin_authorization"); window.location.href = window.location.pathname + "#/login"; }}, "退出登录")); }
         }, {
             path: "/config/payment",
             exact: !0,
@@ -109247,7 +109247,7 @@
                                     });
                                 case 2:
                                     return e.next = 4,
-                                    Object(o["b"])("/passport/auth/login", {
+                                    Object(o["b"])("/passport/auth/adminLogin", {
                                         email: n,
                                         password: r,
                                         otp: otp
@@ -113722,13 +113722,13 @@
             r["a"].success("\u590d\u5236\u6210\u529f")
         }
         function d(e) {
-            return window.localStorage.setItem("authorization", e)
+            return window.localStorage.setItem("admin_authorization", e)
         }
         function p() {
-            return window.localStorage.removeItem("authorization")
+            return window.localStorage.removeItem("admin_authorization")
         }
         function m() {
-            return window.localStorage.getItem("authorization")
+            return window.localStorage.getItem("admin_authorization")
         }
     },
     ykC2: function(e, t, n) {

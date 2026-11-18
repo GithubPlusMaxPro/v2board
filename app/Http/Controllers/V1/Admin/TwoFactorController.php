@@ -92,7 +92,7 @@ class TwoFactorController extends Controller
             $users = User::whereIn('id', [$actorId, $selectedId])->orderBy('id')->lockForUpdate()->get()->keyBy('id');
             $actor = $users->get($actorId);
             $target = $users->get($selectedId);
-            abort_unless($actor && $actor->is_admin && AuthService::decryptAuthData($authorization, true), 403, '请重新登录。');
+            abort_unless($actor && $actor->is_admin && AuthService::decryptAuthData($authorization, 'admin'), 403, '请重新登录。');
             abort_unless($target && $target->is_admin, 404, '管理员不存在。');
             abort_if($targetId !== null && !AdminPermissionService::isSuper($actor->toArray()), 403, '只有超级管理员可以管理其他管理员的两步验证。');
             return $action($actor, $target, hash('sha256', $authorization));

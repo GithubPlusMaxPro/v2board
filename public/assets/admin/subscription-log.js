@@ -113,7 +113,7 @@
             try {
                 var query = new URLSearchParams(Object.assign({ current: targetPage, page_size: pageSize }, activeFilters));
                 var response = await fetch('/api/v1/' + window.settings.secure_path + '/subscriptionLog/fetch?' + query, {
-                    headers: { authorization: localStorage.getItem('authorization') || '', Accept: 'application/json' },
+                    headers: { authorization: localStorage.getItem('admin_authorization') || '', Accept: 'application/json' },
                     signal: controller.signal
                 });
                 var result = await response.json();

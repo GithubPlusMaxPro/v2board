@@ -19,13 +19,14 @@ class AuthService
         $this->user = $user;
     }
 
-    public function generateAuthData(Request $request, ?string $twoFactorProof = null)
+    public function generateAuthData(Request $request, ?string $twoFactorProof = null, string $scope = 'user')
     {
         $guid = Helper::guid();
-        $claims = ['id' => $this->user->id, 'session' => $guid];
+        $claims = ['id' => $this->user->id, 'session' => $guid, 'scope' => $scope];
         if ($twoFactorProof !== null) $claims['two_factor'] = $twoFactorProof;
         $authData = JWT::encode($claims, config('app.key'), 'HS256');
         self::addSession($this->user->id, $guid, [
+            'scope' => $scope,
             'ip' => $request->ip(),
             'login_at' => time(),
             'ua' => $request->userAgent(),
@@ -41,41 +42,33 @@ class AuthService
         }
         return [
             'token' => $this->user->token,
-            'is_admin' => $this->user->is_admin,
-            'admin_access' => $this->user->is_admin ? AdminPermissionService::access($this->user->toArray()) : null,
+            'is_admin' => $scope === 'admin' ? (int)$this->user->is_admin : 0,
+            'admin_access' => $scope === 'admin' && $this->user->is_admin ? AdminPermissionService::access($this->user->toArray()) : null,
             'auth_data' => $authData
         ];
     }
 
-    public static function decryptAuthData($jwt, $fresh = false)
+    public static function decryptAuthData($jwt, ?string $requiredScope = null)
     {
         try {
-            if (!is_string($jwt) || $jwt === '') {
-                return false;
+            if (!is_string($jwt) || $jwt === '') return false;
+            $data = (array)JWT::decode($jwt, new Key(config('app.key'), 'HS256'));
+            // Legacy credentials remain user sessions and cannot enter the admin API.
+            $scope = $data['scope'] ?? 'user';
+            if (!in_array($scope, ['user', 'admin'], true)
+                || ($requiredScope !== null && $scope !== $requiredScope)) return false;
+            if (!self::checkSession($data['id'], $data['session'])) return false;
+            $user = User::select(['id', 'email', 'is_admin', 'is_staff', 'banned', 'admin_permissions'])->find($data['id']);
+            if (!$user || $user->banned) return false;
+            if ($scope === 'admin' && (!$user->is_admin
+                || !(new AdminTwoFactor())->allowsSession($user->id, $data['two_factor'] ?? null))) return false;
+            $identity = $user->toArray();
+            $identity['auth_scope'] = $scope;
+            if ($scope === 'user') {
+                $identity['is_admin'] = 0;
+                unset($identity['admin_permissions']);
             }
-            if ($fresh) {
-                $data = (array)JWT::decode($jwt, new Key(config('app.key'), 'HS256'));
-                if (!self::checkSession($data['id'], $data['session'])) return false;
-                $user = User::select(['id', 'email', 'is_admin', 'is_staff', 'banned', 'admin_permissions'])->find($data['id']);
-                if (!$user || $user->banned) return false;
-                if ($user->is_admin && !(new AdminTwoFactor())->allowsSession($user->id, $data['two_factor'] ?? null)) return false;
-                return $user->toArray();
-            }
-            if (!Cache::has($jwt)) {
-                $data = (array)JWT::decode($jwt, new Key(config('app.key'), 'HS256'));
-                if (!self::checkSession($data['id'], $data['session'])) return false;
-                $user = User::select([
-                    'id',
-                    'email',
-                    'is_admin',
-                    'is_staff'
-                ])
-                    ->find($data['id']);
-                if (!$user) return false;
-                Cache::put($jwt, $user->toArray(), 3600);
-            }
-            $cached = Cache::get($jwt);
-            return !empty($cached['is_admin']) ? self::decryptAuthData($jwt, true) : $cached;
+            return $identity;
         } catch (\Exception $e) {
             return false;
         }
@@ -100,15 +93,20 @@ class AuthService
         return true;
     }
 
-    public function getSessions()
+    public function getSessions(?string $scope = null)
     {
-        return (array)Cache::get(CacheKey::get("USER_SESSIONS", $this->user->id), []);
+        $sessions = (array)Cache::get(CacheKey::get("USER_SESSIONS", $this->user->id), []);
+        return $scope === null ? $sessions : array_filter($sessions, function ($session) use ($scope) {
+            return ($session['scope'] ?? 'user') === $scope;
+        });
     }
 
-    public function removeSession($sessionId)
+    public function removeSession($sessionId, ?string $scope = null)
     {
         $cacheKey = CacheKey::get("USER_SESSIONS", $this->user->id);
         $sessions = (array)Cache::get($cacheKey, []);
+        if ($scope !== null && ($sessions[$sessionId]['scope'] ?? 'user') !== $scope) return false;
+        if (isset($sessions[$sessionId]['auth_data'])) Cache::forget($sessions[$sessionId]['auth_data']);
         unset($sessions[$sessionId]);
         if (!Cache::put(
             $cacheKey,
@@ -117,15 +115,17 @@ class AuthService
         return true;
     }
 
-    public function removeAllSession()
+    public function removeAllSession(?string $scope = null)
     {
         $cacheKey = CacheKey::get("USER_SESSIONS", $this->user->id);
         $sessions = (array)Cache::get($cacheKey, []);
         foreach ($sessions as $guid => $meta) {
+            if ($scope !== null && ($meta['scope'] ?? 'user') !== $scope) continue;
+            unset($sessions[$guid]);
             if (isset($meta['auth_data'])) {
                 Cache::forget($meta['auth_data']);
             }
         }
-        return Cache::forget($cacheKey);
+        return $sessions ? Cache::put($cacheKey, $sessions) : Cache::forget($cacheKey);
     }
 }

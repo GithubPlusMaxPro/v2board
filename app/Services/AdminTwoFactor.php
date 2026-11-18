@@ -33,28 +33,22 @@ class AdminTwoFactor
             : !(bool)($factor->required ?? true);
     }
 
-    public function login(Request $request, User $verified, ?callable $consumeQuickLink = null): array
+    public function login(Request $request, User $verified): array
     {
-        if (!$verified->is_admin && !$this->enabled($verified->id)) {
-            if ($consumeQuickLink) $consumeQuickLink();
-            return (new AuthService($verified))->generateAuthData($request);
-        }
+        abort_unless($verified->is_admin, 403, '请使用管理员账号登录后台。');
 
-        return DB::transaction(function () use ($request, $verified, $consumeQuickLink) {
+        return DB::transaction(function () use ($request, $verified) {
             $user = User::lockForUpdate()->find($verified->id);
-            abort_if(!$user || $user->banned || $user->password !== $verified->password, 422, '请重新登录。');
+            abort_if(!$user || !$user->is_admin || $user->banned || $user->password !== $verified->password, 422, '请重新登录。');
             $factor = $this->factor($user->id)->first();
             $proof = null;
             if (isset($factor->secret)) {
-                abort_if($consumeQuickLink, 422, '该账号已开启两步验证，请使用密码和验证码登录。');
                 $this->verify($user->id, $factor, $request->input('otp'));
                 $proof = hash('sha256', $factor->secret);
             } elseif ($user->is_admin && ($factor->required ?? true)) {
-                abort_if($consumeQuickLink, 422, '请先用密码登录并完成两步验证绑定。');
                 return ['two_factor_setup_required' => true] + $this->prepare($user, '', 'enrollment', $factor);
             }
-            if ($consumeQuickLink) $consumeQuickLink();
-            return (new AuthService($user))->generateAuthData($request, $proof);
+            return (new AuthService($user))->generateAuthData($request, $proof, 'admin');
         });
     }
 
@@ -140,7 +134,7 @@ class AdminTwoFactor
             'revision' => bin2hex(random_bytes(16)),
         ]);
         app(RateLimiter::class)->clear('admin-2fa:setup:' . $target->id);
-        (new AuthService($target))->removeAllSession();
+        (new AuthService($target))->removeAllSession('admin');
         return $codes;
     }
 
@@ -159,7 +153,7 @@ class AdminTwoFactor
         DB::table('v2_admin_two_factor')->updateOrInsert(['user_id' => $user->id], [
             'required' => $required, 'revision' => bin2hex(random_bytes(16)),
         ]);
-        if ($required && !$this->enabled($user->id)) (new AuthService($user))->removeAllSession();
+        if ($required && !$this->enabled($user->id)) (new AuthService($user))->removeAllSession('admin');
         return $this->status($user->id);
     }
 
@@ -169,7 +163,7 @@ class AdminTwoFactor
             'secret' => null, 'last_step' => null, 'recovery_hashes' => null, 'required' => $required,
             'revision' => bin2hex(random_bytes(16)),
         ]);
-        (new AuthService($user))->removeAllSession();
+        (new AuthService($user))->removeAllSession('admin');
         return ['enabled' => false, 'required' => $required];
     }
 

@@ -20,7 +20,7 @@ class Admin
         $authorization = $request->input('auth_data') ?? $request->header('authorization');
         if (!$authorization) abort(403, '未登录或登陆已过期');
 
-        $user = AuthService::decryptAuthData($authorization, true);
+        $user = AuthService::decryptAuthData($authorization, 'admin');
         if (!$user || !$user['is_admin']) abort(403, '未登录或登陆已过期');
         if (!AdminPermissionService::allowsAction($user, $request->route()->getActionName(), $request)) {
             return response()->json(['message' => '没有此操作权限', 'permission_denied' => true], 403);

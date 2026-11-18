@@ -59,7 +59,7 @@ class AccountActivity
         } finally {
             try {
                 if ($login) $user = $login->account ?? null;
-                $email = $user['email'] ?? ($scope === 'login' && $action === 'auth/login' ? $request->input('email') : null);
+                $email = $user['email'] ?? ($scope === 'login' && in_array($action, ['auth/login', 'auth/adminLogin'], true) ? $request->input('email') : null);
                 if (isset($configAudit->changes)) $details['changes'] = (object)$configAudit->changes;
                 if ($scope === 'admin' && $action === 'server/route/save') {
                     $route = $request->attributes->get('account_activity_route');

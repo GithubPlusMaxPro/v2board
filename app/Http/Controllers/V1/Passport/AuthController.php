@@ -139,6 +139,16 @@ class AuthController extends Controller
 
     public function login(AuthLogin $request, AdminTwoFactor $twoFactor)
     {
+        return $this->passwordLogin($request, $twoFactor, false);
+    }
+
+    public function adminLogin(AuthLogin $request, AdminTwoFactor $twoFactor)
+    {
+        return $this->passwordLogin($request, $twoFactor, true);
+    }
+
+    private function passwordLogin(AuthLogin $request, AdminTwoFactor $twoFactor, bool $admin)
+    {
         $email = $request->input('email');
         $password = $request->input('password');
 
@@ -175,8 +185,11 @@ class AuthController extends Controller
             abort(500, __('Your account has been suspended'));
         }
 
+        $data = $admin
+            ? $twoFactor->login($request, $user)
+            : (new AuthService($user))->generateAuthData($request);
         return response([
-            'data' => $twoFactor->login($request, $user)
+            'data' => $data
         ])->header('Cache-Control', 'private, no-store');
     }
 
@@ -192,7 +205,7 @@ class AuthController extends Controller
             ->header('Cache-Control', 'private, no-store');
     }
 
-    public function token2Login(Request $request, AdminTwoFactor $twoFactor)
+    public function token2Login(Request $request)
     {
         if ($request->input('token')) {
             $redirect = '/#/login?verify=' . $request->input('token') . '&redirect=' . ($request->input('redirect') ? $request->input('redirect') : 'dashboard');
@@ -217,10 +230,9 @@ class AuthController extends Controller
             if ($user->banned) {
                 abort(500, __('Your account has been suspended'));
             }
+            abort_unless(Cache::pull($key) === $userId, 422, __('Token error'));
             return response([
-                'data' => $twoFactor->login($request, $user, function () use ($key, $userId) {
-                    abort_unless(Cache::pull($key) === $userId, 422, __('Token error'));
-                })
+                'data' => (new AuthService($user))->generateAuthData($request)
             ])->header('Cache-Control', 'private, no-store');
         }
     }

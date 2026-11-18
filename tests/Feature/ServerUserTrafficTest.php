@@ -9,11 +9,9 @@ use App\Jobs\TrafficFetchJob;
 use App\Models\StatServerUser;
 use App\Models\User;
 use App\Services\AdminPermissionService;
-use App\Services\AuthService;
 use App\Services\UserService;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -63,7 +61,7 @@ class ServerUserTrafficTest extends TestCase
 
     private function authorize(User $user): void
     {
-        $this->withHeader('authorization', (new AuthService($user))->generateAuthData(Request::create('/'))['auth_data']);
+        $this->withHeader('authorization', $this->authToken($user));
     }
 
     private function job(array $data, int $id = 1, string $type = 'vmess', $rate = 1, $at = null): StatServerUserJob

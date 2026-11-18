@@ -6,7 +6,6 @@ use App\Models\User;
 use App\Services\AdminPermissionService;
 use App\Services\AuthService;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
@@ -50,7 +49,7 @@ class AdminPermissionTest extends TestCase
 
     private function token(User $user): string
     {
-        return (new AuthService($user))->generateAuthData(Request::create('/'))['auth_data'];
+        return $this->authToken($user);
     }
 
     private function updatePayload(User $user, array $changes = []): array

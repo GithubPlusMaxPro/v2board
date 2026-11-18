@@ -214,7 +214,7 @@
         async function fetchActivity(path, params) {
             const url = '/api/v1/' + window.settings.secure_path + '/accountActivity/' + path + '?' + new URLSearchParams(params);
             const response = await fetch(url, {
-                headers: { authorization: localStorage.getItem('authorization') || '', Accept: 'application/json' },
+                headers: { authorization: localStorage.getItem('admin_authorization') || '', Accept: 'application/json' },
                 signal: controller.signal
             });
             const result = await response.json();

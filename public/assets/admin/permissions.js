@@ -57,7 +57,7 @@
     async function request(path, body) {
         var response = await fetch('/api/v1/' + window.settings.secure_path + '/permission/' + path, {
             method: body ? 'POST' : 'GET',
-            headers: { authorization: localStorage.getItem('authorization') || '', 'Content-Type': 'application/json', Accept: 'application/json' },
+            headers: { authorization: localStorage.getItem('admin_authorization') || '', 'Content-Type': 'application/json', Accept: 'application/json' },
             body: body ? JSON.stringify(body) : undefined
         });
         var result = await response.json();

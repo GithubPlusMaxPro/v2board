@@ -32,7 +32,7 @@ class UserController extends Controller
         }
         $authService = new AuthService($user);
         return response([
-            'data' => $authService->getSessions()
+            'data' => $authService->getSessions($request->user['auth_scope'])
         ]);
     }
 
@@ -44,7 +44,7 @@ class UserController extends Controller
         }
         $authService = new AuthService($user);
         return response([
-            'data' => $authService->removeSession($request->input('session_id'))
+            'data' => $authService->removeSession($request->input('session_id'), $request->user['auth_scope'])
         ]);
     }
 
@@ -54,7 +54,7 @@ class UserController extends Controller
             'is_login' => $request->user['id'] ? true : false
         ];
         $user = User::select(['id', 'is_admin', 'banned', 'admin_permissions'])->find($request->user['id']);
-        if ($user && $user->is_admin && !$user->banned) {
+        if ($request->user['is_admin'] && $user && $user->is_admin && !$user->banned) {
             $data['is_admin'] = true;
             $data['admin_access'] = AdminPermissionService::access($user->toArray());
         }
@@ -294,7 +294,7 @@ class UserController extends Controller
         if (!$user) {
             abort(500, __('The user does not exist'));
         }
-        $user['admin_access'] = $user->is_admin && !$user->banned ? AdminPermissionService::access($user->toArray()) : null;
+        $user['admin_access'] = $request->user['is_admin'] && $user->is_admin && !$user->banned ? AdminPermissionService::access($user->toArray()) : null;
         unset($user['id'], $user['is_admin'], $user['admin_permissions']);
         $user['avatar_url'] = 'https://cravatar.cn/avatar/' . md5($user->email) . '?s=64&d=identicon';
         return response([

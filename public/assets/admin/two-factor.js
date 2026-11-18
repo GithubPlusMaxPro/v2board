@@ -16,7 +16,7 @@
         const response = await fetch(url, {
             method: data ? 'POST' : 'GET',
             headers: {
-                authorization: localStorage.getItem('authorization') || '',
+                authorization: localStorage.getItem('admin_authorization') || '',
                 Accept: 'application/json',
                 'Content-Type': 'application/json'
             },

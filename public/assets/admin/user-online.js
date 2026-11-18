@@ -14,7 +14,7 @@
     function time(value) { return new Date(value * 1000).toLocaleString('zh-CN', {hour12: false}); }
     async function request(action, filters, signal) {
         var response = await fetch('/api/v1/' + window.settings.secure_path + '/userOnline/' + action + '?' + new URLSearchParams(filters), {
-            headers: {authorization: localStorage.getItem('authorization') || '', Accept: 'application/json'}, signal: signal
+            headers: {authorization: localStorage.getItem('admin_authorization') || '', Accept: 'application/json'}, signal: signal
         });
         var result = await response.json();
         if (!response.ok) throw new Error(result.errors ? Object.values(result.errors)[0][0] : result.message || '查询失败，请重试');

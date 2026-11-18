@@ -126,7 +126,7 @@
         }
         async function requestTraffic(filters) {
             var response = await fetch('/api/v1/' + window.settings.secure_path + '/serverUserTraffic/fetch?' + new URLSearchParams(filters), {
-                headers: { authorization: localStorage.getItem('authorization') || '', Accept: 'application/json' },
+                headers: { authorization: localStorage.getItem('admin_authorization') || '', Accept: 'application/json' },
                 signal: controller.signal
             });
             var result = await response.json();

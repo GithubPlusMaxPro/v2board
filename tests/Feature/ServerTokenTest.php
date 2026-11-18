@@ -3,10 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use App\Services\AuthService;
 use App\Services\ServerService;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
@@ -84,7 +82,7 @@ class ServerTokenTest extends TestCase
     {
         $admin = User::create(['email' => 'admin@example.com', 'token' => 'session-token',
             'uuid' => 'admin-uuid', 'is_admin' => 1]);
-        $this->withHeader('authorization', (new AuthService($admin))->generateAuthData(Request::create('/'))['auth_data']);
+        $this->withHeader('authorization', $this->authToken($admin));
     }
 
     /** @dataProvider nodeTypes */

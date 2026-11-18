@@ -6,11 +6,9 @@ use App\Jobs\RecordUserOnlineJob;
 use App\Jobs\StatServerUserJob;
 use App\Models\User;
 use App\Models\UserOnlineLog;
-use App\Services\AuthService;
 use App\Services\UserOnlineService;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -59,7 +57,7 @@ class UserOnlineTest extends TestCase
 
     private function authorize(User $user): void
     {
-        $this->withHeader('authorization', (new AuthService($user))->generateAuthData(Request::create('/'))['auth_data']);
+        $this->withHeader('authorization', $this->authToken($user));
     }
 
     private function record(int $userId, array $ips, int $at, int $node = 1): RecordUserOnlineJob

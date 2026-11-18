@@ -32,6 +32,14 @@ class AuthService
             'ua' => $request->userAgent(),
             'auth_data' => $authData
         ]);
+        $activity = $request->attributes->get('account_activity_login');
+        if ($activity) {
+            $activity->account = [
+                'id' => $this->user->id,
+                'email' => $this->user->email,
+                'session_hash' => hash('sha256', $authData),
+            ];
+        }
         return [
             'token' => $this->user->token,
             'is_admin' => $this->user->is_admin,

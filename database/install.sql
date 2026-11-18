@@ -597,6 +597,27 @@ CREATE TABLE `v2_user` (
 
 -- 2025-09-12 10:05:00
 
+CREATE TABLE IF NOT EXISTS `v2_account_activity_log` (
+    `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` int DEFAULT NULL,
+    `email` varchar(254) DEFAULT NULL,
+    `session_hash` char(64) DEFAULT NULL,
+    `scope` varchar(10) NOT NULL,
+    `action` varchar(120) NOT NULL,
+    `method` varchar(10) NOT NULL,
+    `target_id` bigint unsigned DEFAULT NULL,
+    `ip` varchar(45) NOT NULL,
+    `user_agent` varchar(1024) NOT NULL,
+    `status_code` smallint unsigned NOT NULL,
+    `created_at` int unsigned NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `activity_log_email` (`email`, `id`),
+    KEY `activity_log_user` (`user_id`, `id`),
+    KEY `activity_log_session` (`session_hash`, `id`),
+    KEY `activity_log_scope` (`scope`, `id`),
+    KEY `activity_log_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS `v2_subscription_log` (
     `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
     `user_id` int(11) NOT NULL,

@@ -37,6 +37,7 @@
     }
     function canPage(path) {
         if (path === '/admin-access') return true;
+        if (path === '/account-activity') return !current || current.is_super_admin;
         if (path.indexOf('/ticket/') === 0) path = '/ticket';
         return !current || !!pages[path] && has(pages[path]);
     }

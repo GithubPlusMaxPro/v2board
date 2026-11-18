@@ -71,6 +71,7 @@ class Kernel extends HttpKernel
         'client' => \App\Http\Middleware\Client::class,
         'staff' => \App\Http\Middleware\Staff::class,
         'subscription.log' => \App\Http\Middleware\SubscriptionLog::class,
+        'account.activity' => \App\Http\Middleware\AccountActivity::class,
         'log' => \App\Http\Middleware\RequestLog::class
     ];
 

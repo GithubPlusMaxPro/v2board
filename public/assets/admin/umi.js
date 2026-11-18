@@ -21040,6 +21040,11 @@
                         href: "/subscription-log",
                         icon: o.a.createElement("i", {className: "nav-main-link-icon si si-docs"})
                     }, {
+                        title: "登录与操作记录",
+                        type: "item",
+                        href: "/account-activity",
+                        icon: o.a.createElement("i", {className: "nav-main-link-icon si si-list"})
+                    }, {
                         title: "节点用户日流量",
                         type: "item",
                         href: "/server-user-traffic",
@@ -21187,7 +21192,8 @@
                             o.a.createElement("span", {className: "nav-main-link-name"}, "管理员权限"))) : null;
                 }
                 if (e === "heading" && t === "管理员审查" && !window.AdminPermissions.has("user.subscribe_log") && !window.AdminPermissions.has("traffic.view") && !window.AdminPermissions.has("online.view")) return null;
-                if (e === "item" && !window.AdminPermissions.canPage(n)) return null;
+                if (e === "item" && (!window.AdminPermissions.canPage(n)
+                    || (n === "/account-activity" && !window.AdminPermissions.isSuper()))) return null;
                 switch (e) {
                 case "heading":
                     return o.a.createElement("li", {
@@ -82452,6 +82458,17 @@
                 componentWillUnmount() { if (this.dispose) this.dispose(); }
                 render() {
                     return i.a.createElement(n("Bl7J")["a"], Object.assign({}, this.props, {title: "节点用户日流量"}),
+                        i.a.createElement("div", {ref: node=>{this.container = node;}}));
+                }
+            }
+        }, {
+            path: "/account-activity",
+            exact: !0,
+            component: class extends i.a.Component {
+                componentDidMount() { this.dispose = window.AccountActivity.mount(this.container); }
+                componentWillUnmount() { if (this.dispose) this.dispose(); }
+                render() {
+                    return i.a.createElement(n("Bl7J")["a"], Object.assign({}, this.props, {title: "登录与操作记录"}),
                         i.a.createElement("div", {ref: node=>{this.container = node;}}));
                 }
             }

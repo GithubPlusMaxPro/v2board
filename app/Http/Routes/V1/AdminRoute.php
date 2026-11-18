@@ -9,7 +9,7 @@ class AdminRoute
     {
         $router->group([
             'prefix' => config('v2board.secure_path', config('v2board.frontend_admin_path', hash('crc32b', config('app.key')))),
-            'middleware' => ['admin', 'log'],
+            'middleware' => ['admin', 'log', 'account.activity:admin'],
         ], function ($router) {
             // Administrator permissions
             $router->get('/permission/current', 'V1\\Admin\\PermissionController@current');
@@ -174,6 +174,7 @@ class AdminRoute
             $router->post('/payment/show', 'V1\\Admin\\PaymentController@show');
             $router->post('/payment/sort', 'V1\\Admin\\PaymentController@sort');
             // System
+            $router->get('/accountActivity/fetch', 'V1\\Admin\\AccountActivityController@fetch');
             $router->get ('/system/getSystemStatus', 'V1\\Admin\\SystemController@getSystemStatus');
             $router->get ('/system/getQueueStats', 'V1\\Admin\\SystemController@getQueueStats');
             $router->get ('/system/getQueueWorkload', 'V1\\Admin\\SystemController@getQueueWorkload');

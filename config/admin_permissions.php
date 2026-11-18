@@ -55,6 +55,7 @@ return [
         'App\\Http\\Controllers\\V1\\Admin\\TwoFactorController@disable' => 'account.two_factor',
         // Login and operation history is available only to super admins.
         'App\\Http\\Controllers\\V1\\Admin\\AccountActivityController@fetch' => null,
+        'App\\Http\\Controllers\\V1\\Admin\\AccountActivityController@detail' => null,
         'App\Http\Controllers\V1\Admin\UserOnlineController@fetch' => 'online.view',
         'App\Http\Controllers\V1\Admin\UserOnlineController@summary' => 'online.view',
         'App\Http\Controllers\V1\Admin\UserOnlineController@history' => 'online.view',

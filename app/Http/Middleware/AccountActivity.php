@@ -20,7 +20,7 @@ class AccountActivity
         $action = explode('/', $request->route()->uri(), 4)[3];
         $request->attributes->set('account_activity_path', '/' . $action);
         $method = $request->method();
-        if ($method === 'HEAD' || $action === 'accountActivity/fetch'
+        if ($method === 'HEAD' || ($scope === 'admin' && strpos($action, 'accountActivity/') === 0)
             || ($scope === 'user' && $method === 'GET' && !in_array($action, self::USER_READS, true))
             || ($action === 'auth/token2Login' && (!$request->input('verify') || $request->input('token')))) {
             return $next($request);

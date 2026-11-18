@@ -181,6 +181,7 @@ class AdminRoute
             $router->post('/payment/sort', 'V1\\Admin\\PaymentController@sort');
             // System
             $router->get('/accountActivity/fetch', 'V1\\Admin\\AccountActivityController@fetch');
+            $router->get('/accountActivity/detail', 'V1\\Admin\\AccountActivityController@detail');
             $router->get ('/system/getSystemStatus', 'V1\\Admin\\SystemController@getSystemStatus');
             $router->get ('/system/getQueueStats', 'V1\\Admin\\SystemController@getQueueStats');
             $router->get ('/system/getQueueWorkload', 'V1\\Admin\\SystemController@getQueueWorkload');

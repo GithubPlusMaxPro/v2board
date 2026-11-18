@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/assets/admin/custom.css?v={{$version}}">
     <link rel="stylesheet" href="/assets/admin/permissions.css?v={{$version}}-modern-permissions-1">
     <link rel="stylesheet" href="/assets/admin/login.css?v={{$version}}-admin-2fa-1">
-    <link rel="stylesheet" href="/assets/admin/audit.css?v={{$version}}-modern-audit-1">
+    <link rel="stylesheet" href="/assets/admin/audit.css?v={{$version}}-historical-json-1">
     <link rel="stylesheet" href="/assets/admin/subscription-log.css?v={{$version}}-subscription-geo-3">
     <link rel="stylesheet" href="/assets/admin/server-user-traffic.css?v={{$version}}-node-users-2">
     <link rel="stylesheet" href="/assets/admin/user-online.css?v={{$version}}-user-list-2">
@@ -35,7 +35,7 @@
 <body>
 <div id="root"></div>
 <script src="/assets/admin/permissions.js?v={{$version}}-admin-2fa-1"></script>
-<script src="/assets/admin/account-activity.js?v={{$version}}-unified-logs-1"></script>
+<script src="/assets/admin/account-activity.js?v={{$version}}-historical-json-1"></script>
 <script src="/assets/admin/two-factor.js?v={{$version}}-admin-2fa-1"></script>
 <script src="/assets/admin/subscription-log.js?v={{$version}}-subscription-geo-3"></script>
 <script src="/assets/admin/server-user-traffic.js?v={{$version}}-node-users-2"></script>

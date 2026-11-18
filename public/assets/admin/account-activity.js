@@ -6,6 +6,17 @@
         login: { 'auth/login': '密码登录', 'auth/token2Login': '快捷登录', 'auth/twoFactor/enroll': '首次绑定两步验证' },
         admin: {
             'config/save': '修改系统配置',
+            'config/setTelegramWebhook': '设置 Telegram 回调',
+            'config/testSendMail': '发送测试邮件',
+            'order/paid': '手动确认订单付款',
+            'payment/getPaymentForm': '查看支付配置表单',
+            'theme/getThemeConfig': '查看主题配置',
+            'theme/saveThemeConfig': '保存主题配置',
+            'twoFactor/begin': '开始绑定两步验证',
+            'user/allDel': '批量删除用户',
+            'user/generate': '批量创建用户',
+            'user/sendMail': '给用户发送邮件',
+            'user/setInviteUser': '设置邀请人',
             'order/assign': '分配订单',
             'order/update': '修改订单',
             'payment/save': '保存支付配置',
@@ -32,6 +43,33 @@
             update: '修改账号设置'
         }
     };
+
+    const resources = {
+        plan: '套餐', order: '订单', notice: '公告', ticket: '工单', coupon: '优惠券',
+        giftcard: '礼品卡', knowledge: '知识库文章', payment: '支付方式',
+        'server/group': '节点权限组', 'server/route': '节点路由', 'server/manage': '节点',
+        'server/anytls': 'AnyTLS 节点', 'server/hysteria': 'Hysteria 节点', 'server/shadowsocks': 'Shadowsocks 节点',
+        'server/trojan': 'Trojan 节点', 'server/tuic': 'TUIC 节点', 'server/vless': 'VLESS 节点',
+        'server/vmess': 'VMess 节点', 'server/v2node': 'V2Node 节点'
+    };
+    const verbs = {
+        save: '保存', drop: '删除', update: '修改', sort: '调整排序',
+        copy: '复制', fetch: '查看', generate: '生成', show: '切换显示状态',
+        detail: '查看详情', cancel: '取消', reply: '回复', close: '关闭'
+    };
+
+    function operationName(item) {
+        const scope = item.scope === 'legacy' ? 'admin' : item.scope;
+        const names = actionLabels[scope] || {};
+        if (names[item.action]) return names[item.action];
+        if (scope === 'admin') {
+            const lastSlash = item.action.lastIndexOf('/');
+            const resource = resources[item.action.slice(0, lastSlash)];
+            const verb = verbs[item.action.slice(lastSlash + 1)];
+            if (verb && resource) return verb + ' ' + resource;
+        }
+        return scopeLabels[item.scope];
+    }
 
     function element(tag, text, parent) {
         const node = document.createElement(tag);
@@ -145,12 +183,12 @@
             const account = element('td', item.email || '—', row);
             if (item.user_id) element('small', 'ID ' + item.user_id, account);
             const operation = element('td', '', row);
-            const labels = actionLabels[item.scope] || {};
-            const label = labels[item.action] || scopeLabels[item.scope];
+            const label = operationName(item);
             const result = item.scope === 'login' ? (item.user_id ? '成功' : item.status_code >= 400 ? '失败' : '未完成') : '';
             element('strong', label + result, operation);
             element('small', item.method + ' /' + item.action, operation);
             if (item.target_id) element('small', '目标 ID ' + item.target_id, operation);
+            if (item.scope === 'legacy') showDetails(operation, item.id);
             element('td', item.ip || '—', row).className = 'audit-ip';
             element('td', item.user_agent || '—', row);
             const response = element('td', item.status_code === null ? '—' : '', row);
@@ -173,20 +211,49 @@
             }
         }
 
+        async function fetchActivity(path, params) {
+            const url = '/api/v1/' + window.settings.secure_path + '/accountActivity/' + path + '?' + new URLSearchParams(params);
+            const response = await fetch(url, {
+                headers: { authorization: localStorage.getItem('authorization') || '', Accept: 'application/json' },
+                signal: controller.signal
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message || '读取记录失败');
+            return result;
+        }
+
+        function showDetails(parent, id) {
+            const disclosure = element('details', '', parent);
+            disclosure.className = 'audit-json-details';
+            element('summary', '查看 JSON', disclosure);
+            const output = element('pre', '', disclosure);
+            let loading = false;
+            let loaded = false;
+            disclosure.addEventListener('toggle', async function () {
+                if (!disclosure.open || loading || loaded) return;
+                loading = true;
+                output.textContent = '正在加载…';
+                try {
+                    const record = await fetchActivity('detail', { id: id });
+                    if (controller.signal.aborted) return;
+                    const hasFields = Object.keys(record.data).length || Object.keys(record.context).length;
+                    output.textContent = hasFields ? JSON.stringify(record, null, 2) : '这条记录没有可展示的 JSON 字段';
+                    loaded = true;
+                } catch (error) {
+                    if (!controller.signal.aborted) output.textContent = '读取失败，收起后重新展开可重试';
+                } finally {
+                    loading = false;
+                }
+            });
+        }
+
         async function load(targetPage) {
             if (busy) return;
             busy = true;
             updateControls();
             status.textContent = '正在加载…';
             try {
-                const query = new URLSearchParams(Object.assign({ current: targetPage, page_size: pageSize }, filters));
-                const url = '/api/v1/' + window.settings.secure_path + '/accountActivity/fetch?' + query;
-                const response = await fetch(url, {
-                    headers: { authorization: localStorage.getItem('authorization') || '', Accept: 'application/json' },
-                    signal: controller.signal
-                });
-                const result = await response.json();
-                if (!response.ok) throw new Error(result.message || '读取记录失败');
+                const result = await fetchActivity('fetch', Object.assign({ current: targetPage, page_size: pageSize }, filters));
                 if (controller.signal.aborted) return;
                 page = result.current;
                 total = result.total;

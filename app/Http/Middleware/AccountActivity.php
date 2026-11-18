@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\AccountActivityLog;
+use App\Models\Log as LogModel;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -18,6 +18,7 @@ class AccountActivity
     public function handle(Request $request, Closure $next, string $scope)
     {
         $action = explode('/', $request->route()->uri(), 4)[3];
+        $request->attributes->set('account_activity_path', '/' . $action);
         $method = $request->method();
         if ($method === 'HEAD' || $action === 'accountActivity/fetch'
             || ($scope === 'user' && $method === 'GET' && !in_array($action, self::USER_READS, true))
@@ -48,7 +49,11 @@ class AccountActivity
             try {
                 if ($login) $user = $login->account ?? null;
                 $email = $user['email'] ?? ($scope === 'login' && $action === 'auth/login' ? $request->input('email') : null);
-                AccountActivityLog::create([
+                LogModel::create([
+                    'title' => $method . ' /' . $action,
+                    'uri' => '/' . $action,
+                    'level' => 'INFO',
+                    'updated_at' => $createdAt,
                     'user_id' => $user['id'] ?? null,
                     'email' => is_string($email) && strlen($email) <= 254 && filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : null,
                     'session_hash' => $scope === 'login' ? ($user['session_hash'] ?? null)

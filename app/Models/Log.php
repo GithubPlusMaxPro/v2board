@@ -12,6 +12,9 @@ class Log extends Model
     protected $guarded = ['id'];
     protected $casts = [
         'created_at' => 'timestamp',
-        'updated_at' => 'timestamp'
+        'updated_at' => 'timestamp',
+        'user_id' => 'integer',
+        'target_id' => 'integer',
+        'status_code' => 'integer',
     ];
 }

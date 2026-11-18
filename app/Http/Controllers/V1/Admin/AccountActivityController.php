@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\V1\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\AccountActivityLog;
+use App\Models\Log;
 use Illuminate\Http\Request;
 
 class AccountActivityController extends Controller
@@ -15,7 +15,7 @@ class AccountActivityController extends Controller
             'page_size' => 'sometimes|integer|min:1|max:100',
             'user_id' => 'sometimes|integer|min:1',
             'email' => 'sometimes|email|max:254',
-            'scope' => 'sometimes|in:login,admin,user',
+            'scope' => 'sometimes|in:login,admin,user,legacy',
             'ip' => 'sometimes|ip',
             'session_hash' => 'sometimes|regex:/^[a-f0-9]{64}$/D',
             'start_at' => 'sometimes|integer|min:0',
@@ -25,7 +25,10 @@ class AccountActivityController extends Controller
             abort(422, '结束时间不能早于开始时间');
         }
 
-        $query = AccountActivityLog::query();
+        $query = Log::whereNotNull('scope')->select([
+            'id', 'user_id', 'email', 'session_hash', 'scope', 'action', 'method',
+            'target_id', 'ip', 'user_agent', 'status_code', 'created_at',
+        ]);
         foreach (['user_id', 'email', 'scope', 'ip', 'session_hash'] as $field) {
             if (isset($params[$field])) $query->where($field, $params[$field]);
         }
@@ -36,7 +39,7 @@ class AccountActivityController extends Controller
         $pageSize = (int)($params['page_size'] ?? 20);
         return response([
             'total' => $query->count(),
-            'data' => $query->orderByDesc('id')->forPage($current, $pageSize)->get(),
+            'data' => $query->orderByDesc('created_at')->orderByDesc('id')->forPage($current, $pageSize)->get(),
             'current' => $current,
             'page_size' => $pageSize,
         ])->header('Cache-Control', 'private, no-store');

@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    const scopeLabels = { login: '登录', admin: '后台操作', user: '用户操作' };
+    const scopeLabels = { login: '登录', admin: '后台操作', user: '用户操作', legacy: '历史路径' };
     const actionLabels = {
         login: { 'auth/login': '密码登录', 'auth/token2Login': '快捷登录', 'auth/twoFactor/enroll': '首次绑定两步验证' },
         admin: {
@@ -145,16 +145,20 @@
             const account = element('td', item.email || '—', row);
             if (item.user_id) element('small', 'ID ' + item.user_id, account);
             const operation = element('td', '', row);
-            const label = actionLabels[item.scope][item.action] || scopeLabels[item.scope];
+            const labels = actionLabels[item.scope] || {};
+            const label = labels[item.action] || scopeLabels[item.scope];
             const result = item.scope === 'login' ? (item.user_id ? '成功' : item.status_code >= 400 ? '失败' : '未完成') : '';
             element('strong', label + result, operation);
             element('small', item.method + ' /' + item.action, operation);
             if (item.target_id) element('small', '目标 ID ' + item.target_id, operation);
             element('td', item.ip || '—', row).className = 'audit-ip';
             element('td', item.user_agent || '—', row);
-            const code = element('span', String(item.status_code), element('td', '', row));
-            code.className = 'audit-chip ' + (item.status_code >= 400 ? 'audit-chip-red'
-                : item.status_code < 300 ? 'audit-chip-green' : 'audit-chip-blue');
+            const response = element('td', item.status_code === null ? '—' : '', row);
+            if (item.status_code !== null) {
+                const code = element('span', String(item.status_code), response);
+                code.className = 'audit-chip ' + (item.status_code >= 400 ? 'audit-chip-red'
+                    : item.status_code < 300 ? 'audit-chip-green' : 'audit-chip-blue');
+            }
             const session = element('td', item.session_hash ? '' : '—', row);
             if (item.session_hash) {
                 const filter = element('button', item.session_hash.slice(0, 12), session);

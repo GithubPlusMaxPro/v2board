@@ -1,7 +1,6 @@
 <?php
 namespace App\Logging;
 
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Logger;
@@ -16,29 +15,34 @@ class MysqlLoggerHandler extends AbstractProcessingHandler
 
     protected function write(array $record): void
     {
-        try{
-            if(isset($record['context']['exception']) && is_object($record['context']['exception'])){
-                $record['context']['exception'] = (array)$record['context']['exception'];
+        $request = request();
+        $activityPath = $request->attributes->get('account_activity_path');
+        try {
+            $context = $record['context'] ?? [];
+            $title = $record['message'];
+            if (isset($context['exception']) && is_object($context['exception'])) {
+                if ($activityPath) {
+                    $title = get_class($context['exception']);
+                    $context = [];
+                } else {
+                    $context['exception'] = (array)$context['exception'];
+                }
             }
-            $record['request_data'] = request()->all() ??[];
-            $log = [
-                'title' => $record['message'],
-                'level' => $record['level_name'],
-                'host' => $record['request_host'] ?? request()->getSchemeAndHttpHost(),
-                'uri' => $record['request_uri'] ?? request()->getRequestUri(),
-                'method' => $record['request_method'] ?? request()->getMethod(),
-                'ip' => request()->getClientIp(),
-                'data' => json_encode($record['request_data']) ,
-                'context' => isset($record['context']) ? json_encode($record['context']) : '',
-                'created_at' => strtotime($record['datetime']),
-                'updated_at' => strtotime($record['datetime']),
-            ];
 
-            LogModel::insert(
-                $log
-            );
-        }catch (\Exception $e){
-            Log::channel('daily')->error($e->getMessage().$e->getFile().$e->getTraceAsString());
+            LogModel::insert([
+                'title' => $title,
+                'level' => $record['level_name'],
+                'host' => $record['request_host'] ?? $request->getSchemeAndHttpHost(),
+                'uri' => $activityPath ?? $record['request_uri'] ?? $request->getRequestUri(),
+                'method' => $record['request_method'] ?? $request->getMethod(),
+                'ip' => $request->getClientIp(),
+                'data' => $activityPath ? null : json_encode($request->all()),
+                'context' => json_encode($context),
+                'created_at' => $record['datetime']->getTimestamp(),
+                'updated_at' => $record['datetime']->getTimestamp(),
+            ]);
+        } catch (\Exception $e) {
+            Log::channel('daily')->error('Could not save system log', ['exception_class' => get_class($e)]);
         }
     }
 }

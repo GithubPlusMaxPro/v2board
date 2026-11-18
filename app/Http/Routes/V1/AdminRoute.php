@@ -9,7 +9,7 @@ class AdminRoute
     {
         $router->group([
             'prefix' => config('v2board.secure_path', config('v2board.frontend_admin_path', hash('crc32b', config('app.key')))),
-            'middleware' => ['admin', 'log', 'account.activity:admin'],
+            'middleware' => ['admin', 'account.activity:admin'],
         ], function ($router) {
             // Administrator permissions
             $router->get('/permission/current', 'V1\\Admin\\PermissionController@current');

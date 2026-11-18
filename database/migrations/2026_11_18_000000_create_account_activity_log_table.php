@@ -8,7 +8,7 @@ class CreateAccountActivityLogTable extends Migration
 {
     public function up()
     {
-        if (Schema::hasTable('v2_account_activity_log')) return;
+        if (Schema::hasTable('v2_account_activity_log') || Schema::hasColumn('v2_log', 'scope')) return;
         Schema::create('v2_account_activity_log', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->integer('user_id')->nullable();

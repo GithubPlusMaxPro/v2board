@@ -57,6 +57,11 @@ class V2boardUpdate extends Command
             } catch (\Exception $e) {
             }
         }
+        if ($this->call('migrate', [
+            '--path' => 'database/migrations/2026_11_18_000002_unify_account_activity_logs.php',
+            '--force' => true,
+        ]) !== 0) return 1;
+
         \Artisan::call('horizon:terminate');
         $this->info('更新完毕，队列服务已重启，你无需进行任何操作。');
     }

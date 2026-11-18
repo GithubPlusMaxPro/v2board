@@ -100,7 +100,7 @@ CREATE TABLE `v2_knowledge` (
 
 
 DROP TABLE IF EXISTS `v2_log`;
-CREATE TABLE `v2_log` (
+CREATE TABLE IF NOT EXISTS `v2_log` (
                           `id` int(11) NOT NULL AUTO_INCREMENT,
                           `title` text NOT NULL,
                           `level` varchar(11) DEFAULT NULL,
@@ -112,7 +112,21 @@ CREATE TABLE `v2_log` (
                           `context` text,
                           `created_at` int(11) NOT NULL,
                           `updated_at` int(11) NOT NULL,
-                          PRIMARY KEY (`id`)
+                          `source_activity_id` bigint unsigned DEFAULT NULL,
+                          `user_id` int DEFAULT NULL,
+                          `email` varchar(254) DEFAULT NULL,
+                          `session_hash` char(64) DEFAULT NULL,
+                          `scope` varchar(10) DEFAULT NULL,
+                          `action` varchar(120) DEFAULT NULL,
+                          `target_id` bigint unsigned DEFAULT NULL,
+                          `user_agent` varchar(1024) DEFAULT NULL,
+                          `status_code` smallint unsigned DEFAULT NULL,
+                          PRIMARY KEY (`id`),
+                          UNIQUE KEY `log_source_activity` (`source_activity_id`),
+                          KEY `log_scope_time` (`scope`, `created_at`, `id`),
+                          KEY `log_session_time` (`session_hash`, `created_at`, `id`),
+                          KEY `log_user_time` (`user_id`, `created_at`, `id`),
+                          KEY `log_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -607,27 +621,6 @@ CREATE TABLE IF NOT EXISTS `v2_admin_two_factor` (
     `revision` char(32) NOT NULL,
     PRIMARY KEY (`user_id`),
     CONSTRAINT `v2_admin_two_factor_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `v2_user` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE IF NOT EXISTS `v2_account_activity_log` (
-    `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-    `user_id` int DEFAULT NULL,
-    `email` varchar(254) DEFAULT NULL,
-    `session_hash` char(64) DEFAULT NULL,
-    `scope` varchar(10) NOT NULL,
-    `action` varchar(120) NOT NULL,
-    `method` varchar(10) NOT NULL,
-    `target_id` bigint unsigned DEFAULT NULL,
-    `ip` varchar(45) NOT NULL,
-    `user_agent` varchar(1024) NOT NULL,
-    `status_code` smallint unsigned NOT NULL,
-    `created_at` int unsigned NOT NULL,
-    PRIMARY KEY (`id`),
-    KEY `activity_log_email` (`email`, `id`),
-    KEY `activity_log_user` (`user_id`, `id`),
-    KEY `activity_log_session` (`session_hash`, `id`),
-    KEY `activity_log_scope` (`scope`, `id`),
-    KEY `activity_log_created` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `v2_subscription_log` (

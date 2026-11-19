@@ -36,7 +36,7 @@ class Loon
                 $uri .= self::buildVless($user['uuid'], $item);
             }elseif ($item['type'] === 'trojan' && (($item['network'] ?? null) !== 'grpc')) {
                 $uri .= self::buildTrojan($user['uuid'], $item);
-            }elseif ($item['type'] === 'hysteria' && $item['version'] === 2) { //loon只支持hysteria2
+            }elseif ($item['type'] === 'hysteria2' || ($item['type'] === 'hysteria' && $item['version'] === 2)) {
                 $uri .= self::buildHysteria($user['uuid'], $item);
             }elseif ($item['type'] === 'anytls') {
                 $uri .= self::buildAnytls($user['uuid'], $item);
@@ -242,22 +242,38 @@ class Loon
             $firstPort = $firstPart;
         }
 
+        $isV2node = ($server['type'] ?? null) === 'hysteria2';
+        $tlsSettings = $isV2node ? ($server['tls_settings'] ?? []) : [];
+        $sni = $tlsSettings['server_name'] ?? $server['server_name'] ?? '';
+        $insecure = $tlsSettings['allow_insecure'] ?? $server['insecure'] ?? 0;
+        $bandwidth = $server['up_mbps'] ?? null;
+
         $config = [
             "{$server['name']}=hysteria2",
-            "{$server['host']}",
-            "{$firstPort}",
-            "password={$password}",
-            "download-bandwidth={$server['up_mbps']}",
-            $server['server_name'] ? "sni={$server['server_name']}" : "",
-            'udp=true'
+            $server['host'],
+            $firstPort,
+            $isV2node ? '"' . $password . '"' : "password={$password}",
         ];
-        if (!empty($server['insecure'])) {
-            array_push($config, $server['insecure'] ? 'skip-cert-verify=true' : 'skip-cert-verify=false');
+        if (!$isV2node || ($bandwidth !== null && $bandwidth !== '')) {
+            $config[] = "download-bandwidth={$bandwidth}";
         }
-        if (isset($server['obfs'])){
-            array_push($config, 'salamander-password=' . $server['obfs_password']);
+        if ($sni) {
+            $config[] = "sni={$sni}";
         }
-        $config = array_filter($config);
+        $config[] = 'udp=true';
+        if (!empty($insecure)) {
+            $config[] = 'skip-cert-verify=true';
+        }
+        if (!empty($tlsSettings['pinned_peer_cert_sha256'])) {
+            $config[] = "tls-cert-sha256={$tlsSettings['pinned_peer_cert_sha256']}";
+        }
+        if (isset($server['obfs'], $server['obfs_password'])) {
+            $obfsPassword = $server['obfs_password'];
+            if ($isV2node) {
+                $obfsPassword = '"' . addcslashes($obfsPassword, "\\\"") . '"';
+            }
+            $config[] = "salamander-password={$obfsPassword}";
+        }
         $uri = implode(',', $config);
         $uri .= "\r\n";
         return $uri;

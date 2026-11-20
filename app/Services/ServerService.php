@@ -241,10 +241,15 @@ class ServerService
         $tmp = array_column($servers, 'sort');
         array_multisort($tmp, SORT_ASC, $servers);
         return array_map(function ($server) {
-            if (strpos($server['port'], '-')) {
-                $server['mport'] = (string)$server['port'];
-            } else {
-                $server['port'] = (int)$server['port'];
+            $port = (string)$server['port'];
+            $hasPortRange = strpos($port, '-') !== false;
+            $isV2nodeHysteria2 = $server['type'] === 'v2node' && ($server['protocol'] ?? null) === 'hysteria2';
+
+            if ($hasPortRange || ($isV2nodeHysteria2 && strpbrk($port, ',:') !== false)) {
+                $server['mport'] = $port;
+            }
+            if (!$hasPortRange) {
+                $server['port'] = (int)$port;
             }
             $server['is_online'] = (time() - 300 > $server['last_check_at']) ? 0 : 1;
             $server['cache_key'] = "{$server['type']}-{$server['id']}-{$server['updated_at']}-{$server['is_online']}";

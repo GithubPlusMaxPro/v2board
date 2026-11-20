@@ -232,15 +232,8 @@ class Loon
     
     public static function buildHysteria($password, $server)
     {
-
-        $parts = explode(",",$server['port']);
-        $firstPart = $parts[0];
-        if (strpos($firstPart, '-') !== false) {
-            $range = explode('-', $firstPart);
-            $firstPort = $range[0];
-        } else {
-            $firstPort = $firstPart;
-        }
+        $ports = str_replace('-', ':', (string)($server['mport'] ?? $server['port']));
+        $firstPort = preg_split('/[:,]/', $ports, 2)[0];
 
         $isV2node = ($server['type'] ?? null) === 'hysteria2';
         $tlsSettings = $isV2node ? ($server['tls_settings'] ?? []) : [];
@@ -266,6 +259,10 @@ class Loon
         }
         if (!empty($tlsSettings['pinned_peer_cert_sha256'])) {
             $config[] = "tls-cert-sha256={$tlsSettings['pinned_peer_cert_sha256']}";
+        }
+        if ($isV2node && strpbrk($ports, ':,') !== false) {
+            $config[] = 'server-ports="' . $ports . '"';
+            $config[] = 'hop-interval=30';
         }
         if (isset($server['obfs'], $server['obfs_password'])) {
             $obfsPassword = $server['obfs_password'];

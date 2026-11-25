@@ -45,7 +45,7 @@ dns:
 proxies: []
 
 proxy-groups:
-  - { name: "$app_name", type: select, proxies: ["自动选择", "故障转移", "美国节点", "荷兰节点"] }
+  - { name: "$app_name", type: select, proxies: ["自动选择", "故障转移"] }
   - { name: "自动选择", type: url-test, proxies: [], url: "http://www.gstatic.com/generate_204", interval: 86400 }
   - { name: "故障转移", type: fallback, proxies: [], url: "http://www.gstatic.com/generate_204", interval: 7200 }
   - { name: "YouTube", type: select, proxies: ["$app_name", "美国节点", "荷兰节点", "自动选择"] }
@@ -53,8 +53,8 @@ proxy-groups:
   - { name: "Apple", type: select, proxies: ["$app_name", "DIRECT", "美国节点"] }
   - { name: "Emby", type: select, proxies: ["$app_name", "DIRECT", "自动选择"] }
   - { name: "游戏代理", type: select, proxies: ["$app_name", "DIRECT", "自动选择"] }
-  - { name: "美国节点", type: select, proxies: ["/(美|US|United States)/i", "$app_name"] }
-  - { name: "荷兰节点", type: select, proxies: ["/(荷|NL|Netherlands)/i", "$app_name"] }
+  - { name: "美国节点", type: select, proxies: ["/(美|US|United States)/i", "自动选择"] }
+  - { name: "荷兰节点", type: select, proxies: ["/(荷|NL|Netherlands)/i", "自动选择"] }
 
 rules:
   # 游戏直连 (DirectGame)

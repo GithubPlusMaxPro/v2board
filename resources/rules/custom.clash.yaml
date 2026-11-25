@@ -53,54 +53,57 @@ proxy-groups:
   - { name: "Apple", type: select, proxies: ["$app_name", "DIRECT", "美国节点"] }
   - { name: "Emby", type: select, proxies: ["$app_name", "DIRECT", "自动选择"] }
   - { name: "游戏代理", type: select, proxies: ["$app_name", "DIRECT", "自动选择"] }
+  - { name: "游戏直连", type: select, proxies: ["DIRECT", "$app_name"] }
+  - { name: "CN服务", type: select, proxies: ["DIRECT", "$app_name"] }
+  - { name: "CN", type: select, proxies: ["DIRECT", "$app_name"] }
   - { name: "美国节点", type: select, proxies: ["/(美|US|United States)/i", "自动选择"] }
   - { name: "荷兰节点", type: select, proxies: ["/(荷|NL|Netherlands)/i", "自动选择"] }
 
 rules:
   # 游戏直连 (DirectGame)
-  - DOMAIN-SUFFIX,cm.steampowered.com,DIRECT
-  - DOMAIN-SUFFIX,steamserver.net,DIRECT
-  - DOMAIN-SUFFIX,steampipe.steamcontent.tnkjmec.com,DIRECT
-  - DOMAIN-SUFFIX,st.dl.eccdnx.com,DIRECT
-  - DOMAIN-SUFFIX,st.dl.bscstorage.net,DIRECT
-  - DOMAIN-SUFFIX,st.dl.pinyuncloud.com,DIRECT
-  - DOMAIN-SUFFIX,dl.steam.clngaa.com,DIRECT
-  - DOMAIN-SUFFIX,cdn.mileweb.cs.steampowered.com.8686c.com,DIRECT
-  - DOMAIN-SUFFIX,cdn-ws.content.steamchina.com,DIRECT
-  - DOMAIN-SUFFIX,cdn-qc.content.steamchina.com,DIRECT
-  - DOMAIN-SUFFIX,cdn-ali.content.steamchina.com,DIRECT
-  - DOMAIN-SUFFIX,xz.pphimalayanrt.com,DIRECT
-  - DOMAIN-SUFFIX,lv.queniujq.cn,DIRECT
-  - DOMAIN-SUFFIX,alibaba.cdn.steampipe.steamcontent.com,DIRECT
-  - GEOSITE,category-games@cn,DIRECT
-  - IP-CIDR,45.121.184.0/24,DIRECT,no-resolve
-  - IP-CIDR,103.10.124.0/23,DIRECT,no-resolve
-  - IP-CIDR,103.28.54.0/24,DIRECT,no-resolve
-  - IP-CIDR,146.66.152.0/24,DIRECT,no-resolve
-  - IP-CIDR,146.66.155.0/24,DIRECT,no-resolve
-  - IP-CIDR,153.254.86.0/24,DIRECT,no-resolve
-  - IP-CIDR,155.133.224.0/22,DIRECT,no-resolve
-  - IP-CIDR,155.133.230.0/24,DIRECT,no-resolve
-  - IP-CIDR,155.133.232.0/23,DIRECT,no-resolve
-  - IP-CIDR,155.133.234.0/24,DIRECT,no-resolve
-  - IP-CIDR,155.133.236.0/22,DIRECT,no-resolve
-  - IP-CIDR,155.133.240.0/23,DIRECT,no-resolve
-  - IP-CIDR,155.133.244.0/23,DIRECT,no-resolve
-  - IP-CIDR,155.133.246.0/24,DIRECT,no-resolve
-  - IP-CIDR,155.133.248.0/21,DIRECT,no-resolve
-  - IP-CIDR,162.254.192.0/21,DIRECT,no-resolve
-  - IP-CIDR,185.25.182.0/23,DIRECT,no-resolve
-  - IP-CIDR,190.217.32.0/22,DIRECT,no-resolve
-  - IP-CIDR,192.69.96.0/22,DIRECT,no-resolve
-  - IP-CIDR,205.196.6.0/24,DIRECT,no-resolve
-  - IP-CIDR,208.64.200.0/22,DIRECT,no-resolve
-  - IP-CIDR,208.78.164.0/22,DIRECT,no-resolve
-  - IP-CIDR,205.185.194.0/24,DIRECT,no-resolve
+  - DOMAIN-SUFFIX,cm.steampowered.com,游戏直连
+  - DOMAIN-SUFFIX,steamserver.net,游戏直连
+  - DOMAIN-SUFFIX,steampipe.steamcontent.tnkjmec.com,游戏直连
+  - DOMAIN-SUFFIX,st.dl.eccdnx.com,游戏直连
+  - DOMAIN-SUFFIX,st.dl.bscstorage.net,游戏直连
+  - DOMAIN-SUFFIX,st.dl.pinyuncloud.com,游戏直连
+  - DOMAIN-SUFFIX,dl.steam.clngaa.com,游戏直连
+  - DOMAIN-SUFFIX,cdn.mileweb.cs.steampowered.com.8686c.com,游戏直连
+  - DOMAIN-SUFFIX,cdn-ws.content.steamchina.com,游戏直连
+  - DOMAIN-SUFFIX,cdn-qc.content.steamchina.com,游戏直连
+  - DOMAIN-SUFFIX,cdn-ali.content.steamchina.com,游戏直连
+  - DOMAIN-SUFFIX,xz.pphimalayanrt.com,游戏直连
+  - DOMAIN-SUFFIX,lv.queniujq.cn,游戏直连
+  - DOMAIN-SUFFIX,alibaba.cdn.steampipe.steamcontent.com,游戏直连
+  - GEOSITE,category-games@cn,游戏直连
+  - IP-CIDR,45.121.184.0/24,游戏直连,no-resolve
+  - IP-CIDR,103.10.124.0/23,游戏直连,no-resolve
+  - IP-CIDR,103.28.54.0/24,游戏直连,no-resolve
+  - IP-CIDR,146.66.152.0/24,游戏直连,no-resolve
+  - IP-CIDR,146.66.155.0/24,游戏直连,no-resolve
+  - IP-CIDR,153.254.86.0/24,游戏直连,no-resolve
+  - IP-CIDR,155.133.224.0/22,游戏直连,no-resolve
+  - IP-CIDR,155.133.230.0/24,游戏直连,no-resolve
+  - IP-CIDR,155.133.232.0/23,游戏直连,no-resolve
+  - IP-CIDR,155.133.234.0/24,游戏直连,no-resolve
+  - IP-CIDR,155.133.236.0/22,游戏直连,no-resolve
+  - IP-CIDR,155.133.240.0/23,游戏直连,no-resolve
+  - IP-CIDR,155.133.244.0/23,游戏直连,no-resolve
+  - IP-CIDR,155.133.246.0/24,游戏直连,no-resolve
+  - IP-CIDR,155.133.248.0/21,游戏直连,no-resolve
+  - IP-CIDR,162.254.192.0/21,游戏直连,no-resolve
+  - IP-CIDR,185.25.182.0/23,游戏直连,no-resolve
+  - IP-CIDR,190.217.32.0/22,游戏直连,no-resolve
+  - IP-CIDR,192.69.96.0/22,游戏直连,no-resolve
+  - IP-CIDR,205.196.6.0/24,游戏直连,no-resolve
+  - IP-CIDR,208.64.200.0/22,游戏直连,no-resolve
+  - IP-CIDR,208.78.164.0/22,游戏直连,no-resolve
+  - IP-CIDR,205.185.194.0/24,游戏直连,no-resolve
 
   # CN 服务直连 (cn_proxy)
-  - GEOSITE,apple-cn,DIRECT
-  - GEOSITE,apple@cn,DIRECT
-  - GEOSITE,google-cn,DIRECT
+  - GEOSITE,apple-cn,CN服务
+  - GEOSITE,apple@cn,CN服务
+  - GEOSITE,google-cn,CN服务
 
   # 屏蔽 QUIC (UDP 443)
   - AND,((NETWORK,UDP),(DST-PORT,443)),REJECT
@@ -187,8 +190,8 @@ rules:
   - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
   - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
   - IP-CIDR,100.64.0.0/10,DIRECT,no-resolve
-  - GEOSITE,cn,DIRECT
-  - GEOIP,CN,DIRECT
+  - GEOSITE,cn,CN
+  - GEOIP,CN,CN
 
   # 海外兜底代理
   - IP-CIDR,149.154.160.0/20,$app_name,no-resolve

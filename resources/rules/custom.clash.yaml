@@ -45,144 +45,144 @@ dns:
 proxies: []
 
 proxy-groups:
-  - { name: "$app_name", type: select, proxies: ["自动选择", "故障转移"] }
-  - { name: "自动选择", type: url-test, proxies: [], url: "http://www.gstatic.com/generate_204", interval: 86400 }
-  - { name: "故障转移", type: fallback, proxies: [], url: "http://www.gstatic.com/generate_204", interval: 7200 }
-  - { name: "游戏直连", type: select, proxies: ["DIRECT", "$app_name"] }
-  - { name: "CN", type: select, proxies: ["DIRECT", "$app_name"] }
-  - { name: "苹果谷歌直连", type: select, proxies: ["DIRECT", "$app_name"] }
-  - { name: "YouTube", type: select, proxies: ["$app_name", "美国节点", "荷兰节点", "自动选择"] }
-  - { name: "AI", type: select, proxies: ["$app_name", "美国节点", "荷兰节点", "自动选择"] }
-  - { name: "Apple", type: select, proxies: ["$app_name", "DIRECT", "美国节点"] }
-  - { name: "Emby", type: select, proxies: ["$app_name", "DIRECT", "自动选择"] }
-  - { name: "游戏代理", type: select, proxies: ["$app_name", "DIRECT", "自动选择"] }
-  - { name: "美国节点", type: select, proxies: ["/(美|US|United States)/i", "自动选择"] }
-  - { name: "荷兰节点", type: select, proxies: ["/(荷|NL|Netherlands)/i", "自动选择"] }
+  - { name: "🚀 $app_name", type: select, proxies: ["♻️ 自动选择", "🔯 故障转移"] }
+  - { name: "♻️ 自动选择", type: url-test, proxies: [], url: "http://www.gstatic.com/generate_204", interval: 86400 }
+  - { name: "🔯 故障转移", type: fallback, proxies: [], url: "http://www.gstatic.com/generate_204", interval: 7200 }
+  - { name: "🎮 游戏直连", type: select, proxies: ["DIRECT", "🚀 $app_name"] }
+  - { name: "🇨🇳 CN", type: select, proxies: ["DIRECT", "🚀 $app_name"] }
+  - { name: "🍎 苹果谷歌直连", type: select, proxies: ["DIRECT", "🚀 $app_name"] }
+  - { name: "📹 YouTube", type: select, proxies: ["🚀 $app_name", "🇺🇸 美国节点", "🇳🇱 荷兰节点", "♻️ 自动选择"] }
+  - { name: "🤖 AI", type: select, proxies: ["🚀 $app_name", "🇺🇸 美国节点", "🇳🇱 荷兰节点", "♻️ 自动选择"] }
+  - { name: "🍏 Apple", type: select, proxies: ["🚀 $app_name", "DIRECT", "🇺🇸 美国节点"] }
+  - { name: "🎬 Emby", type: select, proxies: ["🚀 $app_name", "DIRECT", "♻️ 自动选择"] }
+  - { name: "🕹️ 游戏代理", type: select, proxies: ["🚀 $app_name", "DIRECT", "♻️ 自动选择"] }
+  - { name: "🇺🇸 美国节点", type: select, proxies: ["/(美|US|United States)/i", "♻️ 自动选择"] }
+  - { name: "🇳🇱 荷兰节点", type: select, proxies: ["/(荷|NL|Netherlands)/i", "♻️ 自动选择"] }
 
 rules:
   # 游戏直连 (DirectGame)
-  - DOMAIN-SUFFIX,cm.steampowered.com,游戏直连
-  - DOMAIN-SUFFIX,steamserver.net,游戏直连
-  - DOMAIN-SUFFIX,steampipe.steamcontent.tnkjmec.com,游戏直连
-  - DOMAIN-SUFFIX,st.dl.eccdnx.com,游戏直连
-  - DOMAIN-SUFFIX,st.dl.bscstorage.net,游戏直连
-  - DOMAIN-SUFFIX,st.dl.pinyuncloud.com,游戏直连
-  - DOMAIN-SUFFIX,dl.steam.clngaa.com,游戏直连
-  - DOMAIN-SUFFIX,cdn.mileweb.cs.steampowered.com.8686c.com,游戏直连
-  - DOMAIN-SUFFIX,cdn-ws.content.steamchina.com,游戏直连
-  - DOMAIN-SUFFIX,cdn-qc.content.steamchina.com,游戏直连
-  - DOMAIN-SUFFIX,cdn-ali.content.steamchina.com,游戏直连
-  - DOMAIN-SUFFIX,xz.pphimalayanrt.com,游戏直连
-  - DOMAIN-SUFFIX,lv.queniujq.cn,游戏直连
-  - DOMAIN-SUFFIX,alibaba.cdn.steampipe.steamcontent.com,游戏直连
-  - GEOSITE,category-games@cn,游戏直连
-  - IP-CIDR,45.121.184.0/24,游戏直连,no-resolve
-  - IP-CIDR,103.10.124.0/23,游戏直连,no-resolve
-  - IP-CIDR,103.28.54.0/24,游戏直连,no-resolve
-  - IP-CIDR,146.66.152.0/24,游戏直连,no-resolve
-  - IP-CIDR,146.66.155.0/24,游戏直连,no-resolve
-  - IP-CIDR,153.254.86.0/24,游戏直连,no-resolve
-  - IP-CIDR,155.133.224.0/22,游戏直连,no-resolve
-  - IP-CIDR,155.133.230.0/24,游戏直连,no-resolve
-  - IP-CIDR,155.133.232.0/23,游戏直连,no-resolve
-  - IP-CIDR,155.133.234.0/24,游戏直连,no-resolve
-  - IP-CIDR,155.133.236.0/22,游戏直连,no-resolve
-  - IP-CIDR,155.133.240.0/23,游戏直连,no-resolve
-  - IP-CIDR,155.133.244.0/23,游戏直连,no-resolve
-  - IP-CIDR,155.133.246.0/24,游戏直连,no-resolve
-  - IP-CIDR,155.133.248.0/21,游戏直连,no-resolve
-  - IP-CIDR,162.254.192.0/21,游戏直连,no-resolve
-  - IP-CIDR,185.25.182.0/23,游戏直连,no-resolve
-  - IP-CIDR,190.217.32.0/22,游戏直连,no-resolve
-  - IP-CIDR,192.69.96.0/22,游戏直连,no-resolve
-  - IP-CIDR,205.196.6.0/24,游戏直连,no-resolve
-  - IP-CIDR,208.64.200.0/22,游戏直连,no-resolve
-  - IP-CIDR,208.78.164.0/22,游戏直连,no-resolve
-  - IP-CIDR,205.185.194.0/24,游戏直连,no-resolve
+  - DOMAIN-SUFFIX,cm.steampowered.com,🎮 游戏直连
+  - DOMAIN-SUFFIX,steamserver.net,🎮 游戏直连
+  - DOMAIN-SUFFIX,steampipe.steamcontent.tnkjmec.com,🎮 游戏直连
+  - DOMAIN-SUFFIX,st.dl.eccdnx.com,🎮 游戏直连
+  - DOMAIN-SUFFIX,st.dl.bscstorage.net,🎮 游戏直连
+  - DOMAIN-SUFFIX,st.dl.pinyuncloud.com,🎮 游戏直连
+  - DOMAIN-SUFFIX,dl.steam.clngaa.com,🎮 游戏直连
+  - DOMAIN-SUFFIX,cdn.mileweb.cs.steampowered.com.8686c.com,🎮 游戏直连
+  - DOMAIN-SUFFIX,cdn-ws.content.steamchina.com,🎮 游戏直连
+  - DOMAIN-SUFFIX,cdn-qc.content.steamchina.com,🎮 游戏直连
+  - DOMAIN-SUFFIX,cdn-ali.content.steamchina.com,🎮 游戏直连
+  - DOMAIN-SUFFIX,xz.pphimalayanrt.com,🎮 游戏直连
+  - DOMAIN-SUFFIX,lv.queniujq.cn,🎮 游戏直连
+  - DOMAIN-SUFFIX,alibaba.cdn.steampipe.steamcontent.com,🎮 游戏直连
+  - GEOSITE,category-games@cn,🎮 游戏直连
+  - IP-CIDR,45.121.184.0/24,🎮 游戏直连,no-resolve
+  - IP-CIDR,103.10.124.0/23,🎮 游戏直连,no-resolve
+  - IP-CIDR,103.28.54.0/24,🎮 游戏直连,no-resolve
+  - IP-CIDR,146.66.152.0/24,🎮 游戏直连,no-resolve
+  - IP-CIDR,146.66.155.0/24,🎮 游戏直连,no-resolve
+  - IP-CIDR,153.254.86.0/24,🎮 游戏直连,no-resolve
+  - IP-CIDR,155.133.224.0/22,🎮 游戏直连,no-resolve
+  - IP-CIDR,155.133.230.0/24,🎮 游戏直连,no-resolve
+  - IP-CIDR,155.133.232.0/23,🎮 游戏直连,no-resolve
+  - IP-CIDR,155.133.234.0/24,🎮 游戏直连,no-resolve
+  - IP-CIDR,155.133.236.0/22,🎮 游戏直连,no-resolve
+  - IP-CIDR,155.133.240.0/23,🎮 游戏直连,no-resolve
+  - IP-CIDR,155.133.244.0/23,🎮 游戏直连,no-resolve
+  - IP-CIDR,155.133.246.0/24,🎮 游戏直连,no-resolve
+  - IP-CIDR,155.133.248.0/21,🎮 游戏直连,no-resolve
+  - IP-CIDR,162.254.192.0/21,🎮 游戏直连,no-resolve
+  - IP-CIDR,185.25.182.0/23,🎮 游戏直连,no-resolve
+  - IP-CIDR,190.217.32.0/22,🎮 游戏直连,no-resolve
+  - IP-CIDR,192.69.96.0/22,🎮 游戏直连,no-resolve
+  - IP-CIDR,205.196.6.0/24,🎮 游戏直连,no-resolve
+  - IP-CIDR,208.64.200.0/22,🎮 游戏直连,no-resolve
+  - IP-CIDR,208.78.164.0/22,🎮 游戏直连,no-resolve
+  - IP-CIDR,205.185.194.0/24,🎮 游戏直连,no-resolve
 
   # 苹果/谷歌国内服务直连 (cn_proxy)
-  - GEOSITE,apple-cn,苹果谷歌直连
-  - GEOSITE,apple@cn,苹果谷歌直连
-  - GEOSITE,google-cn,苹果谷歌直连
+  - GEOSITE,apple-cn,🍎 苹果谷歌直连
+  - GEOSITE,apple@cn,🍎 苹果谷歌直连
+  - GEOSITE,google-cn,🍎 苹果谷歌直连
 
   # 屏蔽 QUIC (UDP 443)
   - AND,((NETWORK,UDP),(DST-PORT,443)),REJECT
 
   # 游戏代理 (ProxyGame)
-  - DOMAIN-SUFFIX,steamcommunity.com,游戏代理
-  - DOMAIN-SUFFIX,www.steamcommunity.com,游戏代理
-  - DOMAIN-SUFFIX,store.steampowered.com,游戏代理
-  - DOMAIN-SUFFIX,checkout.steampowered.com,游戏代理
-  - DOMAIN-SUFFIX,api.steampowered.com,游戏代理
-  - DOMAIN-SUFFIX,help.steampowered.com,游戏代理
-  - DOMAIN-SUFFIX,login.steampowered.com,游戏代理
-  - DOMAIN-SUFFIX,store.akamai.steamstatic.com,游戏代理
-  - DOMAIN-SUFFIX,steambroadcast.akamaized.net,游戏代理
-  - DOMAIN-SUFFIX,steamvideo-a.akamaihd.net,游戏代理
-  - DOMAIN-SUFFIX,steamusercontent-a.akamaihd.net,游戏代理
-  - DOMAIN-SUFFIX,steamstore-a.akamaihd.net,游戏代理
-  - DOMAIN-SUFFIX,steamcommunity-a.akamaihd.net,游戏代理
-  - DOMAIN-SUFFIX,steamcdn-a.akamaihd.net,游戏代理
-  - DOMAIN-SUFFIX,steamuserimages-a.akamaihd.net,游戏代理
-  - DOMAIN-SUFFIX,community.akamai.steamstatic.com,游戏代理
-  - DOMAIN-SUFFIX,avatars.akamai.steamstatic.com,游戏代理
-  - DOMAIN-SUFFIX,community.steamstatic.com,游戏代理
-  - DOMAIN-SUFFIX,cdn.akamai.steamstatic.com,游戏代理
-  - DOMAIN-SUFFIX,avatars.steamstatic.com,游戏代理
-  - DOMAIN-SUFFIX,shared.akamai.steamstatic.com,游戏代理
-  - DOMAIN-SUFFIX,clan.akamai.steamstatic.com,游戏代理
-  - DOMAIN-SUFFIX,cdn.cloudflare.steamstatic.com,游戏代理
-  - DOMAIN-SUFFIX,community.cloudflare.steamstatic.com,游戏代理
-  - DOMAIN-SUFFIX,store.cloudflare.steamstatic.com,游戏代理
-  - DOMAIN-SUFFIX,avatars.cloudflare.steamstatic.com,游戏代理
-  - DOMAIN-SUFFIX,clan.cloudflare.steamstatic.com,游戏代理
-  - DOMAIN-SUFFIX,shared.cloudflare.steamstatic.com,游戏代理
-  - DOMAIN-SUFFIX,steam-chat.com,游戏代理
-  - DOMAIN-SUFFIX,steamcloud-ugc.storage.googleapis.com,游戏代理
-  - DOMAIN-SUFFIX,steamcloud-eu-ams.storage.googleapis.com,游戏代理
-  - DOMAIN-SUFFIX,steamcloud-eu-fra.storage.googleapis.com,游戏代理
-  - DOMAIN-SUFFIX,steamcloud-finland.storage.googleapis.com,游戏代理
-  - DOMAIN-SUFFIX,steamcloud-saopaulo.storage.googleapis.com,游戏代理
-  - DOMAIN-SUFFIX,steamcloud-singapore.storage.googleapis.com,游戏代理
-  - DOMAIN-SUFFIX,steamcloud-sydney.storage.googleapis.com,游戏代理
-  - DOMAIN-SUFFIX,steamcloud-taiwan.storage.googleapis.com,游戏代理
-  - DOMAIN-SUFFIX,steamcloud-eu.storage.googleapis.com,游戏代理
-  - DOMAIN-SUFFIX,blizzard.com,游戏代理
-  - GEOSITE,category-games,游戏代理
+  - DOMAIN-SUFFIX,steamcommunity.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,www.steamcommunity.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,store.steampowered.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,checkout.steampowered.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,api.steampowered.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,help.steampowered.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,login.steampowered.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,store.akamai.steamstatic.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,steambroadcast.akamaized.net,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,steamvideo-a.akamaihd.net,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,steamusercontent-a.akamaihd.net,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,steamstore-a.akamaihd.net,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,steamcommunity-a.akamaihd.net,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,steamcdn-a.akamaihd.net,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,steamuserimages-a.akamaihd.net,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,community.akamai.steamstatic.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,avatars.akamai.steamstatic.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,community.steamstatic.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,cdn.akamai.steamstatic.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,avatars.steamstatic.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,shared.akamai.steamstatic.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,clan.akamai.steamstatic.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,cdn.cloudflare.steamstatic.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,community.cloudflare.steamstatic.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,store.cloudflare.steamstatic.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,avatars.cloudflare.steamstatic.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,clan.cloudflare.steamstatic.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,shared.cloudflare.steamstatic.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,steam-chat.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,steamcloud-ugc.storage.googleapis.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,steamcloud-eu-ams.storage.googleapis.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,steamcloud-eu-fra.storage.googleapis.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,steamcloud-finland.storage.googleapis.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,steamcloud-saopaulo.storage.googleapis.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,steamcloud-singapore.storage.googleapis.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,steamcloud-sydney.storage.googleapis.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,steamcloud-taiwan.storage.googleapis.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,steamcloud-eu.storage.googleapis.com,🕹️ 游戏代理
+  - DOMAIN-SUFFIX,blizzard.com,🕹️ 游戏代理
+  - GEOSITE,category-games,🕹️ 游戏代理
 
   # Apple / YouTube / AI / Emby / 美荷分流
-  - GEOSITE,apple,Apple
-  - GEOSITE,apple-intelligence,Apple
-  - IP-CIDR,139.178.128.0/18,Apple,no-resolve
-  - IP-CIDR,144.178.0.0/19,Apple,no-resolve
-  - IP-CIDR,144.178.36.0/22,Apple,no-resolve
-  - IP-CIDR,144.178.48.0/20,Apple,no-resolve
-  - IP-CIDR,17.0.0.0/8,Apple,no-resolve
-  - IP-CIDR,192.35.50.0/24,Apple,no-resolve
-  - IP-CIDR,198.183.17.0/24,Apple,no-resolve
-  - IP-CIDR,205.180.175.0/24,Apple,no-resolve
-  - IP-CIDR,63.92.224.0/19,Apple,no-resolve
-  - IP-CIDR,65.199.22.0/23,Apple,no-resolve
-  - IP-CIDR6,2403:300::/32,Apple,no-resolve
-  - IP-CIDR6,2620:149::/32,Apple,no-resolve
-  - IP-CIDR6,2a01:b740::/32,Apple,no-resolve
+  - GEOSITE,apple,🍏 Apple
+  - GEOSITE,apple-intelligence,🍏 Apple
+  - IP-CIDR,139.178.128.0/18,🍏 Apple,no-resolve
+  - IP-CIDR,144.178.0.0/19,🍏 Apple,no-resolve
+  - IP-CIDR,144.178.36.0/22,🍏 Apple,no-resolve
+  - IP-CIDR,144.178.48.0/20,🍏 Apple,no-resolve
+  - IP-CIDR,17.0.0.0/8,🍏 Apple,no-resolve
+  - IP-CIDR,192.35.50.0/24,🍏 Apple,no-resolve
+  - IP-CIDR,198.183.17.0/24,🍏 Apple,no-resolve
+  - IP-CIDR,205.180.175.0/24,🍏 Apple,no-resolve
+  - IP-CIDR,63.92.224.0/19,🍏 Apple,no-resolve
+  - IP-CIDR,65.199.22.0/23,🍏 Apple,no-resolve
+  - IP-CIDR6,2403:300::/32,🍏 Apple,no-resolve
+  - IP-CIDR6,2620:149::/32,🍏 Apple,no-resolve
+  - IP-CIDR6,2a01:b740::/32,🍏 Apple,no-resolve
 
-  - GEOSITE,youtube,YouTube
-  - GEOSITE,category-ai-!cn,AI
-  - DOMAIN-SUFFIX,plus.younoyes.com,Emby
+  - GEOSITE,youtube,📹 YouTube
+  - GEOSITE,category-ai-!cn,🤖 AI
+  - DOMAIN-SUFFIX,plus.younoyes.com,🎬 Emby
 
   # 分流美国
-  - GEOSITE,okx,美国节点
-  - GEOSITE,wise,美国节点
-  - GEOSITE,paypal,美国节点
-  - GEOSITE,twitter,美国节点
-  - GEOSITE,facebook,美国节点
+  - GEOSITE,okx,🇺🇸 美国节点
+  - GEOSITE,wise,🇺🇸 美国节点
+  - GEOSITE,paypal,🇺🇸 美国节点
+  - GEOSITE,twitter,🇺🇸 美国节点
+  - GEOSITE,facebook,🇺🇸 美国节点
 
   # 分流荷兰
-  - GEOSITE,ifast,荷兰节点
-  - GEOSITE,fibank,荷兰节点
-  - GEOSITE,bybit,荷兰节点
-  - DOMAIN-SUFFIX,bybit.eu,荷兰节点
+  - GEOSITE,ifast,🇳🇱 荷兰节点
+  - GEOSITE,fibank,🇳🇱 荷兰节点
+  - GEOSITE,bybit,🇳🇱 荷兰节点
+  - DOMAIN-SUFFIX,bybit.eu,🇳🇱 荷兰节点
 
   # 局域网与国内直连 (CN)
   - IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
@@ -190,32 +190,32 @@ rules:
   - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
   - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
   - IP-CIDR,100.64.0.0/10,DIRECT,no-resolve
-  - GEOSITE,cn,CN
-  - GEOIP,CN,CN
+  - GEOSITE,cn,🇨🇳 CN
+  - GEOIP,CN,🇨🇳 CN
 
   # 海外兜底代理
-  - IP-CIDR,149.154.160.0/20,$app_name,no-resolve
-  - IP-CIDR,91.108.4.0/22,$app_name,no-resolve
-  - IP-CIDR,91.108.56.0/24,$app_name,no-resolve
-  - IP-CIDR,109.239.140.0/24,$app_name,no-resolve
-  - IP-CIDR,67.198.55.0/24,$app_name,no-resolve
-  - IP-CIDR,8.8.4.4/32,$app_name,no-resolve
-  - IP-CIDR,8.8.8.8/32,$app_name,no-resolve
-  - IP-CIDR,208.67.222.222/32,$app_name,no-resolve
-  - IP-CIDR,208.67.220.220/32,$app_name,no-resolve
-  - IP-CIDR,1.1.1.1/32,$app_name,no-resolve
-  - IP-CIDR,1.1.1.2/32,$app_name,no-resolve
-  - IP-CIDR,1.0.0.1/32,$app_name,no-resolve
-  - IP-CIDR,9.9.9.9/32,$app_name,no-resolve
-  - IP-CIDR,149.112.112.112/32,$app_name,no-resolve
-  - IP-CIDR6,2001:67c:4e8::/48,$app_name,no-resolve
-  - IP-CIDR6,2001:b28:f23c::/48,$app_name,no-resolve
-  - IP-CIDR6,2001:b28:f23d::/48,$app_name,no-resolve
-  - IP-CIDR6,2001:b28:f23f::/48,$app_name,no-resolve
-  - IP-CIDR6,2001:b28:f242::/48,$app_name,no-resolve
-  - IP-CIDR6,2001:4860:4860::8888/128,$app_name,no-resolve
-  - IP-CIDR6,2001:4860:4860::8844/128,$app_name,no-resolve
-  - IP-CIDR6,2606:4700:4700::1111/128,$app_name,no-resolve
-  - IP-CIDR6,2606:4700:4700::1001/128,$app_name,no-resolve
-  - GEOSITE,geolocation-!cn,$app_name
-  - MATCH,$app_name
+  - IP-CIDR,149.154.160.0/20,🚀 $app_name,no-resolve
+  - IP-CIDR,91.108.4.0/22,🚀 $app_name,no-resolve
+  - IP-CIDR,91.108.56.0/24,🚀 $app_name,no-resolve
+  - IP-CIDR,109.239.140.0/24,🚀 $app_name,no-resolve
+  - IP-CIDR,67.198.55.0/24,🚀 $app_name,no-resolve
+  - IP-CIDR,8.8.4.4/32,🚀 $app_name,no-resolve
+  - IP-CIDR,8.8.8.8/32,🚀 $app_name,no-resolve
+  - IP-CIDR,208.67.222.222/32,🚀 $app_name,no-resolve
+  - IP-CIDR,208.67.220.220/32,🚀 $app_name,no-resolve
+  - IP-CIDR,1.1.1.1/32,🚀 $app_name,no-resolve
+  - IP-CIDR,1.1.1.2/32,🚀 $app_name,no-resolve
+  - IP-CIDR,1.0.0.1/32,🚀 $app_name,no-resolve
+  - IP-CIDR,9.9.9.9/32,🚀 $app_name,no-resolve
+  - IP-CIDR,149.112.112.112/32,🚀 $app_name,no-resolve
+  - IP-CIDR6,2001:67c:4e8::/48,🚀 $app_name,no-resolve
+  - IP-CIDR6,2001:b28:f23c::/48,🚀 $app_name,no-resolve
+  - IP-CIDR6,2001:b28:f23d::/48,🚀 $app_name,no-resolve
+  - IP-CIDR6,2001:b28:f23f::/48,🚀 $app_name,no-resolve
+  - IP-CIDR6,2001:b28:f242::/48,🚀 $app_name,no-resolve
+  - IP-CIDR6,2001:4860:4860::8888/128,🚀 $app_name,no-resolve
+  - IP-CIDR6,2001:4860:4860::8844/128,🚀 $app_name,no-resolve
+  - IP-CIDR6,2606:4700:4700::1111/128,🚀 $app_name,no-resolve
+  - IP-CIDR6,2606:4700:4700::1001/128,🚀 $app_name,no-resolve
+  - GEOSITE,geolocation-!cn,🚀 $app_name
+  - MATCH,🚀 $app_name

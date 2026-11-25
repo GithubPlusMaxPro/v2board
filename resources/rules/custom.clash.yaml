@@ -45,6 +45,9 @@ dns:
 proxies: []
 
 proxy-groups:
+  - { name: "游戏直连", type: select, proxies: ["DIRECT", "$app_name"] }
+  - { name: "CN", type: select, proxies: ["DIRECT", "$app_name"] }
+  - { name: "CN服务代理", type: select, proxies: ["DIRECT", "$app_name"] }
   - { name: "$app_name", type: select, proxies: ["自动选择", "故障转移"] }
   - { name: "自动选择", type: url-test, proxies: [], url: "http://www.gstatic.com/generate_204", interval: 86400 }
   - { name: "故障转移", type: fallback, proxies: [], url: "http://www.gstatic.com/generate_204", interval: 7200 }
@@ -53,9 +56,6 @@ proxy-groups:
   - { name: "Apple", type: select, proxies: ["$app_name", "DIRECT", "美国节点"] }
   - { name: "Emby", type: select, proxies: ["$app_name", "DIRECT", "自动选择"] }
   - { name: "游戏代理", type: select, proxies: ["$app_name", "DIRECT", "自动选择"] }
-  - { name: "游戏直连", type: select, proxies: ["DIRECT", "$app_name"] }
-  - { name: "CN服务", type: select, proxies: ["DIRECT", "$app_name"] }
-  - { name: "CN", type: select, proxies: ["DIRECT", "$app_name"] }
   - { name: "美国节点", type: select, proxies: ["/(美|US|United States)/i", "自动选择"] }
   - { name: "荷兰节点", type: select, proxies: ["/(荷|NL|Netherlands)/i", "自动选择"] }
 
@@ -101,9 +101,9 @@ rules:
   - IP-CIDR,205.185.194.0/24,游戏直连,no-resolve
 
   # CN 服务直连 (cn_proxy)
-  - GEOSITE,apple-cn,CN服务
-  - GEOSITE,apple@cn,CN服务
-  - GEOSITE,google-cn,CN服务
+  - GEOSITE,apple-cn,CN服务代理
+  - GEOSITE,apple@cn,CN服务代理
+  - GEOSITE,google-cn,CN服务代理
 
   # 屏蔽 QUIC (UDP 443)
   - AND,((NETWORK,UDP),(DST-PORT,443)),REJECT

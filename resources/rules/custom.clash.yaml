@@ -81,7 +81,6 @@ proxy-groups:
   - { name: "💳 Wise", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
   - { name: "💳 PayPal", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
   - { name: "🏦 iFast", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
-  - { name: "🏦 Fibank", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
   - { name: "🐦 Twitter", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
   - { name: "📘 Facebook", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
 
@@ -227,7 +226,6 @@ rules:
   - DOMAIN-SUFFIX,wise.com,💳 Wise
   - GEOSITE,paypal,💳 PayPal
   - GEOSITE,ifast,🏦 iFast
-  - GEOSITE,fibank,🏦 Fibank
 
   # 社交媒体独立分流
   - GEOSITE,twitter,🐦 Twitter

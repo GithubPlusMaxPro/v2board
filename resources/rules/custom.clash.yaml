@@ -58,13 +58,6 @@ rule-providers:
     url: "https://raw.githubusercontent.com/GithubPlusMaxPro/loon/refs/heads/main/talkatone.list"
     path: ./ruleset/Talkatone.txt
     interval: 86400
-  N26:
-    type: http
-    behavior: classical
-    format: text
-    url: "https://raw.githubusercontent.com/GithubPlusMaxPro/loon/refs/heads/main/n26.list"
-    path: ./ruleset/N26.txt
-    interval: 86400
 
 proxy-groups:
   - { name: "🚀 $app_name", type: select, proxies: ["♻️ 自动选择", "🔯 故障转移"] }
@@ -87,7 +80,6 @@ proxy-groups:
   - { name: "📱 Talkatone", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
   - { name: "💳 Wise", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
   - { name: "💳 PayPal", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
-  - { name: "🏦 N26", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
   - { name: "🏦 iFast", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
   - { name: "🏦 Fibank", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
   - { name: "🐦 Twitter", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
@@ -234,8 +226,6 @@ rules:
   - GEOSITE,wise,💳 Wise
   - DOMAIN-SUFFIX,wise.com,💳 Wise
   - GEOSITE,paypal,💳 PayPal
-  - RULE-SET,N26,🏦 N26
-  - DOMAIN-SUFFIX,n26.com,🏦 N26
   - GEOSITE,ifast,🏦 iFast
   - GEOSITE,fibank,🏦 Fibank
 

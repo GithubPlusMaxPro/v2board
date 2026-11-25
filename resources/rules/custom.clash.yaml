@@ -194,6 +194,8 @@ rules:
 
   - GEOSITE,youtube,📹 YouTube
   - GEOSITE,category-ai-!cn,🤖 AI
+  - DOMAIN-SUFFIX,deepseek.com,🤖 AI
+  - GEOSITE,meta,🤖 AI
   - DOMAIN-SUFFIX,plus.younoyes.com,🎬 Emby
 
   # Telegram

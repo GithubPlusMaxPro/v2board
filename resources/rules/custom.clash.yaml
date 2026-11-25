@@ -44,6 +44,28 @@ dns:
 
 proxies: []
 
+rule-providers:
+  GoogleVoice:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GoogleVoice/GoogleVoice.yaml"
+    path: ./ruleset/GoogleVoice.yaml
+    interval: 86400
+  Talkatone:
+    type: http
+    behavior: classical
+    format: text
+    url: "https://raw.githubusercontent.com/GithubPlusMaxPro/loon/refs/heads/main/talkatone.list"
+    path: ./ruleset/Talkatone.txt
+    interval: 86400
+  N26:
+    type: http
+    behavior: classical
+    format: text
+    url: "https://raw.githubusercontent.com/GithubPlusMaxPro/loon/refs/heads/main/n26.list"
+    path: ./ruleset/N26.txt
+    interval: 86400
+
 proxy-groups:
   - { name: "🚀 $app_name", type: select, proxies: ["♻️ 自动选择", "🔯 故障转移"] }
   - { name: "♻️ 自动选择", type: url-test, proxies: [], url: "http://www.gstatic.com/generate_204", interval: 86400 }
@@ -51,13 +73,25 @@ proxy-groups:
   - { name: "🎮 游戏直连", type: select, proxies: ["DIRECT", "🚀 $app_name"] }
   - { name: "🇨🇳 CN", type: select, proxies: ["DIRECT", "🚀 $app_name"] }
   - { name: "🍎 苹果谷歌直连", type: select, proxies: ["DIRECT", "🚀 $app_name"] }
-  - { name: "📹 YouTube", type: select, proxies: ["🚀 $app_name", "🇺🇸 美国节点", "🇳🇱 荷兰节点", "♻️ 自动选择"] }
-  - { name: "🤖 AI", type: select, proxies: ["🚀 $app_name", "🇺🇸 美国节点", "🇳🇱 荷兰节点", "♻️ 自动选择"] }
-  - { name: "🍏 Apple", type: select, proxies: ["🚀 $app_name", "DIRECT", "🇺🇸 美国节点"] }
+  - { name: "✈️ Telegram", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "🔯 故障转移"] }
+  - { name: "📹 YouTube", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "🔯 故障转移"] }
+  - { name: "🤖 AI", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "🔯 故障转移"] }
+  - { name: "🍏 Apple", type: select, proxies: ["🚀 $app_name", "DIRECT", "♻️ 自动选择"] }
   - { name: "🎬 Emby", type: select, proxies: ["🚀 $app_name", "DIRECT", "♻️ 自动选择"] }
   - { name: "🕹️ 游戏代理", type: select, proxies: ["🚀 $app_name", "DIRECT", "♻️ 自动选择"] }
-  - { name: "🇺🇸 美国节点", type: select, proxies: ["/(美|US|United States)/i", "♻️ 自动选择"] }
-  - { name: "🇳🇱 荷兰节点", type: select, proxies: ["/(荷|NL|Netherlands)/i", "♻️ 自动选择"] }
+  - { name: "🪙 Binance", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
+  - { name: "🪙 OKX", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
+  - { name: "🪙 Kraken", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
+  - { name: "🪙 Bybit", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
+  - { name: "📞 GoogleVoice", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
+  - { name: "📱 Talkatone", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
+  - { name: "💳 Wise", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
+  - { name: "💳 PayPal", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
+  - { name: "🏦 N26", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
+  - { name: "🏦 iFast", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
+  - { name: "🏦 Fibank", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
+  - { name: "🐦 Twitter", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
+  - { name: "📘 Facebook", type: select, proxies: ["🚀 $app_name", "♻️ 自动选择", "DIRECT"] }
 
 rules:
   # 游戏直连 (DirectGame)
@@ -171,18 +205,43 @@ rules:
   - GEOSITE,category-ai-!cn,🤖 AI
   - DOMAIN-SUFFIX,plus.younoyes.com,🎬 Emby
 
-  # 分流美国
-  - GEOSITE,okx,🇺🇸 美国节点
-  - GEOSITE,wise,🇺🇸 美国节点
-  - GEOSITE,paypal,🇺🇸 美国节点
-  - GEOSITE,twitter,🇺🇸 美国节点
-  - GEOSITE,facebook,🇺🇸 美国节点
+  # Telegram
+  - GEOSITE,telegram,✈️ Telegram
+  - IP-CIDR,149.154.160.0/20,✈️ Telegram,no-resolve
+  - IP-CIDR,91.108.4.0/22,✈️ Telegram,no-resolve
+  - IP-CIDR,91.108.56.0/24,✈️ Telegram,no-resolve
+  - IP-CIDR,109.239.140.0/24,✈️ Telegram,no-resolve
+  - IP-CIDR,67.198.55.0/24,✈️ Telegram,no-resolve
+  - IP-CIDR6,2001:67c:4e8::/48,✈️ Telegram,no-resolve
+  - IP-CIDR6,2001:b28:f23c::/48,✈️ Telegram,no-resolve
+  - IP-CIDR6,2001:b28:f23d::/48,✈️ Telegram,no-resolve
+  - IP-CIDR6,2001:b28:f23f::/48,✈️ Telegram,no-resolve
+  - IP-CIDR6,2001:b28:f242::/48,✈️ Telegram,no-resolve
 
-  # 分流荷兰
-  - GEOSITE,ifast,🇳🇱 荷兰节点
-  - GEOSITE,fibank,🇳🇱 荷兰节点
-  - GEOSITE,bybit,🇳🇱 荷兰节点
-  - DOMAIN-SUFFIX,bybit.eu,🇳🇱 荷兰节点
+  # 交易所独立分流
+  - GEOSITE,binance,🪙 Binance
+  - GEOSITE,okx,🪙 OKX
+  - GEOSITE,kraken,🪙 Kraken
+  - DOMAIN-SUFFIX,kraken.com,🪙 Kraken
+  - GEOSITE,bybit,🪙 Bybit
+  - DOMAIN-SUFFIX,bybit.eu,🪙 Bybit
+
+  # 通讯与银行独立分流
+  - RULE-SET,GoogleVoice,📞 GoogleVoice
+  - DOMAIN-SUFFIX,voice.google.com,📞 GoogleVoice
+  - RULE-SET,Talkatone,📱 Talkatone
+  - DOMAIN-SUFFIX,talkatone.com,📱 Talkatone
+  - GEOSITE,wise,💳 Wise
+  - DOMAIN-SUFFIX,wise.com,💳 Wise
+  - GEOSITE,paypal,💳 PayPal
+  - RULE-SET,N26,🏦 N26
+  - DOMAIN-SUFFIX,n26.com,🏦 N26
+  - GEOSITE,ifast,🏦 iFast
+  - GEOSITE,fibank,🏦 Fibank
+
+  # 社交媒体独立分流
+  - GEOSITE,twitter,🐦 Twitter
+  - GEOSITE,facebook,📘 Facebook
 
   # 局域网与国内直连 (CN)
   - IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
@@ -194,11 +253,6 @@ rules:
   - GEOIP,CN,🇨🇳 CN
 
   # 海外兜底代理
-  - IP-CIDR,149.154.160.0/20,🚀 $app_name,no-resolve
-  - IP-CIDR,91.108.4.0/22,🚀 $app_name,no-resolve
-  - IP-CIDR,91.108.56.0/24,🚀 $app_name,no-resolve
-  - IP-CIDR,109.239.140.0/24,🚀 $app_name,no-resolve
-  - IP-CIDR,67.198.55.0/24,🚀 $app_name,no-resolve
   - IP-CIDR,8.8.4.4/32,🚀 $app_name,no-resolve
   - IP-CIDR,8.8.8.8/32,🚀 $app_name,no-resolve
   - IP-CIDR,208.67.222.222/32,🚀 $app_name,no-resolve
@@ -208,11 +262,6 @@ rules:
   - IP-CIDR,1.0.0.1/32,🚀 $app_name,no-resolve
   - IP-CIDR,9.9.9.9/32,🚀 $app_name,no-resolve
   - IP-CIDR,149.112.112.112/32,🚀 $app_name,no-resolve
-  - IP-CIDR6,2001:67c:4e8::/48,🚀 $app_name,no-resolve
-  - IP-CIDR6,2001:b28:f23c::/48,🚀 $app_name,no-resolve
-  - IP-CIDR6,2001:b28:f23d::/48,🚀 $app_name,no-resolve
-  - IP-CIDR6,2001:b28:f23f::/48,🚀 $app_name,no-resolve
-  - IP-CIDR6,2001:b28:f242::/48,🚀 $app_name,no-resolve
   - IP-CIDR6,2001:4860:4860::8888/128,🚀 $app_name,no-resolve
   - IP-CIDR6,2001:4860:4860::8844/128,🚀 $app_name,no-resolve
   - IP-CIDR6,2606:4700:4700::1111/128,🚀 $app_name,no-resolve

@@ -47,7 +47,7 @@ proxies: []
 proxy-groups:
   - { name: "游戏直连", type: select, proxies: ["DIRECT", "$app_name"] }
   - { name: "CN", type: select, proxies: ["DIRECT", "$app_name"] }
-  - { name: "CN服务代理", type: select, proxies: ["DIRECT", "$app_name"] }
+  - { name: "苹果谷歌直连", type: select, proxies: ["DIRECT", "$app_name"] }
   - { name: "$app_name", type: select, proxies: ["自动选择", "故障转移"] }
   - { name: "自动选择", type: url-test, proxies: [], url: "http://www.gstatic.com/generate_204", interval: 86400 }
   - { name: "故障转移", type: fallback, proxies: [], url: "http://www.gstatic.com/generate_204", interval: 7200 }
@@ -100,10 +100,10 @@ rules:
   - IP-CIDR,208.78.164.0/22,游戏直连,no-resolve
   - IP-CIDR,205.185.194.0/24,游戏直连,no-resolve
 
-  # CN 服务直连 (cn_proxy)
-  - GEOSITE,apple-cn,CN服务代理
-  - GEOSITE,apple@cn,CN服务代理
-  - GEOSITE,google-cn,CN服务代理
+  # 苹果/谷歌国内服务直连 (cn_proxy)
+  - GEOSITE,apple-cn,苹果谷歌直连
+  - GEOSITE,apple@cn,苹果谷歌直连
+  - GEOSITE,google-cn,苹果谷歌直连
 
   # 屏蔽 QUIC (UDP 443)
   - AND,((NETWORK,UDP),(DST-PORT,443)),REJECT

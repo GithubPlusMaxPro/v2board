@@ -36,7 +36,7 @@ class Loon
                 $uri .= self::buildVless($user['uuid'], $item);
             }elseif ($item['type'] === 'trojan' && (($item['network'] ?? null) !== 'grpc')) {
                 $uri .= self::buildTrojan($user['uuid'], $item);
-            }elseif ($item['type'] === 'hysteria2' || ($item['type'] === 'hysteria' && $item['version'] === 2)) {
+            }elseif ($item['type'] === 'hysteria2' || ($item['type'] === 'hysteria' && (int)$item['version'] === 2)) {
                 $uri .= self::buildHysteria($user['uuid'], $item);
             }elseif ($item['type'] === 'anytls') {
                 $uri .= self::buildAnytls($user['uuid'], $item);
@@ -111,14 +111,15 @@ class Loon
         }
         if ($server['tls']) {
             array_push($config, 'over-tls=true');
-            $tlsSettings = $server['tlsSettings'] ?? $server['tls_settings'] ?? [];
-            if (!empty($tlsSettings)) {
-                if (isset($tlsSettings['allowInsecure']) && !empty($tlsSettings['allowInsecure']))
-                    array_push($config, 'skip-cert-verify=' . ($tlsSettings['allowInsecure'] ? 'true' : 'false'));
-                $serverName = $tlsSettings['serverName'] ?? $tlsSettings['server_name'] ?? null;
-                if (!empty($serverName))
-                    array_push($config, "tls-name={$serverName}");
+            $tlsSettings = $server['tls_settings'] ?? $server['tlsSettings'] ?? [];
+            if (!empty($tlsSettings['allow_insecure'] ?? $tlsSettings['allowInsecure'] ?? 0)) {
+                $config[] = 'skip-cert-verify=true';
             }
+            $sni = $tlsSettings['server_name'] ?? $tlsSettings['serverName'] ?? '';
+            if ($sni !== '') {
+                $config[] = "sni={$sni}";
+            }
+            Helper::appendTlsCertificateFingerprint($config, $server, 'tls-cert-sha256');
         }
         if ($server['network'] === 'ws') {
             array_push($config, 'transport=ws');
@@ -160,7 +161,7 @@ class Loon
                     array_push($config, "host={$tcpSettings['header']['request']['headers']['Host'][0]}");
             }
         }
-        if ($server['tls'] === 1) {
+        if ((int)$server['tls'] === 1) {
             array_push($config, 'over-tls=true');
             array_push($config, "flow={$server['flow']}");
             if ($server['tls_settings']) {
@@ -168,9 +169,10 @@ class Loon
                 if (!empty($tlsSettings['allow_insecure'] ?? 0))
                     array_push($config, 'skip-cert-verify=true');
                 if (isset($tlsSettings['server_name']) && !empty($tlsSettings['server_name']))
-                    array_push($config, "tls-name={$tlsSettings['server_name']}");
+                    array_push($config, "sni={$tlsSettings['server_name']}");
             }
-        }elseif($server['tls'] === 2){
+            Helper::appendTlsCertificateFingerprint($config, $server, 'tls-cert-sha256');
+        }elseif((int)$server['tls'] === 2){
             array_push($config, "flow={$server['flow']}");
             if ($server['tls_settings']) {
                 $tlsSettings = $server['tls_settings'];
@@ -202,18 +204,21 @@ class Loon
     
     public static function buildTrojan($password, $server)
     {
+        $tlsSettings = $server['tls_settings'] ?? [];
+        $sni = $server['server_name'] ?? $tlsSettings['server_name'] ?? '';
         $config = [
             "{$server['name']}=trojan",
             "{$server['host']}",
             "{$server['port']}",
             "{$password}",
-            !empty($server['server_name']) ? "tls-name={$server['server_name']}" : "",
+            $sni !== '' ? "sni={$sni}" : "",
             'fast-open=false',
             'udp=true'
         ];
-        if (!empty($server['allow_insecure'])) {
-            array_push($config, $server['allow_insecure'] ? 'skip-cert-verify=true' : 'skip-cert-verify=false');
+        if (!empty($server['allow_insecure'] ?? $tlsSettings['allow_insecure'] ?? 0)) {
+            $config[] = 'skip-cert-verify=true';
         }
+        Helper::appendTlsCertificateFingerprint($config, $server, 'tls-cert-sha256');
         if (isset($server['network']) && (string)$server['network'] === 'ws') {
             array_push($config, 'ws=true');
             if ($server['network_settings']) {
@@ -236,7 +241,7 @@ class Loon
         $firstPort = preg_split('/[:,]/', $ports, 2)[0];
 
         $isV2node = ($server['type'] ?? null) === 'hysteria2';
-        $tlsSettings = $isV2node ? ($server['tls_settings'] ?? []) : [];
+        $tlsSettings = $server['tls_settings'] ?? [];
         $sni = $tlsSettings['server_name'] ?? $server['server_name'] ?? '';
         $insecure = $tlsSettings['allow_insecure'] ?? $server['insecure'] ?? 0;
         $bandwidth = $server['up_mbps'] ?? null;
@@ -250,21 +255,19 @@ class Loon
         if (!$isV2node || ($bandwidth !== null && $bandwidth !== '')) {
             $config[] = "download-bandwidth={$bandwidth}";
         }
-        if ($sni) {
+        if ($sni !== '') {
             $config[] = "sni={$sni}";
         }
         $config[] = 'udp=true';
         if (!empty($insecure)) {
             $config[] = 'skip-cert-verify=true';
         }
-        if (!empty($tlsSettings['pinned_peer_cert_sha256'])) {
-            $config[] = "tls-cert-sha256={$tlsSettings['pinned_peer_cert_sha256']}";
-        }
+        Helper::appendTlsCertificateFingerprint($config, $server, 'tls-cert-sha256');
         if ($isV2node && strpbrk($ports, ':,') !== false) {
             $config[] = 'server-ports="' . $ports . '"';
             $config[] = 'hop-interval=30';
         }
-        if (isset($server['obfs'], $server['obfs_password'])) {
+        if (isset($server['obfs'], $server['obfs_password']) && $server['obfs_password'] !== '') {
             $obfsPassword = $server['obfs_password'];
             if ($isV2node) {
                 $obfsPassword = '"' . addcslashes($obfsPassword, "\\\"") . '"';
@@ -292,6 +295,7 @@ class Loon
         }
         $insecure = $server['insecure'] ?? $tlsSettings['allow_insecure'] ?? 0;
         $config[] = 'skip-cert-verify=' . ($insecure ? 'true' : 'false');
+        Helper::appendTlsCertificateFingerprint($config, $server, 'tls-cert-sha256');
 
         $uri = implode(',', $config);
         $uri .= "\r\n";
